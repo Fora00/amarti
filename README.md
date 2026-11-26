@@ -1,15 +1,17 @@
 # aMarti ceramics
 
 Sito di aMarti ceramics, laboratorio di ceramica e workshop a Rovereto:
-calendario dei corsi, pagina di ogni evento (con file `.ics`) e negozio.
+calendario dei corsi, pagina di ogni evento (con file `.ics` e modulo di
+iscrizione "Prenota") e negozio. Le iscrizioni si seguono in una dashboard privata.
 
-**Anteprima:** https://fora00.github.io/amarti/ (non indicizzata: prezzi e dominio sono ancora provvisori).
+- **Sito (anteprima):** https://fora00.github.io/amarti/ (non indicizzato: prezzi e dominio sono ancora provvisori)
+- **Dashboard:** https://fora00.github.io/amarti/dashboard/ (link "Dashboard" in fondo a ogni pagina)
 
 | Cartella | Cosa |
 |---|---|
-| `site/` | Sito pubblico (Astro, zero JavaScript). Eventi in `site/src/content/eventi/`. |
-| `app/` | Dashboard privata per seguire le iscrizioni, pubblicata su `/dashboard/` (accesso con link via email, che resta salvato). |
-| `backend/` | Supabase (schema, edge functions) e un backend finto per lo sviluppo locale. |
+| `site/` | Sito pubblico (Astro). Quasi zero JavaScript: solo il pulsante tema chiaro/scuro e la copia del messaggio Instagram. Eventi in `site/src/content/eventi/`. |
+| `app/` | Dashboard privata: iscritti per corso, stato (iscritta, confermata, pagato, attesa, annullata), scorciatoie WhatsApp/email. Pubblicata su `/dashboard/`; si entra con un link via email, una volta per dispositivo. |
+| `backend/` | Supabase: `schema.sql` (tabelle e regole di accesso), edge functions `signup` e `request`, script per lo stack locale. |
 | `vendor/` | Codice condiviso copiato da un altro repo: non si modifica qui. |
 
 ## Comandi
@@ -19,7 +21,9 @@ Serve Node 20.12+ e pnpm (`corepack enable`).
 ```sh
 pnpm install
 pnpm dev        # sito su http://localhost:4321
-pnpm check
+pnpm dev:app    # dashboard su http://localhost:4322
+pnpm check      # tipi (sito e dashboard)
+pnpm test       # test di backend e codice condiviso
 pnpm build
 ```
 
@@ -41,5 +45,23 @@ svuota iscrizioni e messaggi, `pnpm backend:local stop` ferma i container.
 `.env.development` vale solo per `pnpm dev`: `pnpm build` e GitHub Pages usano
 sempre il progetto Supabase vero.
 
-Ogni push su `main` ricostruisce e pubblica il sito con GitHub Actions
-(`.github/workflows/pages.yml`).
+## Pubblicazione
+
+Ogni push su `main` ricostruisce sito e dashboard e li pubblica su GitHub Pages
+(`.github/workflows/pages.yml`). Il workflow legge due **variabili** del repo
+(Settings → Secrets and variables → Actions → Variables, non segreti: sono
+pubbliche per natura): `PUBLIC_SUPABASE_URL` e `PUBLIC_SUPABASE_ANON_KEY`.
+
+La parte Supabase non passa dal workflow: si aggiorna dalla cartella `backend/`
+con la CLI (`supabase link` al progetto, una volta).
+
+```sh
+supabase db query --remote -f supabase/schema.sql   # tabelle e regole (idempotente)
+supabase functions deploy signup                    # e/o request
+supabase config push                                # accesso: link via email, URL di ritorno
+supabase secrets set SITE_URL=https://…             # dove la funzione rimanda dopo l'invio
+```
+
+Chi può entrare nella dashboard: un utente in Supabase Auth (le registrazioni
+libere sono disattivate) **e** la sua email nella tabella `staff`. Mai mettere la
+chiave `service_role`/`secret` in una variabile `PUBLIC_` o in un file committato.
