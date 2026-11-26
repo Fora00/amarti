@@ -1,58 +1,132 @@
 ---
+/**
+ * Corsi — the owner's home page. One card per course in the programme, grouped
+ * by month, with the month's accent. Built from the public site's content (see
+ * src/content.config.ts), so it is static HTML: the only script is the login
+ * guard and the "already happened" marking (the build date is not today).
+ *
+ * Sign-ups are NOT wired yet: every card says so instead of showing a fake
+ * count. Next step (plan/BOOKING-FLOW.md): a `signups` table keyed by the
+ * course id, then the count vs the minimum and the list of names per course.
+ */
+import { getCollection } from "astro:content";
 import AppLayout from "../layouts/AppLayout.astro";
+
+const eventi = await getCollection("eventi");
+const ospiti = new Map((await getCollection("ospiti")).map((o) => [o.id, o.data.name]));
+
+// Wall-clock strings, never a Z: read the parts, no time-zone conversion.
+const parts = (s: string) => {
+  const [d, t = ""] = s.split("T");
+  const [y, m, day] = d.split("-").map(Number);
+  const [hh, mm] = t ? t.split(":").map(Number) : [];
+  return { y, m, day, hh, mm, hasTime: Boolean(t) };
+};
+const asDate = (s: string) => { const p = parts(s); return new Date(p.y, p.m - 1, p.day, p.hh ?? 0, p.mm ?? 0); };
+const dayFmt = new Intl.DateTimeFormat("it-IT", { weekday: "short", day: "numeric", month: "short" });
+const monthFmt = new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" });
+const when = (s: string) => {
+  const p = parts(s);
+  return `${dayFmt.format(asDate(s))}${p.hasTime ? ` · ${String(p.hh).padStart(2, "0")}:${String(p.mm).padStart(2, "0")}` : ""}`;
+};
+
+// A two-evening course is one course: show day 1, list day 2 inside it.
+const byId = new Map(eventi.map((e) => [e.id, e]));
+const courses = eventi
+  .filter((e) => !e.data.serie || e.data.serie.day === 1)
+  .sort((a, b) => a.data.start.localeCompare(b.data.start))
+  .map((e) => {
+    const other = e.data.serie ? byId.get(e.data.serie.with) : undefined;
+    const last = other?.data.start ?? e.data.start;
+    return {
+      id: e.id,
+      title: e.data.title,
+      month: parts(e.data.start).m,
+      monthKey: e.data.start.slice(0, 7),
+      dates: [e.data.start, ...(other ? [other.data.start] : [])].map(when),
+      // The last evening, as YYYY-MM-DD: the course is past from the next day.
+      lastDay: last.slice(0, 10),
+      host: e.data.host ? (ospiti.get(e.data.host) ?? e.data.host) : undefined,
+      capacity: e.data.capacity,
+      free: e.data.free,
+    };
+  });
+
+const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
+  key,
+  label: monthFmt.format(asDate(`${key}-01`)),
+  courses: courses.filter((c) => c.monthKey === key),
+}));
 ---
 
-<AppLayout title="Richieste" active="richieste">
-  <p class="muted">I messaggi inviati dai visitatori dal sito.</p>
-  <div id="inbox" style="margin-top:1rem"></div>
+<AppLayout title="Corsi" active="corsi" eyebrow="Programma">
+  <p class="muted">
+    I corsi in calendario sul sito. Qui vedrai chi si è iscritto a ciascuno e se è stato raggiunto il numero minimo.
+  </p>
+  <p class="card quiet" style="margin-top:1rem">
+    Le iscrizioni dal sito non sono ancora attive: per ora si prenota via DM su Instagram.
+  </p>
+
+  {months.map((m) => (
+    <section class="section corsi-section" data-month={courses.find((c) => c.monthKey === m.key)?.month}>
+      <h2 class="day-title corsi-month">{m.label}</h2>
+      <ul class="list">
+        {m.courses.map((c) => (
+          <li class="card corso" data-month={c.month} data-last-day={c.lastDay}>
+            <div class="row">
+              <strong>{c.title}</strong>
+              <span class="pill past-pill" hidden>Concluso</span>
+            </div>
+            <p class="muted" style="margin:.35rem 0 0">
+              {c.dates.join(" + ")}{c.host && ` · con ${c.host}`}
+            </p>
+            <p class="corso-facts">
+              <span><span class="muted">Iscritti</span> —</span>
+              <span><span class="muted">Minimo</span> da definire</span>
+              <span><span class="muted">Posti</span> {c.capacity ?? "da definire"}</span>
+              {c.free && <span>Gratuito</span>}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <p id="past-toggle" style="margin-top:1.5rem" hidden></p>
   <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../lib/guard";
-    import { data } from "../lib/data";
     import { mode, supabase } from "../lib/supabase";
-    import { $, button, el, fmtFull, href, render, say } from "../lib/ui";
-    import { attempt, whatsappUrl } from "../lib/views";
-    import type { InboxRow } from "../lib/types";
+    import { $, button, href, render } from "../lib/ui";
+    import { attempt } from "../lib/views";
 
-    // Payload keys → what the owner reads. Anything not listed is shown as is, so
-    // a new form field is visible immediately even before it gets a label.
-    const LABELS: Record<string, string> = { nome: "Nome", email: "Email", telefono: "Telefono", messaggio: "Messaggio" };
-
-    function details(payload: Record<string, string>) {
-      const dl = el("dl", { style: "display:grid;grid-template-columns:max-content 1fr;gap:.25rem 1rem;margin:.75rem 0" });
-      for (const [key, value] of Object.entries(payload)) {
-        if (!value) continue;
-        // textContent via el(): a stranger typed this, it is never parsed as HTML.
-        dl.append(el("dt", { class: "muted" }, LABELS[key] ?? key), el("dd", { style: "margin:0;white-space:pre-wrap" }, value));
-      }
-      return dl;
+    // The page was built on some earlier day: decide "past" in the browser.
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const past = [...document.querySelectorAll<HTMLElement>(".corso")].filter((c) => (c.dataset.lastDay ?? "") < today);
+    for (const card of past) {
+      card.classList.add("past");
+      card.querySelector<HTMLElement>(".past-pill")!.hidden = false;
     }
-
-    function card(row: InboxRow) {
-      const p = row.payload;
-      const contacts = el("span", { class: "row", style: "justify-content:flex-start" },
-        p.email ? el("a", { href: `mailto:${p.email}`, class: "btn secondary" }, "Rispondi per email") : null,
-        p.telefono ? el("a", { href: whatsappUrl(p.telefono), class: "btn secondary", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp") : null);
-      return el("li", { class: row.handled ? "card" : "card warn" },
-        el("div", { class: "row" },
-          el("strong", {}, p.nome ?? "Messaggio"),
-          el("span", { class: "muted" }, fmtFull(row.created_at), row.handled ? " · gestita" : "")),
-        details(p),
-        contacts,
-        row.handled ? null : el("div", { style: "margin-top:1rem" },
-          button("Segna come gestita", () => attempt(async () => { await data.markInboxHandled(row.id); await load(); }), "secondary")));
-    }
-
-    async function load() {
-      const rows = await data.listInbox();
-      const box = $<HTMLElement>("#inbox");
-      if (rows.length === 0) {
-        render(box, el("p", { class: "muted" }, "Nessuna richiesta, per ora."));
-        return;
+    // Upcoming first: past courses are hidden behind a button, and a month with
+    // nothing left in it disappears with them.
+    const showPast = (on: boolean) => {
+      document.body.classList.toggle("show-past", on);
+      for (const section of document.querySelectorAll<HTMLElement>(".corsi-section")) {
+        section.hidden = !on && [...section.querySelectorAll(".corso")].every((c) => c.classList.contains("past"));
       }
-      say("");
-      render(box, el("ul", { class: "list" }, ...rows.map(card)));
+    };
+    if (past.length > 0) {
+      const label = (on: boolean) => on ? "Nascondi i corsi conclusi" : `Mostra i corsi conclusi (${past.length})`;
+      const btn = button(label(false), () => {
+        const on = !document.body.classList.contains("show-past");
+        showPast(on);
+        btn.textContent = label(on);
+      }, "secondary");
+      render($("#past-toggle"), btn);
+      $("#past-toggle").hidden = false;
+      showPast(false);
     }
 
     void attempt(async () => {
@@ -63,7 +137,15 @@ import AppLayout from "../layouts/AppLayout.astro";
           location.assign(href("/login/"));
         }), "secondary"));
       }
-      await load();
     });
   </script>
 </AppLayout>
+
+<style>
+  .corsi-month { color: var(--accent); text-transform: capitalize; }
+  /* The month's Wada swatch as a stripe, like the date tiles on the site. */
+  .corso { border-left: .4rem solid var(--tile); }
+  .corso.past { opacity: .6; }
+  :global(body:not(.show-past)) .corso.past { display: none; }
+  .corso-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .5rem 0 0; }
+</style>

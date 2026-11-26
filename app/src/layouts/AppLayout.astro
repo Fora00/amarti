@@ -3,11 +3,14 @@ import "../styles/global.css";
 import AppShell from "@factory/design-system/components/AppShell.astro";
 import { mode } from "../lib/env";
 
-interface Props { title: string; active?: "richieste" | ""; eyebrow?: string; plain?: boolean }
+interface Props { title: string; active?: "corsi" | "richieste" | ""; eyebrow?: string; plain?: boolean }
 const { title, active = "", eyebrow, plain = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 // Add a tab here when you add a page: { id, label, href, icon } (icons: today, dogs, inbox, hours, more).
-const nav = [{ id: "richieste", label: "Richieste", href: `${base}/`, icon: "inbox" }] as const;
+const nav = [
+  { id: "corsi", label: "Corsi", href: `${base}/`, icon: "today" },
+  { id: "richieste", label: "Richieste", href: `${base}/richieste/`, icon: "inbox" },
+] as const;
 ---
 
 <html lang="it">
