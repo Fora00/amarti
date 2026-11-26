@@ -2,6 +2,7 @@
 import Container from "@factory/design-system/components/Container.astro";
 import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
 import { site } from "../site.config.ts";
+import { url } from "../lib/path.ts";
 import { i18n } from "../i18n/dictionaries.ts";
 
 const t = i18n.useTranslations("it");
@@ -21,7 +22,11 @@ const year = new Date().getFullYear();
           ))
         }
       </ul>
-      <p>© {year} {site.name}</p>
+      <p>
+        © {year} {site.name} ·{" "}
+        <!-- The owner's private app, published under the site at /app/ (login by email link). -->
+        <a href={url("/app/")} rel="nofollow" class="text-ink-muted hover:text-accent">Area riservata</a>
+      </p>
     </div>
   </Container>
 </footer>
