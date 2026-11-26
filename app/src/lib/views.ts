@@ -61,10 +61,12 @@ export function signupItem(row: SignupRow, course: CourseInfo | undefined, reloa
       row.email ? el("a", { href: mailto(row.email, subject, text ?? `Ciao ${row.nome}!`), class: "btn secondary small" }, "Email") : null));
 }
 
-/** The "Esci" button every signed-in page shows at the bottom. */
+/** The "Password" link and the "Esci" button every signed-in page shows at the bottom. */
 export function sessionButton(target: HTMLElement, signOut: () => Promise<unknown>) {
-  render(target, button("Esci", () => attempt(async () => {
-    await signOut();
-    location.assign(href("/login/"));
-  }), "secondary"));
+  render(target, el("span", { class: "row", style: "justify-content:flex-start;gap:.5rem" },
+    el("a", { href: href("/account/"), class: "btn secondary" }, "Password"),
+    button("Esci", () => attempt(async () => {
+      await signOut();
+      location.assign(href("/login/"));
+    }), "secondary")));
 }

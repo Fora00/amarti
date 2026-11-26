@@ -17,3 +17,11 @@ verify_jwt = false
 site_url = "https://fora00.github.io/amarti/dashboard/"
 additional_redirect_urls = ["https://fora00.github.io/amarti/dashboard/", "http://localhost:4322/", "http://127.0.0.1:4322/"]
 enable_signup = false
+# Email + password as well as the link (set from the dashboard's /account/ page).
+minimum_password_length = 10
+
+# The sign-in email carries a 6-digit CODE (typed into the dashboard's login
+# page) instead of a link: it also works inside an installed home-screen app.
+[auth.email.template.magic_link]
+subject = "Il tuo codice per la dashboard aMarti"
+content_path = "./supabase/templates/magic_link.html"

@@ -1,0 +1,64 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Il tuo accesso">
+  <p class="muted">
+    Con una password entri senza aspettare l'email: il browser (o il portachiavi dell'iPhone) la ricorda per te.
+    Il codice via email resta per il primo accesso su un nuovo dispositivo o se la dimentichi.
+  </p>
+  <form id="password-form" class="card" style="max-width:24rem;margin-top:1rem">
+    <!-- For password managers: which account this password belongs to. -->
+    <input id="username" name="username" type="email" autocomplete="username" hidden />
+    <p class="muted" id="who" style="margin:0 0 .75rem"></p>
+    <div class="field">
+      <label for="new-password">Nuova password</label>
+      <input id="new-password" name="new-password" type="password" class="input" required minlength="10" autocomplete="new-password" />
+    </div>
+    <div class="field" style="margin-top:.75rem">
+      <label for="repeat-password">Ripeti la password</label>
+      <input id="repeat-password" name="repeat-password" type="password" class="input" required minlength="10" autocomplete="new-password" />
+    </div>
+    <p class="muted" style="margin:.5rem 0 0">Almeno 10 caratteri.</p>
+    <div style="margin-top:1rem"><button class="btn" type="submit">Salva la password</button></div>
+  </form>
+  <p id="session" style="margin-top:2rem"></p>
+
+  <script>
+    import { requireStaff } from "../../lib/guard";
+    import { supabase } from "../../lib/supabase";
+    import { $, say } from "../../lib/ui";
+    import { attempt, sessionButton } from "../../lib/views";
+
+    void attempt(async () => {
+      await requireStaff();
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email ?? "";
+      $<HTMLInputElement>("#username").value = email;
+      $("#who").textContent = email ? `Account: ${email}` : "";
+      sessionButton($("#session"), () => supabase.auth.signOut());
+      if (new URLSearchParams(location.search).has("benvenuta")) {
+        say("Sei dentro. Se vuoi, imposta qui una password: la prossima volta entri senza aspettare l'email.");
+      }
+
+      $<HTMLFormElement>("#password-form").addEventListener("submit", (ev) => {
+        ev.preventDefault();
+        const a = $<HTMLInputElement>("#new-password").value;
+        const b = $<HTMLInputElement>("#repeat-password").value;
+        void attempt(async () => {
+          if (a.length < 10) throw new Error("La password deve avere almeno 10 caratteri.");
+          if (a !== b) throw new Error("Le due password non coincidono.");
+          const { error } = await supabase.auth.updateUser({ password: a });
+          if (error) {
+            if (/should be different/i.test(error.message)) throw new Error("È uguale a quella di prima: scegline una diversa.");
+            if (/weak|short|characters/i.test(error.message)) throw new Error("Password troppo debole: usane una più lunga.");
+            throw new Error("Non è stato possibile salvare la password. Riprova.");
+          }
+          $<HTMLFormElement>("#password-form").reset();
+          $<HTMLInputElement>("#username").value = email;
+          say("Password salvata. La prossima volta entra con email e password.");
+        });
+      });
+    });
+  </script>
+</AppLayout>

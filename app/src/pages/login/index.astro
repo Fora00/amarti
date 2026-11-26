@@ -3,13 +3,27 @@ import AppLayout from "../../layouts/AppLayout.astro";
 ---
 
 <AppLayout title="Accesso" plain>
-  <p class="muted" id="intro">Inserisci la tua email: ti inviamo un link per entrare, senza password.</p>
+  <p class="muted" id="intro">Entra con email e password. Primo accesso o password dimenticata? Ricevi un codice via email.</p>
   <form id="login" class="card" style="max-width:24rem;margin-top:1rem">
     <div class="field">
       <label for="email">Email</label>
-      <input id="email" name="email" type="email" class="input" required autocomplete="email" />
+      <input id="email" name="email" type="email" class="input" required autocomplete="username" />
     </div>
-    <div style="margin-top:1rem"><button class="btn" type="submit">Inviami il link di accesso</button></div>
+    <div class="field" style="margin-top:.75rem">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" class="input" autocomplete="current-password" />
+    </div>
+    <div class="row" style="margin-top:1rem;justify-content:flex-start;flex-wrap:wrap;gap:.5rem">
+      <button class="btn" type="submit">Entra</button>
+      <button class="btn secondary" type="button" id="magic">Inviami un codice via email</button>
+    </div>
+  </form>
+  <form id="code-form" class="card" style="max-width:24rem;margin-top:1rem" hidden>
+    <div class="field">
+      <label for="code">Codice ricevuto via email</label>
+      <input id="code" name="code" class="input" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required />
+    </div>
+    <div style="margin-top:1rem"><button class="btn" type="submit">Entra con il codice</button></div>
   </form>
 
   <script>
@@ -17,7 +31,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
     import { $, href, say } from "../../lib/ui";
     import { attempt } from "../../lib/views";
 
-    // Back from an email link that no longer works: Supabase puts the reason in
+    // Back from an OLD email link (before codes) that no longer works: Supabase puts the reason in
     // the hash (#error=access_denied&error_code=otp_expired…). Each new email
     // cancels the previous link, and a link lasts one hour.
     const hash = new URLSearchParams(location.hash.slice(1));
@@ -29,6 +43,8 @@ import AppLayout from "../../layouts/AppLayout.astro";
     if (new URLSearchParams(location.search).has("negato")) {
       say("Questo indirizzo non ha accesso alla dashboard.", true);
     }
+
+    const email = () => $<HTMLInputElement>("#email").value.trim().toLowerCase();
 
     if (!configured) {
       // No Supabase project in this build: there is nothing to sign in to.
@@ -44,26 +60,60 @@ import AppLayout from "../../layouts/AppLayout.astro";
           if (data.session) location.replace(href("/"));
         });
       }
+
+      // Email + password: no email is sent, so no mailer rate limit. The
+      // password is set once from /account/ after a first sign-in by link; the
+      // browser / iCloud Keychain then fills it in.
       $<HTMLFormElement>("#login").addEventListener("submit", (ev) => {
         ev.preventDefault();
-        const email = $<HTMLInputElement>("#email").value.trim().toLowerCase();
+        const password = $<HTMLInputElement>("#password").value;
+        void attempt(async () => {
+          if (!password) throw new Error("Scrivi la password, oppure usa «Inviami un codice via email».");
+          const { error } = await supabase.auth.signInWithPassword({ email: email(), password });
+          if (error) {
+            if (error.status === 429) throw new Error("Troppi tentativi: aspetta qualche minuto e riprova.");
+            throw new Error("Email o password non corretti. Se non hai ancora una password, usa «Inviami un codice via email».");
+          }
+          location.replace(href("/"));
+        });
+      });
+
+      // Email code (the magic-link email, whose template shows {{ .Token }}):
+      // first sign-in on a device, or a forgotten password. Typed here, so it
+      // also works inside an installed home-screen app.
+      $<HTMLButtonElement>("#magic").addEventListener("click", () => {
+        const form = $<HTMLFormElement>("#login");
+        if (!$<HTMLInputElement>("#email").checkValidity()) { form.reportValidity(); return; }
         void attempt(async () => {
           const { error } = await supabase.auth.signInWithOtp({
-            email,
+            email: email(),
             // `shouldCreateUser: false`: only an account that already exists can sign in.
-            options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}${href("/")}` },
+            options: { shouldCreateUser: false },
           });
           if (error) {
             // Supabase's built-in mailer allows only a few emails per hour per project.
             if (error.status === 429 || /rate limit/i.test(error.message)) {
-              throw new Error("Troppe email di accesso in poco tempo: aspetta un po' (fino a un'ora) e riprova. Se hai già ricevuto un'email, usa il link più recente.");
+              throw new Error("Troppe email di accesso in poco tempo: aspetta un po' (fino a un'ora) e riprova. Se hai già ricevuto un codice, usa il più recente.");
             }
             if (/signups not allowed|user not found/i.test(error.message)) {
               throw new Error("Questo indirizzo non ha accesso alla dashboard.");
             }
-            throw new Error("Non è stato possibile inviare il link. Controlla l'indirizzo e riprova.");
+            throw new Error("Non è stato possibile inviare il codice. Controlla l'indirizzo e riprova.");
           }
-          say("Controlla la tua email (anche nello spam): ti abbiamo inviato il link di accesso. Usa l'ultima email ricevuta: le precedenti non valgono più.");
+          say("Ti abbiamo inviato un codice via email (guarda anche nello spam): scrivilo qui sotto. Vale l'ultimo ricevuto.");
+          $<HTMLFormElement>("#code-form").hidden = false;
+          $<HTMLInputElement>("#code").focus();
+        });
+      });
+
+      $<HTMLFormElement>("#code-form").addEventListener("submit", (ev) => {
+        ev.preventDefault();
+        const token = $<HTMLInputElement>("#code").value.replace(/\s/g, "");
+        void attempt(async () => {
+          const { error } = await supabase.auth.verifyOtp({ email: email(), token, type: "email" });
+          if (error) throw new Error("Codice non valido o scaduto: controlla di usare l'ultimo ricevuto, oppure chiedine uno nuovo.");
+          // First time in: suggest a password so the next sign-in needs no email.
+          location.replace(href("/account/?benvenuta=1"));
         });
       });
     }
