@@ -1,22 +1,24 @@
 /**
- * The one door to the data. Pages call these methods and never know whether the
- * answer comes from the local mock backend or from Supabase — which is what lets
- * the app be built and tried before the real project exists, and connected
- * later by changing `PUBLIC_DATA_MODE` and nothing else.
+ * The one door to the data. Pages call these methods, never `supabase.from()`
+ * directly, so the queries live in one file (data-supabase.ts) and match the
+ * tables in backend/supabase/schema.sql.
  *
- * The two implementations must stay behaviourally identical: data-mock.ts talks
- * to backend/mock/backend.mjs, data-supabase.ts to the tables in
- * backend/supabase/schema.sql. When you add a method, add it to all three.
+ * There is no mock implementation any more (plan/DECISIONS.md, 2026-11-27): the
+ * app always talks to Supabase; an unconfigured build is stopped by
+ * `requireStaff()` with a message before any of these is called.
  */
-import type { InboxRow } from "./types";
-import { mode } from "./env";
-import { mockData } from "./data-mock";
+import type { InboxRow, SignupRow, SignupStatus } from "./types";
 import { supabaseData } from "./data-supabase";
 
 export interface Data {
   listInbox(): Promise<InboxRow[]>;
   countOpenInbox(): Promise<number>;
   markInboxHandled(id: string): Promise<void>;
+  /** Every sign-up, newest first. */
+  listSignups(): Promise<SignupRow[]>;
+  /** Sign-ups still `iscritta` (not yet looked at): the Corsi tab badge. */
+  countNewSignups(): Promise<number>;
+  setSignupStatus(id: string, status: SignupStatus): Promise<void>;
 }
 
-export const data: Data = mode === "supabase" ? supabaseData : mockData;
+export const data: Data = supabaseData;

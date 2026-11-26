@@ -13,7 +13,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
   </form>
 
   <script>
-    import { mode, supabase } from "../../lib/supabase";
+    import { configured, problem, supabase } from "../../lib/supabase";
     import { $, href, say } from "../../lib/ui";
     import { attempt } from "../../lib/views";
 
@@ -21,10 +21,11 @@ import AppLayout from "../../layouts/AppLayout.astro";
       say("Questo indirizzo non ha accesso all'area riservata.", true);
     }
 
-    if (mode === "mock") {
-      // The demo has no accounts: nothing private is in it.
+    if (!configured) {
+      // No Supabase project in this build: there is nothing to sign in to.
       $("#login").remove();
-      $("#intro").textContent = "Modalità demo: non serve accedere.";
+      $("#intro").hidden = true;
+      say(problem ?? "Area riservata non configurata.", true);
     } else {
       $<HTMLFormElement>("#login").addEventListener("submit", (ev) => {
         ev.preventDefault();

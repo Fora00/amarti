@@ -10,9 +10,9 @@ import AppLayout from "../../layouts/AppLayout.astro";
   <script>
     import { requireStaff } from "../../lib/guard";
     import { data } from "../../lib/data";
-    import { mode, supabase } from "../../lib/supabase";
-    import { $, button, el, fmtFull, href, render, say } from "../../lib/ui";
-    import { attempt, whatsappUrl } from "../../lib/views";
+    import { supabase } from "../../lib/supabase";
+    import { $, button, el, fmtFull, render, say } from "../../lib/ui";
+    import { attempt, sessionButton, whatsappUrl } from "../../lib/views";
     import type { InboxRow } from "../../lib/types";
 
     // Payload keys → what the owner reads. Anything not listed is shown as is, so
@@ -57,12 +57,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
 
     void attempt(async () => {
       await requireStaff();
-      if (mode === "supabase") {
-        render($("#session"), button("Esci", () => attempt(async () => {
-          await supabase.auth.signOut();
-          location.assign(href("/login/"));
-        }), "secondary"));
-      }
+      sessionButton($("#session"), () => supabase.auth.signOut());
       await load();
     });
   </script>

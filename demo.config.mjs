@@ -13,8 +13,9 @@ export default {
   ],
   // A GitHub preview: nothing indexed, robots Disallow.
   demoEnv: { PUBLIC_DEMO: "1" },
-  // Local demo: the contact form POSTs to the mock backend, the app uses mock data.
-  localEnv: { PUBLIC_FORMS_BASE: "/functions/v1", PUBLIC_DATA_MODE: "mock" },
+  // Local demo: the contact form POSTs to the mock backend. The app has no mock
+  // mode (plan/DECISIONS.md 2026-11-27): it uses Supabase from app/.env.
+  localEnv: { PUBLIC_FORMS_BASE: "/functions/v1" },
   // Relative to this folder.
   backend: "backend/mock/backend.mjs",
 };

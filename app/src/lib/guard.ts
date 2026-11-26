@@ -1,4 +1,4 @@
-import { configured, mode, problem, supabase } from "./supabase";
+import { configured, problem, supabase } from "./supabase";
 import { href, say } from "./ui";
 
 /**
@@ -8,11 +8,8 @@ import { href, say } from "./ui";
  * empty page.
  */
 export async function requireStaff(): Promise<void> {
-  // Demo mode has no accounts: the local mock server is the only backend and
-  // there is nothing private in it.
-  if (mode === "mock") return;
   if (!configured) {
-    say(problem ?? "Modalità dati di prova: nessun collegamento a Supabase.", true);
+    say(problem ?? "Area riservata non configurata.", true);
     throw new Error("supabase not configured");
   }
   const { data } = await supabase.auth.getSession();
