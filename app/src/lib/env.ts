@@ -17,10 +17,10 @@ export const supabaseAnonKey: string = String(import.meta.env.PUBLIC_SUPABASE_AN
 /** Why the app cannot start, in Italian for the person looking at the screen; null if fine. */
 export const problem: string | null = (() => {
   if (!supabaseUrl || !supabaseAnonKey) {
-    return "Area riservata non ancora configurata: mancano PUBLIC_SUPABASE_URL e PUBLIC_SUPABASE_ANON_KEY. Chi gestisce il sito deve impostarle e ripubblicare l'app.";
+    return "Dashboard non ancora configurata: mancano PUBLIC_SUPABASE_URL e PUBLIC_SUPABASE_ANON_KEY. Chi gestisce il sito deve impostarle e ripubblicare la dashboard.";
   }
   if (!/^https:\/\//.test(supabaseUrl) && !/^http:\/\/(localhost|127\.0\.0\.1)/.test(supabaseUrl)) {
-    return "Area riservata non configurata correttamente: PUBLIC_SUPABASE_URL deve iniziare con https:// (o essere localhost).";
+    return "Dashboard non configurata correttamente: PUBLIC_SUPABASE_URL deve iniziare con https:// (o essere localhost).";
   }
   return null;
 })();

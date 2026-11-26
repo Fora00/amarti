@@ -18,15 +18,23 @@ import AppLayout from "../../layouts/AppLayout.astro";
     import { attempt } from "../../lib/views";
 
     if (new URLSearchParams(location.search).has("negato")) {
-      say("Questo indirizzo non ha accesso all'area riservata.", true);
+      say("Questo indirizzo non ha accesso alla dashboard.", true);
     }
 
     if (!configured) {
       // No Supabase project in this build: there is nothing to sign in to.
       $("#login").remove();
       $("#intro").hidden = true;
-      say(problem ?? "Area riservata non configurata.", true);
+      say(problem ?? "Dashboard non configurata.", true);
     } else {
+      // Already signed in on this browser (the session is kept in localStorage
+      // and refreshed by supabase-js): go straight to the dashboard. `?negato`
+      // means the guard just signed a non-staff account out — stay here then.
+      if (!new URLSearchParams(location.search).has("negato")) {
+        void supabase.auth.getSession().then(({ data }) => {
+          if (data.session) location.replace(href("/"));
+        });
+      }
       $<HTMLFormElement>("#login").addEventListener("submit", (ev) => {
         ev.preventDefault();
         const email = $<HTMLInputElement>("#email").value.trim().toLowerCase();

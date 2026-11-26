@@ -24,8 +24,8 @@ const year = new Date().getFullYear();
       </ul>
       <p>
         © {year} {site.name} ·{" "}
-        <!-- The owner's private app, published under the site at /app/ (login by email link). -->
-        <a href={url("/app/")} rel="nofollow" class="text-ink-muted hover:text-accent">Area riservata</a>
+        <!-- The owner's dashboard (the private app), published under the site at /dashboard/; login by email link. -->
+        <a href={url("/dashboard/")} rel="nofollow" class="text-ink-muted hover:text-accent">Dashboard</a>
       </p>
     </div>
   </Container>

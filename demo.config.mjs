@@ -9,7 +9,7 @@ export default {
   name: "amarti",
   builds: [
     { package: "amarti", dir: "amarti/site", mount: "/", baseEnv: "SITE_BASE" },
-    { package: "amarti-app", dir: "amarti/app", mount: "/app/", baseEnv: "APP_BASE" },
+    { package: "amarti-app", dir: "amarti/app", mount: "/dashboard/", baseEnv: "APP_BASE" },
   ],
   // A GitHub preview: nothing indexed, robots Disallow.
   demoEnv: { PUBLIC_DEMO: "1" },

@@ -1,4 +1,4 @@
-# Builds the public site and the private app (under <site>/app/) and publishes
+# Builds the public site and the private app (under <site>/dashboard/) and publishes
 # both on GitHub Pages (Settings → Pages →
 # Source: GitHub Actions). Runs on every push to main, or by hand.
 #
@@ -60,7 +60,7 @@ jobs:
       - name: Build app
         run: pnpm --filter amarti-app build
         env:
-          APP_BASE: ${{ steps.pages.outputs.base_path }}/app/
+          APP_BASE: ${{ steps.pages.outputs.base_path }}/dashboard/
           APP_SITE: ${{ steps.pages.outputs.origin }}
           PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
@@ -73,8 +73,8 @@ jobs:
 
       - name: Put the app under the site
         run: |
-          rm -rf site/dist/app
-          cp -R app/dist site/dist/app
+          rm -rf site/dist/dashboard
+          cp -R app/dist site/dist/dashboard
 
       - uses: actions/upload-pages-artifact@v3
         with:

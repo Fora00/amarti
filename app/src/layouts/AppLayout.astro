@@ -11,8 +11,8 @@ const nav = [
   { id: "corsi", label: "Corsi", href: `${base}/`, icon: "today" },
   { id: "richieste", label: "Richieste", href: `${base}/richieste/`, icon: "inbox" },
 ] as const;
-// The public site: the app lives at <site>/app/ on Pages, so drop the last segment.
-const siteHref = `${base.replace(/\/app$/, "")}/`;
+// The public site: the dashboard lives at <site>/dashboard/ on Pages, so drop the last segment.
+const siteHref = `${base.replace(/\/dashboard$/, "")}/`;
 ---
 
 <html lang="it" data-theme="light">
@@ -28,11 +28,11 @@ const siteHref = `${base.replace(/\/app$/, "")}/`;
     <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
     <!-- Installable app (PWA): see annina/app for the manifest, the service worker and the icons;
          the pieces are in @factory/common/pwa, @factory/common/pwa-client and `pnpm pwa-icons`. -->
-    <title>{title} · Area aMarti ceramics</title>
+    <title>{title} · Dashboard aMarti ceramics</title>
   </head>
   <body>
     <AppShell
-      title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Area riservata" homeHref={`${base}/`}>
+      title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Dashboard" homeHref={`${base}/`}>
       <div slot="actions" class="layout-actions">
         <slot name="actions" />
         <a href={siteHref} class="btn small secondary">← Sito</a>

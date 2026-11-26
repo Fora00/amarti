@@ -9,7 +9,7 @@ import { href, say } from "./ui";
  */
 export async function requireStaff(): Promise<void> {
   if (!configured) {
-    say(problem ?? "Area riservata non configurata.", true);
+    say(problem ?? "Dashboard non configurata.", true);
     throw new Error("supabase not configured");
   }
   const { data } = await supabase.auth.getSession();
