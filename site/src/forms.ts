@@ -1,5 +1,5 @@
 /**
- * Where the public form POSTs: the Supabase edge function in
+ * Where the public forms POST: the Supabase edge function in
  * backend/supabase/functions. Built from `PUBLIC_SUPABASE_URL`; with no
  * project yet it stays a `.example` placeholder that can never resolve.
  */
@@ -12,4 +12,6 @@ const functions =
 
 export const forms = {
   request: `${functions}/request`,
+  /** Course sign-up from an event page → `signups` (backend/supabase/functions/signup). */
+  signup: `${functions}/signup`,
 } as const;

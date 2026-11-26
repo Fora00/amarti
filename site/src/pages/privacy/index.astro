@@ -1,0 +1,72 @@
+---
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Prose from "@factory/design-system/components/Prose.astro";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { i18n } from "../../i18n/dictionaries.ts";
+
+const t = i18n.useTranslations("it");
+/**
+ * DRAFT wording, not reviewed by the owner or anyone legal. The version name
+ * says so (CONVENTIONS → "A consent text is versioned data"); change it with
+ * the wording. Placeholders in [square brackets] are for Martina to fill.
+ */
+const version = "bozza-2026-11-27";
+---
+
+<!-- Draft: kept out of search until the owner confirms it. -->
+<BaseLayout title={t("privacy.title")} description={t("privacy.lead")} noindex>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="md">
+          <p role="note" class="rounded-lg border border-accent bg-accent-muted p-4 font-semibold text-ink">
+            Bozza da confermare: questo testo non è ancora stato verificato da aMarti ceramics.
+            Le parti tra parentesi quadre sono da completare.
+          </p>
+          <Heading level={1}>{t("privacy.title")}</Heading>
+          <p class="text-ink-muted text-pretty">{t("privacy.lead")}</p>
+          <Prose>
+            <h2>Chi tratta i dati</h2>
+            <p>
+              aMarti ceramics (aMarticeramics Lab), Piazza Malfatti 10, Rovereto (TN).
+              [Ragione sociale, codice fiscale o partita IVA, email di contatto.]
+            </p>
+
+            <h2>Quali dati e perché</h2>
+            <p>
+              Quando ti iscrivi a un laboratorio ci lasci nome, cognome, email, telefono ed
+              eventuali note. Li usiamo solo per gestire la tua iscrizione: confermarti il posto
+              quando il corso parte, mandarti il link per il pagamento, avvisarti di cambi o
+              annullamenti. Quando ci scrivi dal modulo contatti, usiamo i tuoi dati solo per
+              risponderti.
+            </p>
+            <p>
+              La base giuridica è la tua richiesta di partecipare (art. 6.1.b GDPR). Non usiamo i
+              dati per pubblicità e non li vendiamo a nessuno.
+            </p>
+
+            <h2>Dove sono conservati e per quanto</h2>
+            <p>
+              In un database ospitato da un fornitore esterno (Supabase), accessibile solo a chi
+              gestisce il laboratorio. Il pagamento avviene sulla pagina di SumUp: il sito non vede
+              mai i dati della tua carta. Conserviamo i dati per [durata da definire, ad es. 12 mesi
+              dopo il laboratorio], salvo obblighi fiscali.
+            </p>
+
+            <h2>I tuoi diritti</h2>
+            <p>
+              Puoi chiederci in qualsiasi momento di vedere, correggere o cancellare i tuoi dati,
+              o di smettere di usarli, scrivendo a [email di contatto] o in DM su Instagram. Puoi
+              anche rivolgerti al Garante per la protezione dei dati personali (garanteprivacy.it).
+            </p>
+          </Prose>
+          <p class="text-sm text-ink-muted">Versione: {version}</p>
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

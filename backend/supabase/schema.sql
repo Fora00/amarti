@@ -7,9 +7,9 @@
 --   * Every table has row-level security ON and exactly one policy: the
 --     signed-in user must be listed in `staff`. The public anon key can
 --     therefore read and write NOTHING by itself.
---   * The public website never touches these tables. Its form POSTs to the
---     `request` edge function, which writes an `inbox` row with the service
---     role.
+--   * The public website never touches these tables. Its forms POST to the
+--     `request` edge function (an `inbox` row) and the `signup` edge function
+--     (a `signups` row), which write with the service role.
 --   * Turn OFF "Allow new users to sign up" (Authentication → Sign In / Up)
 --     and add the owner's address to `staff`. Both layers matter: with sign-up
 --     off nobody else can create an account, and `is_staff()` would still
@@ -43,12 +43,31 @@ create table if not exists inbox (
 );
 create index if not exists inbox_open_idx on inbox (handled, created_at desc);
 
+-- Course sign-ups from the event pages (the `signup` edge function, service
+-- role). Free: payment is a SumUp link the owner sends by hand once a course
+-- reaches its minimum, and she moves `status` in the app. All text columns are
+-- untrusted visitor input: render with textContent, never as HTML.
+create table if not exists signups (
+  id uuid primary key default gen_random_uuid(),
+  event_id text not null,          -- the site's event entry id (file name without .md), e.g. '2026-12-14-tazza-natale-day-1'
+  nome text not null,
+  cognome text not null,
+  email text not null,
+  telefono text not null,
+  note text,
+  privacy_at timestamptz not null, -- when the visitor ticked the privacy consent
+  status text not null default 'iscritta'
+    check (status in ('iscritta','confermata','pagato','attesa','annullata')),
+  created_at timestamptz not null default now()
+);
+create index if not exists signups_event_idx on signups (event_id, created_at);
+
 -- -- row-level security --------------------------------------------------------
 
 do $$
 declare t text;
 begin
-  foreach t in array array['staff', 'inbox'] loop
+  foreach t in array array['staff', 'inbox', 'signups'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists staff_only on %I', t);
     if t = 'staff' then

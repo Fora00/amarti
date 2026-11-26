@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "aMarti ceramics backend: Supabase schema and edge functions, plus the local mock backend. Not a build target — it is deployed to Supabase by hand. supabase-js is a devDependency only so `deno check` can resolve the functions' npm: import from node_modules; Supabase installs its own copy when deploying.",
+  "description": "aMarti ceramics backend: Supabase schema and edge functions, plus the local mock backend. Not a build target \u2014 it is deployed to Supabase by hand. supabase-js is a devDependency only so `deno check` can resolve the functions' npm: import from node_modules; Supabase installs its own copy when deploying.",
   "scripts": {
-    "check:functions": "deno check --no-lock supabase/functions/*/index.ts"
+    "check:functions": "deno check --no-lock supabase/functions/*/index.ts",
+    "test": "node --test \"test/*.test.mjs\""
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.58.0"

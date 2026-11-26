@@ -1,0 +1,78 @@
+---
+/**
+ * Free course sign-up, zero JS: a plain POST to the `signup` edge function
+ * (backend/supabase/functions/signup), which answers 303 → /iscrizione/, or
+ * back to this event page with #errore. Field names and limits must match
+ * `signupFields` in backend/supabase/functions/_shared/specs.ts: a field not
+ * listed there is dropped by the server.
+ */
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
+
+import FormField from "./FormField.astro";
+import { forms } from "../forms.ts";
+import { url } from "../lib/path.ts";
+import { site } from "../site.config.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+
+interface Props {
+  /** The event entry id (file name without .md). */
+  eventId: string;
+}
+const { eventId } = Astro.props;
+const t = i18n.useTranslations("it");
+const instagram = site.links.find((link) => link.label === "Instagram")?.url;
+---
+
+<section id="prenota" aria-labelledby="prenota-title" class="scroll-mt-6 rounded-card border border-line bg-surface-muted p-5 sm:p-8">
+  <Stack gap="md">
+    <Heading level={2} size="xl" id="prenota-title" class="text-heading!">{t("signup.title")}</Heading>
+    <p class="text-pretty">{t("signup.lead")}</p>
+    <p class="text-sm text-ink-muted text-pretty">{t("signup.how")}</p>
+
+    <!-- Shown only when the server sent the visitor back here with #errore (CSS :target). -->
+    <p id="errore" role="alert" class="hidden scroll-mt-6 rounded-lg border border-accent bg-accent-muted p-4 font-semibold text-ink target:block">
+      {t("signup.error")}
+    </p>
+
+    <form method="post" action={forms.signup} class="grid gap-5">
+      <input type="hidden" name="event_id" value={eventId} />
+      <div class="grid gap-5 sm:grid-cols-2">
+        <FormField id="nome" label={t("signup.firstName")} required autocomplete="given-name" maxlength={80} />
+        <FormField id="cognome" label={t("signup.lastName")} required autocomplete="family-name" maxlength={80} />
+      </div>
+      <FormField id="email" label={t("signup.email")} type="email" required autocomplete="email" maxlength={160} />
+      <FormField id="telefono" label={t("signup.phone")} type="tel" required autocomplete="tel" maxlength={30} hint={t("signup.phoneHint")} />
+      <FormField id="note" label={t("signup.note")} multiline maxlength={1000} hint={t("signup.noteHint")} />
+
+      <div class="flex items-start gap-3">
+        <input id="privacy" name="privacy" type="checkbox" value="si" required class="mt-1 size-5 shrink-0 accent-accent" />
+        <label for="privacy" class="text-sm text-ink">
+          {t("signup.privacyBefore")}<a href={url("/privacy/")}>{t("signup.privacyLink")}</a>{t("signup.privacyAfter")}<span aria-hidden="true"> *</span>
+        </label>
+      </div>
+
+      <!-- Honeypot: humans never see it; a bot that fills it is dropped. -->
+      <div class="sr-only" aria-hidden="true">
+        <label>Non compilare <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+
+      <Stack direction="row" gap="sm" align="center" wrap>
+        <Button type="submit" size="lg">{t("signup.submit")}</Button>
+      </Stack>
+      <p class="text-sm text-ink-muted">
+        {t("signup.fallback")}
+      </p>
+    </form>
+
+    {
+      instagram && (
+        <p class="text-sm text-ink-muted">
+          <ExternalLink href={instagram}>{t("signup.orInstagram")}</ExternalLink>
+        </p>
+      )
+    }
+  </Stack>
+</section>

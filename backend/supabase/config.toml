@@ -5,3 +5,14 @@ project_id = "amarti"
 
 [functions.request]
 verify_jwt = false
+
+[functions.signup]
+verify_jwt = false
+
+# Sign-in for the private app: magic link only, for addresses already in Auth
+# (the owner, added by hand) — nobody can create an account. The link returns
+# to the app on GitHub Pages; localhost is for `pnpm dev:app`.
+[auth]
+site_url = "https://fora00.github.io/amarti/app/"
+additional_redirect_urls = ["https://fora00.github.io/amarti/app/", "http://localhost:4321/", "http://localhost:4491/"]
+enable_signup = false

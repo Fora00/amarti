@@ -110,5 +110,36 @@
   },
   "form": {
     "error": "Non siamo riusciti a inviare il messaggio. Controlla i campi obbligatori e riprova."
+  },
+  "signup": {
+    "cta": "Prenota il tuo posto",
+    "title": "Prenota il tuo posto",
+    "lead": "Lascia i tuoi dati: l'iscrizione è gratuita e non ti impegna a pagare subito.",
+    "how": "Quando il corso raggiunge il numero minimo di iscritti, Martina ti conferma il posto su WhatsApp o via email e ti manda il link SumUp per pagare. Se il corso non parte, non paghi nulla.",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "email": "Email",
+    "phone": "Telefono",
+    "phoneHint": "Meglio un numero con WhatsApp: la conferma arriva lì.",
+    "note": "Note (facoltativo)",
+    "noteHint": "Allergie, esigenze particolari, se vieni con qualcuno…",
+    "privacyBefore": "Ho letto l'",
+    "privacyLink": "informativa privacy",
+    "privacyAfter": " e acconsento all'uso dei miei dati per gestire l'iscrizione.",
+    "submit": "Iscriviti al laboratorio",
+    "error": "Non siamo riusciti a registrare l'iscrizione. Controlla i campi (email e telefono validi, privacy spuntata) e riprova.",
+    "orInstagram": "Preferisci scrivere? Puoi prenotare anche in DM su Instagram.",
+    "fallback": "Se non vedi la conferma, riprova o scrivici su Instagram."
+  },
+  "signupThanks": {
+    "title": "Sei in lista!",
+    "lead": "Abbiamo ricevuto la tua iscrizione: grazie!",
+    "next": "Quando il corso raggiunge il numero minimo di iscritti, Martina ti conferma il posto su WhatsApp o via email.",
+    "pay": "Il pagamento arriva solo dopo la conferma, con un link SumUp: fino ad allora non devi fare nulla.",
+    "back": "Torna al programma"
+  },
+  "privacy": {
+    "title": "Informativa privacy",
+    "lead": "Come usiamo i dati che ci lasci quando ti iscrivi a un laboratorio o ci scrivi dal sito."
   }
 }

@@ -12,11 +12,12 @@ import Heading from "@factory/design-system/components/Heading.astro";
 import Button from "@factory/design-system/components/Button.astro";
 import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
 import { eventLd, breadcrumbsLd, faqPageLd } from "@factory/common";
-import { resolveTiming } from "@factory/common/calendar";
+import { isUpcoming, resolveTiming } from "@factory/common/calendar";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DateTile from "../../components/DateTile.astro";
 import PriceTbd from "../../components/PriceTbd.astro";
+import SignupForm from "../../components/SignupForm.astro";
 import { dateTile, formatWhen } from "../../lib/when.ts";
 import { formatPrice } from "../../lib/price.ts";
 import { site } from "../../site.config.ts";
@@ -49,6 +50,12 @@ const copyMessage =
 // Day 2 of a two-evening course is booked with day 1, so only day 1 books.
 const laterDay = Boolean(data.serie && data.serie.day > 1);
 const bookable = Boolean(data.bookingUrl) && data.status === "scheduled" && !data.soldOut && !laterDay;
+// The free sign-up form (→ `signups`, see backend/supabase/functions/signup).
+// Not on day 2+, not once the event is over (decided at build time: a rebuild
+// removes it), not when cancelled, postponed or sold out. Instagram stays as the
+// secondary path, and the demo "Paga e prenota" goes: payment now comes only
+// after Martina confirms the course (plan/BOOKING-FLOW.md, 2026-11-26).
+const signupOpen = data.status === "scheduled" && !data.soldOut && !laterDay && isUpcoming(data);
 const host = data.host ? await getEntry(data.host) : undefined;
 // `reference()` does not check that the id exists: getEntry just returns
 // undefined and the guest would vanish silently. Fail the build instead.
@@ -167,11 +174,13 @@ const jsonLd = [
           </dl>
 
           <Stack direction="row" gap="sm" wrap align="center">
+            {signupOpen && <Button href="#prenota">{t("signup.cta")}</Button>}
             {
               bookable && data.bookingUrl && (
                 <Button
                   href={data.bookingUrl}
                   external={data.bookingUrl.startsWith("http")}
+                  variant={signupOpen ? "secondary" : "primary"}
                   data-copy={copyMessage}
                 >
                   {t(`events.book.${data.bookingProvider}`)}
@@ -182,7 +191,7 @@ const jsonLd = [
               // Demo only: online payment is not decided yet (plan/BOOKING-FLOW.md).
               // A plain disabled <button> (the design-system Button does not type `disabled`),
               // so it cannot be followed or focused by mistake.
-              bookable && !data.free && (
+              bookable && !data.free && !signupOpen && (
                 <button
                   type="button"
                   disabled
@@ -202,7 +211,7 @@ const jsonLd = [
             </Button>
           </Stack>
 
-          {bookable && !data.free && <p class="text-sm text-ink-muted">{t("events.payDemo")}</p>}
+          {bookable && !data.free && !signupOpen && <p class="text-sm text-ink-muted">{t("events.payDemo")}</p>}
           {laterDay && <p class="text-ink-muted">{t("events.serieBookFirst")}</p>}
 
           {
@@ -240,6 +249,8 @@ const jsonLd = [
           }
 
           <Prose><Content /></Prose>
+
+          {signupOpen && <SignupForm eventId={event.id} />}
         </Stack>
       </Container>
     </Section>

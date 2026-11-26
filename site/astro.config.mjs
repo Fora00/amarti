@@ -34,7 +34,10 @@ export default defineConfig({
       : [
           sitemap({
             i18n: sitemapI18nConfig(site, { locales: [...builtLocales] }),
-            filter: (page) => sitemapFilter(site, [...builtLocales])(page) && !page.includes("/grazie/"),
+            // noindex pages (thank-you pages, the draft privacy notice) stay out of the sitemap.
+            filter: (page) =>
+              sitemapFilter(site, [...builtLocales])(page) &&
+              !["/grazie/", "/iscrizione/", "/privacy/"].some((p) => page.includes(p)),
           }),
         ],
 

@@ -6,8 +6,8 @@
  * It is a plug-in for the factory's demo server (`pnpm demo --amarti`, see
  * common/src/demo). The server owns static files, ports and persistence; this
  * file owns only what is specific to this site:
- *   1. POST /functions/v1/request — what the `request` edge function does,
- *      using the SAME validation (supabase/functions/_shared/*.ts)
+ *   1. POST /functions/v1/request and /functions/v1/signup — what the edge
+ *      functions do, using the SAME validation (supabase/functions/_shared/*.ts)
  *   2. POST /__mock/rpc/<method> — what the app's data layer calls
  *
  * State: deploy/.state/amarti.json (git-ignored). `--reset` starts again.
@@ -16,7 +16,13 @@
 import { randomUUID } from "node:crypto";
 
 import { MAX_BODY_BYTES, validate } from "../supabase/functions/_shared/validate.ts";
-import { requestFields } from "../supabase/functions/_shared/specs.ts";
+import {
+  requestFields,
+  signupCheck,
+  signupFailPath,
+  signupFields,
+  signupRow,
+} from "../supabase/functions/_shared/specs.ts";
 
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -24,7 +30,7 @@ const iso = (ms) => new Date(ms).toISOString();
 let state;
 let save;
 
-const seed = () => ({ inbox: [] });
+const seed = () => ({ inbox: [], signups: [] });
 
 const methods = {
   listInbox() {
@@ -58,11 +64,32 @@ export function createBackend(kit) {
     kit.redirect(res, okPath);
   }
 
+  // Same contract as supabase/functions/signup: row shape from signupRow().
+  async function acceptSignup(req, res) {
+    let params;
+    try { params = new URLSearchParams(await kit.readBody(req, MAX_BODY_BYTES)); } catch { return kit.redirect(res, "/eventi/"); }
+    const fail = signupFailPath(params.get("event_id"));
+    const verdict = validate((name) => params.get(name), signupFields, signupCheck);
+    if (verdict.result === "spam") return kit.redirect(res, "/iscrizione/");
+    if (verdict.result === "invalid") return kit.redirect(res, fail);
+    const now = Date.now();
+    (state.signups ??= []).push({
+      id: randomUUID(), ...signupRow(verdict.values, new Date(now)), status: "iscritta", created_at: iso(now),
+    });
+    save();
+    console.log(`  signups ← ${verdict.values.nome} ${verdict.values.cognome} (${verdict.values.event_id})`);
+    kit.redirect(res, "/iscrizione/");
+  }
+
   return {
     async handle(req, res, url) {
       const path = url.pathname;
       if (req.method === "POST" && path === "/functions/v1/request") {
         await acceptForm(req, res, "/grazie/", "/contatti/#errore");
+        return true;
+      }
+      if (req.method === "POST" && path === "/functions/v1/signup") {
+        await acceptSignup(req, res);
         return true;
       }
       if (req.method === "POST" && path.startsWith("/__mock/rpc/")) {

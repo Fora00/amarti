@@ -12,8 +12,50 @@ function redirect(path: string): Response {
   return new Response(null, { status: 303, headers: { Location: `${siteUrl()}${path}` } });
 }
 
+export interface FormTarget {
+  fields: FieldSpec;
+  okPath: string;
+  /** A fixed path, or one read from the raw form (`undefined` when the body could not be read). */
+  failPath: string | ((get: ((name: string) => unknown) | undefined) => string);
+  extraCheck?: (v: Record<string, string>) => boolean;
+  /** Validated values → the table and the row to insert (service role). */
+  insert: (v: Record<string, string>) => { table: string; row: Record<string, unknown> };
+}
+
+/** Validates a form POST and stores one row. Always answers with a redirect. */
+export async function handlePost(req: Request, target: FormTarget): Promise<Response> {
+  const fail = (get?: (name: string) => unknown) =>
+    redirect(typeof target.failPath === "string" ? target.failPath : target.failPath(get));
+
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  if (Number(req.headers.get("content-length") ?? "0") > MAX_BODY_BYTES) return fail();
+
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return fail();
+  }
+  const get = (name: string) => form.get(name);
+
+  const verdict = validate(get, target.fields, target.extraCheck);
+  if (verdict.result === "spam") return redirect(target.okPath);
+  if (verdict.result === "invalid") return fail(get);
+
+  const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { persistSession: false },
+  });
+  const { table, row } = target.insert(verdict.values);
+  const { error } = await db.from(table).insert(row);
+  if (error) {
+    console.error(`${table} insert failed`, error.message);
+    return fail(get);
+  }
+  return redirect(target.okPath);
+}
+
 /** Validates a form POST and stores it in `inbox`. Always answers with a redirect. */
-export async function handleForm(
+export function handleForm(
   req: Request,
   kind: string,
   fields: FieldSpec,
@@ -21,27 +63,11 @@ export async function handleForm(
   failPath: string,
   extraCheck?: (v: Record<string, string>) => boolean,
 ): Promise<Response> {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  if (Number(req.headers.get("content-length") ?? "0") > MAX_BODY_BYTES) return redirect(failPath);
-
-  let form: FormData;
-  try {
-    form = await req.formData();
-  } catch {
-    return redirect(failPath);
-  }
-
-  const verdict = validate((name) => form.get(name), fields, extraCheck);
-  if (verdict.result === "spam") return redirect(okPath);
-  if (verdict.result === "invalid") return redirect(failPath);
-
-  const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-    auth: { persistSession: false },
+  return handlePost(req, {
+    fields,
+    okPath,
+    failPath,
+    extraCheck,
+    insert: (payload) => ({ table: "inbox", row: { kind, payload } }),
   });
-  const { error } = await db.from("inbox").insert({ kind, payload: verdict.values });
-  if (error) {
-    console.error("inbox insert failed", error.message);
-    return redirect(failPath);
-  }
-  return redirect(okPath);
 }
