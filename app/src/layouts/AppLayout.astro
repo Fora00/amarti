@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import AppShell from "@factory/design-system/components/AppShell.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
 
 interface Props { title: string; active?: "corsi" | "richieste" | ""; eyebrow?: string; plain?: boolean }
 const { title, active = "", eyebrow, plain = false } = Astro.props;
@@ -10,11 +11,15 @@ const nav = [
   { id: "corsi", label: "Corsi", href: `${base}/`, icon: "today" },
   { id: "richieste", label: "Richieste", href: `${base}/richieste/`, icon: "inbox" },
 ] as const;
+// The public site: the app lives at <site>/app/ on Pages, so drop the last segment.
+const siteHref = `${base.replace(/\/app$/, "")}/`;
 ---
 
-<html lang="it">
+<html lang="it" data-theme="light">
   <head>
     <meta charset="utf-8" />
+    <!-- Light unless dark was chosen with the toggle (site or app, same storage key). Before paint. -->
+    <script is:inline>try{if(localStorage.getItem("amarti-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>
     <!-- viewport-fit=cover: the whole screen of an installed app; the CSS keeps clear of the notch -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <!-- Private app: behind a login, never to be indexed. -->
@@ -28,7 +33,11 @@ const nav = [
   <body>
     <AppShell
       title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Area riservata" homeHref={`${base}/`}>
-      <slot name="actions" slot="actions" />
+      <div slot="actions" class="layout-actions">
+        <slot name="actions" />
+        <a href={siteHref} class="btn small secondary">← Sito</a>
+        <ThemeToggle />
+      </div>
       <slot />
     </AppShell>
     {!plain && (
@@ -49,3 +58,7 @@ const nav = [
     )}
   </body>
 </html>
+
+<style>
+  .layout-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
+</style>

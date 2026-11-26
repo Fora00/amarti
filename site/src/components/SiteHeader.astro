@@ -4,6 +4,7 @@ import { url } from "../lib/path.ts";
 import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
 
 import Logo from "./Logo.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 import { site, instagramDm } from "../site.config.ts";
 import { i18n } from "../i18n/dictionaries.ts";
 
@@ -37,6 +38,7 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
         <li>
           <ExternalLink href={instagramDm} class={linkClass}>{t("nav.write")}</ExternalLink>
         </li>
+        <li class="flex"><ThemeToggle /></li>
       </ul>
     </nav>
   </Container>
