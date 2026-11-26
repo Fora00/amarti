@@ -1,56 +1,18 @@
 ---
 /**
  * Corsi — the owner's home page. One card per course in the programme, grouped
- * by month, with the month's accent. Built from the public site's content (see
- * src/content.config.ts), so it is static HTML: the only script is the login
- * guard and the "already happened" marking (the build date is not today).
- *
- * Sign-ups are NOT wired yet: every card says so instead of showing a fake
- * count. Next step (plan/BOOKING-FLOW.md): a `signups` table keyed by the
- * course id, then the count vs the minimum and the list of names per course.
+ * by month, with the month's accent. The list is static HTML built from the
+ * public site's content (src/lib/programma.ts); after the login guard the
+ * script fetches `signups` and fills each card's counts. A sign-up whose
+ * `event_id` matches no course goes under "Altre iscrizioni", so nothing is lost.
  */
-import { getCollection } from "astro:content";
 import AppLayout from "../layouts/AppLayout.astro";
+import { asDate, loadCourses } from "../lib/programma";
+import { MINIMO_DEFAULT } from "../lib/corsi";
 
-const eventi = await getCollection("eventi");
-const ospiti = new Map((await getCollection("ospiti")).map((o) => [o.id, o.data.name]));
-
-// Wall-clock strings, never a Z: read the parts, no time-zone conversion.
-const parts = (s: string) => {
-  const [d, t = ""] = s.split("T");
-  const [y, m, day] = d.split("-").map(Number);
-  const [hh, mm] = t ? t.split(":").map(Number) : [];
-  return { y, m, day, hh, mm, hasTime: Boolean(t) };
-};
-const asDate = (s: string) => { const p = parts(s); return new Date(p.y, p.m - 1, p.day, p.hh ?? 0, p.mm ?? 0); };
-const dayFmt = new Intl.DateTimeFormat("it-IT", { weekday: "short", day: "numeric", month: "short" });
+const courses = await loadCourses();
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const monthFmt = new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" });
-const when = (s: string) => {
-  const p = parts(s);
-  return `${dayFmt.format(asDate(s))}${p.hasTime ? ` · ${String(p.hh).padStart(2, "0")}:${String(p.mm).padStart(2, "0")}` : ""}`;
-};
-
-// A two-evening course is one course: show day 1, list day 2 inside it.
-const byId = new Map(eventi.map((e) => [e.id, e]));
-const courses = eventi
-  .filter((e) => !e.data.serie || e.data.serie.day === 1)
-  .sort((a, b) => a.data.start.localeCompare(b.data.start))
-  .map((e) => {
-    const other = e.data.serie ? byId.get(e.data.serie.with) : undefined;
-    const last = other?.data.start ?? e.data.start;
-    return {
-      id: e.id,
-      title: e.data.title,
-      month: parts(e.data.start).m,
-      monthKey: e.data.start.slice(0, 7),
-      dates: [e.data.start, ...(other ? [other.data.start] : [])].map(when),
-      // The last evening, as YYYY-MM-DD: the course is past from the next day.
-      lastDay: last.slice(0, 10),
-      host: e.data.host ? (ospiti.get(e.data.host) ?? e.data.host) : undefined,
-      capacity: e.data.capacity,
-      free: e.data.free,
-    };
-  });
 
 const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
   key,
@@ -61,29 +23,30 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
 
 <AppLayout title="Corsi" active="corsi" eyebrow="Programma">
   <p class="muted">
-    I corsi in calendario sul sito. Qui vedrai chi si è iscritto a ciascuno e se è stato raggiunto il numero minimo.
-  </p>
-  <p class="card quiet" style="margin-top:1rem">
-    Le iscrizioni dal sito non sono ancora attive: per ora si prenota via DM su Instagram.
+    I corsi in calendario sul sito, con chi si è iscritto dal modulo. Apri un corso per vedere i nomi e
+    cambiare lo stato di ogni iscrizione.
   </p>
 
   {months.map((m) => (
-    <section class="section corsi-section" data-month={courses.find((c) => c.monthKey === m.key)?.month}>
+    <section class="section corsi-section" data-month={m.courses[0]?.month}>
       <h2 class="day-title corsi-month">{m.label}</h2>
       <ul class="list">
         {m.courses.map((c) => (
-          <li class="card corso" data-month={c.month} data-last-day={c.lastDay}>
+          <li class="card corso" data-month={c.month} data-last-day={c.lastDay} data-course-id={c.id}
+            data-aliases={c.aliases.join(" ")} data-capacity={c.capacity ?? ""}>
             <div class="row">
-              <strong>{c.title}</strong>
+              <a class="corso-link" href={`${base}/corsi/${c.id}/`}><strong>{c.title}</strong></a>
               <span class="pill past-pill" hidden>Concluso</span>
+              <span class="pill new-pill" hidden></span>
             </div>
             <p class="muted" style="margin:.35rem 0 0">
               {c.dates.join(" + ")}{c.host && ` · con ${c.host}`}
             </p>
             <p class="corso-facts">
-              <span><span class="muted">Iscritti</span> —</span>
-              <span><span class="muted">Minimo</span> da definire</span>
-              <span><span class="muted">Posti</span> {c.capacity ?? "da definire"}</span>
+              <span><span class="muted">Iscritti</span> <span class="n-iscritti">…</span>{c.capacity != null && ` / ${c.capacity} posti`}</span>
+              <span><span class="muted">Minimo</span> <span class="n-minimo">{MINIMO_DEFAULT ?? "da definire"}</span></span>
+              {c.capacity == null && <span><span class="muted">Posti</span> da definire</span>}
+              <span><span class="muted">In attesa</span> <span class="n-attesa">…</span></span>
               {c.free && <span>Gratuito</span>}
             </p>
           </li>
@@ -92,19 +55,30 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
     </section>
   ))}
 
+  <section class="section" id="altre" hidden>
+    <h2 class="day-title">Altre iscrizioni</h2>
+    <p class="muted">Iscrizioni a un corso che non è (più) nel programma del sito.</p>
+    <ul class="list" id="altre-list"></ul>
+  </section>
+
   <p id="past-toggle" style="margin-top:1.5rem" hidden></p>
   <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../lib/guard";
-    import { mode, supabase } from "../lib/supabase";
-    import { $, button, href, render } from "../lib/ui";
-    import { attempt } from "../lib/views";
+    import { data } from "../lib/data";
+    import { supabase } from "../lib/supabase";
+    import { MINIMO_DEFAULT, isActive } from "../lib/corsi";
+    import { $, button, render, say } from "../lib/ui";
+    import { attempt, sessionButton, signupItem } from "../lib/views";
+    import type { SignupRow } from "../lib/types";
+
+    const cards = [...document.querySelectorAll<HTMLElement>(".corso")];
 
     // The page was built on some earlier day: decide "past" in the browser.
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const past = [...document.querySelectorAll<HTMLElement>(".corso")].filter((c) => (c.dataset.lastDay ?? "") < today);
+    const past = cards.filter((c) => (c.dataset.lastDay ?? "") < today);
     for (const card of past) {
       card.classList.add("past");
       card.querySelector<HTMLElement>(".past-pill")!.hidden = false;
@@ -129,14 +103,45 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
       showPast(false);
     }
 
+    // event_id → card (day 2 of a two-evening course points at day 1's card).
+    const cardFor = new Map<string, HTMLElement>();
+    for (const card of cards) for (const id of (card.dataset.aliases ?? "").split(" ")) if (id) cardFor.set(id, card);
+
+    async function load() {
+      const rows = await data.listSignups();
+      const byCard = new Map<HTMLElement, SignupRow[]>();
+      const orphans: SignupRow[] = [];
+      for (const row of rows) {
+        const card = cardFor.get(row.event_id);
+        if (card) byCard.set(card, [...(byCard.get(card) ?? []), row]);
+        else orphans.push(row);
+      }
+
+      for (const card of cards) {
+        const list = byCard.get(card) ?? [];
+        const active = list.filter(isActive).length;
+        const waiting = list.filter((s) => s.status === "attesa").length;
+        const fresh = list.filter((s) => s.status === "iscritta").length;
+        card.querySelector<HTMLElement>(".n-iscritti")!.textContent = String(active);
+        card.querySelector<HTMLElement>(".n-attesa")!.textContent = String(waiting);
+        if (MINIMO_DEFAULT != null) {
+          card.querySelector<HTMLElement>(".n-minimo")!.textContent =
+            `${MINIMO_DEFAULT} · ${active >= MINIMO_DEFAULT ? "raggiunto" : `ne mancano ${MINIMO_DEFAULT - active}`}`;
+        }
+        const pill = card.querySelector<HTMLElement>(".new-pill")!;
+        pill.textContent = fresh === 1 ? "1 nuova" : `${fresh} nuove`;
+        pill.hidden = fresh === 0;
+      }
+
+      $("#altre").hidden = orphans.length === 0;
+      render($("#altre-list"), ...orphans.map((row) => signupItem(row, undefined, load)));
+      say("");
+    }
+
     void attempt(async () => {
       await requireStaff();
-      if (mode === "supabase") {
-        render($("#session"), button("Esci", () => attempt(async () => {
-          await supabase.auth.signOut();
-          location.assign(href("/login/"));
-        }), "secondary"));
-      }
+      sessionButton($("#session"), () => supabase.auth.signOut());
+      await load();
     });
   </script>
 </AppLayout>
@@ -147,5 +152,6 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
   .corso { border-left: .4rem solid var(--tile); }
   .corso.past { opacity: .6; }
   :global(body:not(.show-past)) .corso.past { display: none; }
+  .corso-link { color: inherit; text-decoration: underline; text-underline-offset: .2em; }
   .corso-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .5rem 0 0; }
 </style>

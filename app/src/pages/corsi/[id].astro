@@ -1,0 +1,82 @@
+---
+/**
+ * One course: its sign-ups, newest first, with the status of each and the
+ * WhatsApp / email shortcuts for the confirmation message. A static route per
+ * course from the same content as the Corsi page; the names are fetched after
+ * the login guard.
+ */
+import AppLayout from "../../layouts/AppLayout.astro";
+import { loadCourses, type Course } from "../../lib/programma";
+import { MINIMO_DEFAULT } from "../../lib/corsi";
+
+export async function getStaticPaths() {
+  return (await loadCourses()).map((course) => ({ params: { id: course.id }, props: { course } }));
+}
+
+const { course } = Astro.props as { course: Course };
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const dates = course.dates.join(" + ");
+---
+
+<AppLayout title={course.title} active="corsi" eyebrow="Corso">
+  <div id="corso" data-month={course.month} data-aliases={course.aliases.join(" ")} data-title={course.title}
+    data-dates={dates} data-capacity={course.capacity ?? ""}>
+    <p><a href={`${base}/`}>← Tutti i corsi</a></p>
+    <p class="muted" style="margin:.5rem 0 0">{dates}{course.host && ` · con ${course.host}`}</p>
+    <p class="corso-facts">
+      <span><span class="muted">Iscritti</span> <span id="n-iscritti">…</span>{course.capacity != null && ` / ${course.capacity} posti`}</span>
+      <span><span class="muted">Minimo</span> {MINIMO_DEFAULT ?? "da definire"}</span>
+      {course.capacity == null && <span><span class="muted">Posti</span> da definire</span>}
+      <span><span class="muted">In attesa</span> <span id="n-attesa">…</span></span>
+      {course.free && <span>Gratuito</span>}
+    </p>
+  </div>
+
+  <div id="signups" style="margin-top:1rem"></div>
+  <p id="session" style="margin-top:2rem"></p>
+
+  <script>
+    import { requireStaff } from "../../lib/guard";
+    import { data } from "../../lib/data";
+    import { supabase } from "../../lib/supabase";
+    import { isActive, STATUS_LABELS } from "../../lib/corsi";
+    import { $, el, render, say } from "../../lib/ui";
+    import { attempt, sessionButton, signupItem, type CourseInfo } from "../../lib/views";
+    import type { SignupStatus } from "../../lib/types";
+
+    const root = $<HTMLElement>("#corso");
+    const ids = new Set((root.dataset.aliases ?? "").split(" ").filter(Boolean));
+    const info: CourseInfo = { title: root.dataset.title ?? "", dates: root.dataset.dates ?? "" };
+    // Grouped in the order she works through them; empty groups are left out.
+    const ORDER: SignupStatus[] = ["iscritta", "confermata", "pagato", "attesa", "annullata"];
+
+    async function load() {
+      const rows = (await data.listSignups()).filter((r) => ids.has(r.event_id));
+      $("#n-iscritti").textContent = String(rows.filter(isActive).length);
+      $("#n-attesa").textContent = String(rows.filter((r) => r.status === "attesa").length);
+      const box = $<HTMLElement>("#signups");
+      say("");
+      if (rows.length === 0) {
+        render(box, el("p", { class: "muted" }, "Nessuna iscrizione a questo corso, per ora."));
+        return;
+      }
+      render(box, ...ORDER.map((status) => {
+        const group = rows.filter((r) => r.status === status);
+        if (group.length === 0) return null;
+        return el("section", { class: "section" },
+          el("h2", { class: "day-title" }, `${STATUS_LABELS[status]} (${group.length})`),
+          el("ul", { class: "list" }, ...group.map((row) => signupItem(row, info, load))));
+      }));
+    }
+
+    void attempt(async () => {
+      await requireStaff();
+      sessionButton($("#session"), () => supabase.auth.signOut());
+      await load();
+    });
+  </script>
+</AppLayout>
+
+<style>
+  .corso-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .5rem 0 0; }
+</style>

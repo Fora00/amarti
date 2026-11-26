@@ -1,7 +1,6 @@
 ---
 import "../styles/global.css";
 import AppShell from "@factory/design-system/components/AppShell.astro";
-import { mode } from "../lib/env";
 
 interface Props { title: string; active?: "corsi" | "richieste" | ""; eyebrow?: string; plain?: boolean }
 const { title, active = "", eyebrow, plain = false } = Astro.props;
@@ -28,10 +27,25 @@ const nav = [
   </head>
   <body>
     <AppShell
-      title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Area riservata" homeHref={`${base}/`}
-      banner={mode === "mock" ? "Modalità demo · dati di prova" : undefined}>
+      title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Area riservata" homeHref={`${base}/`}>
       <slot name="actions" slot="actions" />
       <slot />
     </AppShell>
+    {!plain && (
+      <script>
+        // Tab badges: new sign-ups (still `iscritta`) on Corsi, open messages on
+        // Richieste. Silent on failure; RLS answers 0 rows before login anyway.
+        import { configured } from "../lib/supabase";
+        import { data } from "../lib/data";
+        const fill = (tab: string, n: number) => {
+          const badge = document.querySelector<HTMLElement>(`[data-badge-for="${tab}"]`);
+          if (badge) { badge.textContent = n > 99 ? "99+" : String(n); badge.hidden = n === 0; }
+        };
+        if (configured) {
+          data.countNewSignups().then((n) => fill("corsi", n)).catch(() => {});
+          data.countOpenInbox().then((n) => fill("richieste", n)).catch(() => {});
+        }
+      </script>
+    )}
   </body>
 </html>

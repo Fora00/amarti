@@ -1,7 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import type { Data } from "./data";
-import type { InboxRow } from "./types";
+import type { InboxRow, SignupRow } from "./types";
 
 /** Supabase returns `{ error }` instead of throwing; pages expect a rejection. */
 function ok<T>(result: { data: T; error: PostgrestError | null }): T {
@@ -23,5 +23,19 @@ export const supabaseData: Data = {
 
   async markInboxHandled(id) {
     ok(await supabase.from("inbox").update({ handled: true }).eq("id", id));
+  },
+
+  async listSignups() {
+    return (ok(await supabase.from("signups").select("*").order("created_at", { ascending: false })) ?? []) as SignupRow[];
+  },
+
+  async countNewSignups() {
+    const { count, error } = await supabase.from("signups").select("id", { count: "exact", head: true }).eq("status", "iscritta");
+    if (error) throw new Error(error.message);
+    return count ?? 0;
+  },
+
+  async setSignupStatus(id, status) {
+    ok(await supabase.from("signups").update({ status }).eq("id", id));
   },
 };

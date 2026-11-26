@@ -1,4 +1,5 @@
-# Builds the public site and publishes it on GitHub Pages (Settings → Pages →
+# Builds the public site and the private app (under <site>/app/) and publishes
+# both on GitHub Pages (Settings → Pages →
 # Source: GitHub Actions). Runs on every push to main, or by hand.
 #
 # It is still a PREVIEW build (PUBLIC_DEMO=1): noindex on every page, robots
@@ -48,12 +49,32 @@ jobs:
         env:
           SITE_BASE: ${{ steps.pages.outputs.base_path }}/
           PUBLIC_DEMO: "1"
+          # The sign-up form on event pages POSTs to <this>/functions/v1/signup.
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
 
-      # No hosted backend yet: the sign-up form and its thank-you page would
-      # post nowhere. Nothing links to them. Remove once the backend is live.
-      - name: Drop pages that need the backend
+      # The private app (behind the magic-link login, noindex). Its Supabase URL and
+      # anon key are public by nature, so they are repository VARIABLES, not secrets:
+      # Settings → Secrets and variables → Actions → Variables →
+      # PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY. Unset = the app still builds
+      # and says it is not configured. env-guard.mjs refuses a service-role key.
+      - name: Build app
+        run: pnpm --filter amarti-app build
+        env:
+          APP_BASE: ${{ steps.pages.outputs.base_path }}/app/
+          APP_SITE: ${{ steps.pages.outputs.origin }}
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+
+      # The generic contact form is not linked anywhere yet: keep it off the
+      # preview. The course sign-up (eventi/*, iscrizione/, privacy/) stays.
+      - name: Drop the unlinked contact form
         working-directory: site/dist
         run: rm -rf contatti grazie en/contatti en/grazie
+
+      - name: Put the app under the site
+        run: |
+          rm -rf site/dist/app
+          cp -R app/dist site/dist/app
 
       - uses: actions/upload-pages-artifact@v3
         with:
