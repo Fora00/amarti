@@ -24,3 +24,4 @@ deploy/
 # Project notes about the client (brief, open questions, payments): local only,
 # never in the public repo. Back them up some other way.
 /plan/
+**/supabase/.branches/
