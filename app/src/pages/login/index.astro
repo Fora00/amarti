@@ -17,6 +17,15 @@ import AppLayout from "../../layouts/AppLayout.astro";
     import { $, href, say } from "../../lib/ui";
     import { attempt } from "../../lib/views";
 
+    // Back from an email link that no longer works: Supabase puts the reason in
+    // the hash (#error=access_denied&error_code=otp_expired…). Each new email
+    // cancels the previous link, and a link lasts one hour.
+    const hash = new URLSearchParams(location.hash.slice(1));
+    if (hash.get("error")) {
+      say("Questo link di accesso non è più valido: ogni nuova email annulla quella prima, e un link dura un'ora. Usa l'ultima email ricevuta, oppure chiedine una nuova.", true);
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+
     if (new URLSearchParams(location.search).has("negato")) {
       say("Questo indirizzo non ha accesso alla dashboard.", true);
     }
@@ -44,8 +53,17 @@ import AppLayout from "../../layouts/AppLayout.astro";
             // `shouldCreateUser: false`: only an account that already exists can sign in.
             options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}${href("/")}` },
           });
-          if (error) throw new Error("Non è stato possibile inviare il link. Controlla l'indirizzo e riprova.");
-          say("Controlla la tua email: ti abbiamo inviato il link di accesso.");
+          if (error) {
+            // Supabase's built-in mailer allows only a few emails per hour per project.
+            if (error.status === 429 || /rate limit/i.test(error.message)) {
+              throw new Error("Troppe email di accesso in poco tempo: aspetta un po' (fino a un'ora) e riprova. Se hai già ricevuto un'email, usa il link più recente.");
+            }
+            if (/signups not allowed|user not found/i.test(error.message)) {
+              throw new Error("Questo indirizzo non ha accesso alla dashboard.");
+            }
+            throw new Error("Non è stato possibile inviare il link. Controlla l'indirizzo e riprova.");
+          }
+          say("Controlla la tua email (anche nello spam): ti abbiamo inviato il link di accesso. Usa l'ultima email ricevuta: le precedenti non valgono più.");
         });
       });
     }

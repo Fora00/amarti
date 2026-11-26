@@ -14,7 +14,8 @@ export async function requireStaff(): Promise<void> {
   }
   const { data } = await supabase.auth.getSession();
   if (!data.session) {
-    location.replace(href("/login/"));
+    // Keep the hash: a dead email link comes back as #error=…, and login explains it.
+    location.replace(href("/login/") + location.hash);
     throw new Error("redirecting to login");
   }
   const { data: rows, error } = await supabase.from("staff").select("email").limit(1);
