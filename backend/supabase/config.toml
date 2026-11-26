@@ -20,8 +20,10 @@ enable_signup = false
 # Email + password as well as the link (set from the dashboard's /account/ page).
 minimum_password_length = 10
 
-# The sign-in email carries a 6-digit CODE (typed into the dashboard's login
-# page) instead of a link: it also works inside an installed home-screen app.
-[auth.email.template.magic_link]
-subject = "Il tuo codice per la dashboard aMarti"
-content_path = "./supabase/templates/magic_link.html"
+# The sign-in email SHOULD carry a 6-digit code (supabase/templates/magic_link.html):
+# Supabase refuses custom templates on the free tier with its built-in mailer
+# ("entitlement_required"). Uncomment once a custom SMTP is set ([auth.email.smtp]).
+# Until then the hosted email has the default LINK; the login page handles both.
+# [auth.email.template.magic_link]
+# subject = "Il tuo codice per la dashboard aMarti"
+# content_path = "./supabase/templates/magic_link.html"

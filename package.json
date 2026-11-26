@@ -13,7 +13,8 @@
     "check": "pnpm -r --if-present check",
     "test": "pnpm -r --if-present test",
     "vendor:check": "node vendor/scripts/vendor-check.mjs",
-    "backend:local": "node backend/scripts/local.mjs"
+    "backend:local": "node backend/scripts/local.mjs",
+    "backend:login-link": "node backend/scripts/login-link.mjs"
   },
   "devDependencies": {
     "astro": "^7.2.10",

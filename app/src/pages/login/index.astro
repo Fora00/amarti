@@ -3,7 +3,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
 ---
 
 <AppLayout title="Accesso" plain>
-  <p class="muted" id="intro">Entra con email e password. Primo accesso o password dimenticata? Ricevi un codice via email.</p>
+  <p class="muted" id="intro">Entra con email e password. Primo accesso o password dimenticata? Ricevi un'email di accesso.</p>
   <form id="login" class="card" style="max-width:24rem;margin-top:1rem">
     <div class="field">
       <label for="email">Email</label>
@@ -15,12 +15,13 @@ import AppLayout from "../../layouts/AppLayout.astro";
     </div>
     <div class="row" style="margin-top:1rem;justify-content:flex-start;flex-wrap:wrap;gap:.5rem">
       <button class="btn" type="submit">Entra</button>
-      <button class="btn secondary" type="button" id="magic">Inviami un codice via email</button>
+      <button class="btn secondary" type="button" id="magic">Inviami un'email di accesso</button>
     </div>
+    <p style="margin:.75rem 0 0"><button class="btn small secondary" type="button" id="have-code">Ho già un codice</button></p>
   </form>
   <form id="code-form" class="card" style="max-width:24rem;margin-top:1rem" hidden>
     <div class="field">
-      <label for="code">Codice ricevuto via email</label>
+      <label for="code">Codice ricevuto via email (se l'email ne contiene uno)</label>
       <input id="code" name="code" class="input" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required />
     </div>
     <div style="margin-top:1rem"><button class="btn" type="submit">Entra con il codice</button></div>
@@ -68,11 +69,11 @@ import AppLayout from "../../layouts/AppLayout.astro";
         ev.preventDefault();
         const password = $<HTMLInputElement>("#password").value;
         void attempt(async () => {
-          if (!password) throw new Error("Scrivi la password, oppure usa «Inviami un codice via email».");
+          if (!password) throw new Error("Scrivi la password, oppure usa «Inviami un'email di accesso».");
           const { error } = await supabase.auth.signInWithPassword({ email: email(), password });
           if (error) {
             if (error.status === 429) throw new Error("Troppi tentativi: aspetta qualche minuto e riprova.");
-            throw new Error("Email o password non corretti. Se non hai ancora una password, usa «Inviami un codice via email».");
+            throw new Error("Email o password non corretti. Se non hai ancora una password, usa «Inviami un'email di accesso».");
           }
           location.replace(href("/"));
         });
@@ -88,28 +89,36 @@ import AppLayout from "../../layouts/AppLayout.astro";
           const { error } = await supabase.auth.signInWithOtp({
             email: email(),
             // `shouldCreateUser: false`: only an account that already exists can sign in.
-            options: { shouldCreateUser: false },
+            // The hosted email carries a LINK (custom templates need a custom SMTP on
+            // the free tier); the local stack's carries a CODE. Both work here.
+            options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}${href("/")}` },
           });
           if (error) {
             // Supabase's built-in mailer allows only a few emails per hour per project.
             if (error.status === 429 || /rate limit/i.test(error.message)) {
-              throw new Error("Troppe email di accesso in poco tempo: aspetta un po' (fino a un'ora) e riprova. Se hai già ricevuto un codice, usa il più recente.");
+              throw new Error("Troppe email di accesso in poco tempo: aspetta un po' (fino a un'ora) e riprova. Se hai già ricevuto un'email, usa la più recente.");
             }
             if (/signups not allowed|user not found/i.test(error.message)) {
               throw new Error("Questo indirizzo non ha accesso alla dashboard.");
             }
-            throw new Error("Non è stato possibile inviare il codice. Controlla l'indirizzo e riprova.");
+            throw new Error("Non è stato possibile inviare l'email. Controlla l'indirizzo e riprova.");
           }
-          say("Ti abbiamo inviato un codice via email (guarda anche nello spam): scrivilo qui sotto. Vale l'ultimo ricevuto.");
+          say("Ti abbiamo inviato un'email di accesso (guarda anche nello spam): apri il link che contiene, oppure, se contiene un codice, scrivilo qui sotto. Vale solo l'ultima ricevuta.");
           $<HTMLFormElement>("#code-form").hidden = false;
           $<HTMLInputElement>("#code").focus();
         });
+      });
+
+      $<HTMLButtonElement>("#have-code").addEventListener("click", () => {
+        $<HTMLFormElement>("#code-form").hidden = false;
+        $<HTMLInputElement>("#code").focus();
       });
 
       $<HTMLFormElement>("#code-form").addEventListener("submit", (ev) => {
         ev.preventDefault();
         const token = $<HTMLInputElement>("#code").value.replace(/\s/g, "");
         void attempt(async () => {
+          if (!$<HTMLInputElement>("#email").checkValidity()) throw new Error("Scrivi prima la tua email, sopra.");
           const { error } = await supabase.auth.verifyOtp({ email: email(), token, type: "email" });
           if (error) throw new Error("Codice non valido o scaduto: controlla di usare l'ultimo ricevuto, oppure chiedine uno nuovo.");
           // First time in: suggest a password so the next sign-in needs no email.
