@@ -1,0 +1,27 @@
+# Ospiti che tengono laboratori all'aMarticeramics Lab.
+# `id` è quello che un evento scrive in `host:`. `instagram` è l'handle senza @:
+# handle dati dall'utente il 2026-11-20 per 5 ospiti; gli altri vuoti finché non sono verificati (lo tagga lei nei post) — mai a indovinare,
+# un handle sbagliato manda la gente da uno sconosciuto.
+- id: materianomade
+  name: Materianomade
+  instagram: materianomade
+- id: artemisya-creations
+  name: Artemisya Creations
+- id: artlab
+  name: Artlab
+  instagram: artlab.alexandra
+- id: il-grillo
+  name: Il Grillo
+- id: nebulosa-lab
+  name: Nebulosa Lab
+  instagram: nebulosa_lab
+- id: erbesapienti
+  name: Erbesapienti
+- id: lorenzo-bicelli
+  name: Lorenzo Bicelli
+  instagram: lorenz.bicelli
+- id: minicami
+  name: Minicami
+  instagram: minicami_world
+- id: dialogoconitarocchi
+  name: Dialogoconitarocchi

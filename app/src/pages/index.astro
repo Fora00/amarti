@@ -1,0 +1,69 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Richieste" active="richieste">
+  <p class="muted">I messaggi inviati dai visitatori dal sito.</p>
+  <div id="inbox" style="margin-top:1rem"></div>
+  <p id="session" style="margin-top:2rem"></p>
+
+  <script>
+    import { requireStaff } from "../lib/guard";
+    import { data } from "../lib/data";
+    import { mode, supabase } from "../lib/supabase";
+    import { $, button, el, fmtFull, href, render, say } from "../lib/ui";
+    import { attempt, whatsappUrl } from "../lib/views";
+    import type { InboxRow } from "../lib/types";
+
+    // Payload keys → what the owner reads. Anything not listed is shown as is, so
+    // a new form field is visible immediately even before it gets a label.
+    const LABELS: Record<string, string> = { nome: "Nome", email: "Email", telefono: "Telefono", messaggio: "Messaggio" };
+
+    function details(payload: Record<string, string>) {
+      const dl = el("dl", { style: "display:grid;grid-template-columns:max-content 1fr;gap:.25rem 1rem;margin:.75rem 0" });
+      for (const [key, value] of Object.entries(payload)) {
+        if (!value) continue;
+        // textContent via el(): a stranger typed this, it is never parsed as HTML.
+        dl.append(el("dt", { class: "muted" }, LABELS[key] ?? key), el("dd", { style: "margin:0;white-space:pre-wrap" }, value));
+      }
+      return dl;
+    }
+
+    function card(row: InboxRow) {
+      const p = row.payload;
+      const contacts = el("span", { class: "row", style: "justify-content:flex-start" },
+        p.email ? el("a", { href: `mailto:${p.email}`, class: "btn secondary" }, "Rispondi per email") : null,
+        p.telefono ? el("a", { href: whatsappUrl(p.telefono), class: "btn secondary", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp") : null);
+      return el("li", { class: row.handled ? "card" : "card warn" },
+        el("div", { class: "row" },
+          el("strong", {}, p.nome ?? "Messaggio"),
+          el("span", { class: "muted" }, fmtFull(row.created_at), row.handled ? " · gestita" : "")),
+        details(p),
+        contacts,
+        row.handled ? null : el("div", { style: "margin-top:1rem" },
+          button("Segna come gestita", () => attempt(async () => { await data.markInboxHandled(row.id); await load(); }), "secondary")));
+    }
+
+    async function load() {
+      const rows = await data.listInbox();
+      const box = $<HTMLElement>("#inbox");
+      if (rows.length === 0) {
+        render(box, el("p", { class: "muted" }, "Nessuna richiesta, per ora."));
+        return;
+      }
+      say("");
+      render(box, el("ul", { class: "list" }, ...rows.map(card)));
+    }
+
+    void attempt(async () => {
+      await requireStaff();
+      if (mode === "supabase") {
+        render($("#session"), button("Esci", () => attempt(async () => {
+          await supabase.auth.signOut();
+          location.assign(href("/login/"));
+        }), "secondary"));
+      }
+      await load();
+    });
+  </script>
+</AppLayout>

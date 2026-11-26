@@ -1,0 +1,106 @@
+/*
+ * @factory/design-system — private-app components
+ *
+ * The look of the dashboards behind a login (annina/app and every app the
+ * generator makes): a phone-first shell with a tab bar, cards, forms, buttons,
+ * a confirm sheet. Plain CSS on the semantic roles (never primitives), so dark
+ * mode and any re-theme keep working. The DOM of lists is built in TypeScript
+ * (@factory/common/app), so these class names are referenced from there too.
+ *
+ * Import AFTER theme.css and base.css:
+ *   @import "@factory/design-system/app.css";
+ */
+
+body {
+  margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font-body);
+  min-height: 100dvh; display: flex; flex-direction: column;
+  /* the notch / home bar of an installed app */
+  padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+  -webkit-tap-highlight-color: transparent;
+}
+a { color: inherit; }
+h1 { font-size: 1.65rem; line-height: 1.15; font-weight: 750; margin: 0; letter-spacing: -.01em; }
+h2 { font-size: 1.15rem; font-weight: 700; margin: 0 0 .75rem; }
+h3 { font-size: 1rem; font-weight: 700; margin: 0 0 .5rem; }
+p { margin: 0 0 .5rem; }
+.font-semibold { font-weight: 650; }
+
+/* -- shell ---------------------------------------------------------------- */
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  padding: calc(.55rem + env(safe-area-inset-top)) 1rem .55rem; background: var(--surface-raised); border-bottom: 1px solid var(--line); }
+.brand { font-weight: 750; text-decoration: none; letter-spacing: -.01em; }
+.pill { font-size: .78rem; font-weight: 650; padding: .15rem .6rem; border-radius: 999px; background: var(--accent-muted); border: 1px solid var(--accent); }
+.banner { margin: 0; padding: .4rem 1rem; text-align: center; font-size: .85rem; font-weight: 600; background: var(--accent-muted); }
+main { width: 100%; max-width: 46rem; margin: 0 auto; padding: 1.25rem 1rem calc(6.5rem + env(safe-area-inset-bottom)); flex: 1; }
+.pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.eyebrow { margin: 0 0 .15rem; font-size: .85rem; color: var(--ink-muted); text-transform: capitalize; }
+.actions-slot { display: flex; gap: .5rem; flex-wrap: wrap; }
+.actions-slot:empty { display: none; }
+
+.tabbar { position: fixed; z-index: 30; inset: auto 0 0 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  background: var(--surface-raised); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; min-height: 3.6rem;
+  padding: .4rem .25rem; text-decoration: none; color: var(--ink-muted); font-size: .72rem; font-weight: 600; position: relative; }
+.tabbar a[aria-current="page"] { color: var(--accent); }
+.tabbar a[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+.icon { position: relative; display: inline-flex; }
+.tab-badge { position: absolute; top: -.35rem; right: -.7rem; min-width: 1.1rem; height: 1.1rem; padding: 0 .25rem; border-radius: 999px;
+  background: var(--accent); color: var(--accent-contrast); font-size: .68rem; line-height: 1.1rem; text-align: center; font-weight: 700; }
+
+@media (min-width: 48rem) {
+  /* a wide screen: the tabs become a row under the top bar */
+  .tabbar { position: sticky; top: 2.9rem; inset: auto; order: 1; grid-auto-flow: column; grid-auto-columns: max-content; justify-content: center; gap: .5rem;
+    border-top: 0; border-bottom: 1px solid var(--line); padding: 0 1rem; }
+  .tabbar a { flex-direction: row; gap: .5rem; font-size: .92rem; min-height: 3rem; padding: .5rem 1rem; }
+  .tabbar a[aria-current="page"]::before { top: auto; bottom: -1px; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
+  main { order: 2; padding-bottom: 4rem; }
+}
+
+/* -- controls ------------------------------------------------------------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2.75rem; padding: .5rem 1rem;
+  border-radius: .6rem; border: 1px solid transparent; background: var(--accent); color: var(--accent-contrast);
+  font: inherit; font-weight: 650; cursor: pointer; text-decoration: none; touch-action: manipulation; }
+.btn:hover { background: var(--accent-hover); }
+.btn:active { transform: translateY(1px); }
+.btn.secondary { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn.secondary:hover { background: var(--surface-muted); }
+.btn.danger { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn.small { min-height: 2.25rem; padding: .25rem .75rem; font-size: .9rem; }
+.btn[disabled] { opacity: .55; cursor: default; }
+.field { display: grid; gap: .25rem; font-size: .9rem; color: var(--ink-muted); }
+.input { width: 100%; min-height: 2.75rem; padding: .5rem .75rem; border-radius: .6rem; box-sizing: border-box;
+  border: 1px solid var(--line-strong); background: var(--surface-raised); color: var(--ink); font: inherit; font-size: 1rem; /* 16px: iOS does not zoom */ }
+textarea.input { min-height: 5.5rem; }
+.grid-form { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.span-all { grid-column: 1 / -1; }
+
+/* -- content -------------------------------------------------------------- */
+.card { background: var(--surface-raised); border: 1px solid var(--line); border-radius: .85rem; padding: 1rem 1.1rem; }
+.card.warn { border-color: var(--accent); border-width: 2px; }
+.card.quiet { background: transparent; border-style: dashed; text-align: center; color: var(--ink-muted); }
+.muted { color: var(--ink-muted); }
+.badge { display: inline-block; padding: .1rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; background: var(--accent-muted); color: var(--ink); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; }
+.actions { justify-content: flex-start; }
+.section { margin-top: 2rem; }
+.day-title { margin: 1.25rem 0 .5rem; font-size: .95rem; text-transform: capitalize; color: var(--ink-muted); font-weight: 700; }
+#status { min-height: 0; margin: .5rem 0; font-weight: 600; }
+#status:not(:empty) { padding: .6rem .85rem; border-radius: .6rem; background: var(--surface-muted); border: 1px solid var(--line-strong); }
+#status[data-error="true"]:not(:empty) { border-color: var(--accent); background: var(--accent-muted); }
+
+/* one appointment: the time is the headline */
+.appt { display: grid; grid-template-columns: 4.6rem 1fr; gap: .25rem .9rem; align-items: start; }
+.appt .when { font-variant-numeric: tabular-nums; font-weight: 750; font-size: 1.15rem; line-height: 1.2; }
+.appt .when small { display: block; font-weight: 500; font-size: .78rem; color: var(--ink-muted); }
+.appt .controls { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; }
+.appt.done { opacity: .72; }
+
+/* a modal sheet (confirmations): bottom on a phone */
+dialog.sheet { border: 1px solid var(--line-strong); border-radius: 1rem; padding: 1.25rem; width: min(26rem, calc(100vw - 2rem));
+  background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-lift-lg); }
+dialog.sheet::backdrop { background: oklch(0 0 0 / .45); }
+dialog.sheet .actions { justify-content: flex-end; margin-top: 1rem; }
+@media (max-width: 40rem) { dialog.sheet { margin: auto auto calc(1rem + env(safe-area-inset-bottom)); } }
+
+@media (prefers-reduced-motion: reduce) { .btn:active { transform: none; } }

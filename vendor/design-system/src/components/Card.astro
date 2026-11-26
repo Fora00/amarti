@@ -1,0 +1,44 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+interface Props extends HTMLAttributes<"div"> {
+  /** Makes the whole card a link. */
+  href?: string | URL;
+  tone?: "raised" | "outline" | "muted";
+  padding?: "none" | "sm" | "md" | "lg";
+  as?: "div" | "article" | "li" | "figure";
+}
+
+const {
+  href,
+  tone = "raised",
+  padding = "md",
+  as = "div",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const tones = {
+  raised: "bg-surface-raised border border-line shadow-lift",
+  outline: "bg-transparent border border-line",
+  muted: "bg-surface-muted border border-transparent",
+} as const;
+
+const paddings = { none: "", sm: "p-4", md: "p-6", lg: "p-8 sm:p-10" } as const;
+
+const Tag = href ? "a" : as;
+
+const classes = cx(
+  "block rounded-card",
+  tones[tone],
+  paddings[padding],
+  href &&
+    "no-underline transition-shadow transition-colors duration-150 ease-out-soft hover:border-line-strong hover:shadow-lift-lg",
+  className,
+);
+---
+
+<Tag class={classes} href={href?.toString()} {...rest}>
+  <slot />
+</Tag>

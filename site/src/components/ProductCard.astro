@@ -1,0 +1,46 @@
+---
+import { Image } from "astro:assets";
+import { url } from "../lib/path.ts";
+import type { CollectionEntry } from "astro:content";
+import Card from "@factory/design-system/components/Card.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+
+import { formatPrice } from "../lib/price.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+
+interface Props {
+  product: CollectionEntry<"prodotti">;
+  /** Heading level, so the card fits whatever outline the page already has. */
+  level?: 2 | 3;
+}
+
+const { product, level = 3 } = Astro.props;
+const t = i18n.useTranslations("it");
+const { data } = product;
+const sold = data.availability === "sold";
+---
+
+<Card as="li" href={url(`/negozio/${product.id}/`)} tone="raised" padding="none" class="overflow-hidden">
+  {
+    data.photo ? (
+      <Image
+        src={data.photo}
+        alt={data.photoAlt ?? ""}
+        width={480}
+        height={480}
+        widths={[240, 480]}
+        sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
+        class="aspect-square w-full object-cover"
+      />
+    ) : (
+      <div class="aspect-square w-full bg-surface-muted" aria-hidden="true" />
+    )
+  }
+  <Stack gap="xs" align="start" class="p-5">
+    <Heading level={level} size="md">{data.title}</Heading>
+    <p class="text-sm text-ink-muted">
+      {sold ? t("shop.sold") : formatPrice(data.price)}
+    </p>
+  </Stack>
+</Card>

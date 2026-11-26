@@ -1,0 +1,54 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+interface Props extends HTMLAttributes<"div"> {
+  gap?: "xs" | "sm" | "md" | "lg" | "xl";
+  direction?: "column" | "row";
+  align?: "start" | "center" | "end" | "stretch";
+  justify?: "start" | "center" | "end" | "between";
+  /** Only meaningful with direction="row". */
+  wrap?: boolean;
+  as?: "div" | "ul" | "ol" | "nav" | "header" | "footer";
+}
+
+const {
+  gap = "md",
+  direction = "column",
+  align = "stretch",
+  justify = "start",
+  wrap = false,
+  as: Tag = "div",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const gaps = { xs: "gap-2", sm: "gap-3", md: "gap-6", lg: "gap-10", xl: "gap-16" } as const;
+const aligns = {
+  start: "items-start",
+  center: "items-center",
+  end: "items-end",
+  stretch: "items-stretch",
+} as const;
+const justifies = {
+  start: "justify-start",
+  center: "justify-center",
+  end: "justify-end",
+  between: "justify-between",
+} as const;
+---
+
+<Tag
+  class={cx(
+    "flex",
+    direction === "column" ? "flex-col" : "flex-row",
+    wrap && "flex-wrap",
+    gaps[gap],
+    aligns[align],
+    justifies[justify],
+    className,
+  )}
+  {...rest}
+>
+  <slot />
+</Tag>

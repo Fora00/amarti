@@ -1,0 +1,116 @@
+---
+import type { SiteConfig, SocialImage } from "../site/config.ts";
+import { absoluteUrl, canonicalUrl } from "../site/url.ts";
+import type { Alternate } from "../i18n/index.ts";
+
+/**
+ * Every `<head>` tag that must be consistent across a site.
+ *
+ * Nothing here should ever be hand-written in a page: canonical URLs and
+ * hreflang in particular are the two tags that are silently wrong most often,
+ * and being wrong costs indexing rather than throwing an error.
+ *
+ * `site` is passed explicitly because Astro has no ambient context — a layout
+ * threads it through once and pages never see it.
+ */
+interface Props {
+  site: SiteConfig;
+  /** Page title, without the site name — the suffix is added here. */
+  title: string;
+  /** Falls back to the site description. Write it as a standalone answer. */
+  description?: string;
+  /** Falls back to `site.defaultImage`. */
+  image?: SocialImage;
+  /** Override the canonical. Defaults to the current URL, normalised. */
+  canonical?: string | URL;
+  /** hreflang rows from `getAlternates()`. Never build these by hand. */
+  alternates?: Alternate[];
+  /** BCP-47 tag for `og:locale` and `<html lang>`'s sibling meta. */
+  locale?: string;
+  type?: "website" | "article";
+  /** Keeps the page out of indexes while still allowing link discovery. */
+  noindex?: boolean;
+  /** Suppress the ` — Site Name` suffix, e.g. on the home page. */
+  bareTitle?: boolean;
+  article?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    author?: string;
+  };
+}
+
+const {
+  site,
+  title,
+  description = site.description,
+  image = site.defaultImage,
+  canonical,
+  alternates = [],
+  locale = site.locales.default,
+  type = "website",
+  noindex = false,
+  bareTitle = false,
+  article,
+} = Astro.props;
+
+const fullTitle = bareTitle ? title : `${title} — ${site.name}`;
+const url = canonical ? absoluteUrl(site, canonical) : canonicalUrl(site, Astro.url);
+const imageUrl = image ? absoluteUrl(site, image.src) : undefined;
+
+// og:locale wants `it_IT`, not `it`. With a bare language tag the region is
+// unknown, so repeat the language rather than inventing a country.
+const ogLocale = locale.includes("-")
+  ? locale.replace("-", "_")
+  : `${locale}_${locale.toUpperCase()}`;
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={url} />
+
+{noindex && <meta name="robots" content="noindex, follow" />}
+{site.themeColor && <meta name="theme-color" content={site.themeColor} />}
+
+{
+  alternates.map((alternate) => (
+    <link rel="alternate" hreflang={alternate.locale} href={alternate.href} />
+  ))
+}
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={url} />
+<meta property="og:locale" content={ogLocale} />
+{
+  image && imageUrl && (
+    <>
+      <meta property="og:image" content={imageUrl} />
+      <meta property="og:image:alt" content={image.alt} />
+      <meta property="og:image:width" content={String(image.width)} />
+      <meta property="og:image:height" content={String(image.height)} />
+    </>
+  )
+}
+
+{
+  article && (
+    <>
+      {article.publishedTime && (
+        <meta property="article:published_time" content={article.publishedTime} />
+      )}
+      {article.modifiedTime && (
+        <meta property="article:modified_time" content={article.modifiedTime} />
+      )}
+      {article.author && <meta property="article:author" content={article.author} />}
+    </>
+  )
+}
+
+<meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+{site.twitterHandle && <meta name="twitter:site" content={site.twitterHandle} />}
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+{imageUrl && <meta name="twitter:image" content={imageUrl} />}
+{image && <meta name="twitter:image:alt" content={image.alt} />}

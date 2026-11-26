@@ -1,0 +1,46 @@
+/*
+ * aMarti ceramics — brand tokens.
+ *
+ * PLACEHOLDER PALETTE (keep in sync with the public site's global.css — the two
+ * packages share a look but not a file). A warm neutral ramp and a terracotta accent, chosen so
+ * the scaffold looks intentional before a brand exists. Replace both ramps by
+ * sampling the client's own logo/assets, then re-check contrast: accent-600
+ * carries white text in light mode and accent-400 carries dark text in dark
+ * mode (vendor/plan/CONVENTIONS.md → Tokens).
+ *
+ * Order is load-bearing: the design system declares the primitives, then this
+ * file overrides them. No `@source` line here on purpose — theme.css has one.
+ */
+@import "@factory/design-system/theme.css";
+@import "@factory/design-system/base.css";
+@import "@factory/design-system/app.css";
+
+@theme {
+  /* Neutrals — paper. */
+  --color-brand-50: oklch(0.988 0.004 60);
+  --color-brand-100: oklch(0.966 0.008 60);
+  --color-brand-200: oklch(0.928 0.013 60);
+  --color-brand-300: oklch(0.868 0.019 60);
+  --color-brand-400: oklch(0.742 0.026 60);
+  --color-brand-500: oklch(0.62 0.03 60);
+  --color-brand-600: oklch(0.508 0.033 59);
+  --color-brand-700: oklch(0.415 0.035 58);
+  --color-brand-800: oklch(0.326 0.037 57);
+  --color-brand-900: oklch(0.258 0.039 56);
+  --color-brand-950: oklch(0.194 0.04 55);
+
+  /* Terracotta — accent. */
+  --color-accent-50: oklch(0.972 0.014 45);
+  --color-accent-100: oklch(0.94 0.031 45);
+  --color-accent-200: oklch(0.882 0.058 45);
+  --color-accent-300: oklch(0.802 0.086 45);
+  --color-accent-400: oklch(0.7 0.107 45);
+  --color-accent-500: oklch(0.56 0.122 42);
+  --color-accent-600: oklch(0.43 0.12 40);
+  --color-accent-700: oklch(0.36 0.115 38);
+  --color-accent-800: oklch(0.3 0.105 36);
+  --color-accent-900: oklch(0.252 0.095 35);
+  --color-accent-950: oklch(0.205 0.082 34);
+}
+
+/* The components (shell, tab bar, cards, forms, buttons, confirm sheet) are in design-system/src/app.css. */

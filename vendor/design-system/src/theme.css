@@ -1,0 +1,182 @@
+/*
+ * @factory/design-system — tokens
+ *
+ * Two layers, deliberately:
+ *   1. PRIMITIVES  (@theme)        — ramps and scales. What a SITE overrides.
+ *   2. SEMANTICS   (:root vars)    — roles. What COMPONENTS consume.
+ * Layer 3 re-exposes the semantics as utilities via `@theme inline`, which is
+ * load-bearing: without `inline`, Tailwind resolves the reference at build time
+ * and the dark-mode cascade stops working. See plan/CONVENTIONS.md.
+ *
+ * Components must never reference a primitive directly. If you want to write
+ * `bg-brand-500` inside a component, add a semantic role instead.
+ */
+
+@import "tailwindcss";
+
+/* Classes used only inside this package would otherwise be tree-shaken away.
+   Path is relative to this file, so consuming sites inherit it for free. */
+@source "./components";
+
+/* ------------------------------------------------------------------ *
+ * 1. Primitives — a site overrides these and everything else follows.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  /* Default brand: a warm neutral. Intentionally pleasant but unopinionated —
+     it should read as "not yet themed" without looking broken. */
+  --color-brand-50:  oklch(0.985 0.004 90);
+  --color-brand-100: oklch(0.962 0.008 90);
+  --color-brand-200: oklch(0.922 0.014 90);
+  --color-brand-300: oklch(0.858 0.021 88);
+  --color-brand-400: oklch(0.735 0.028 86);
+  --color-brand-500: oklch(0.612 0.032 84);
+  --color-brand-600: oklch(0.508 0.031 82);
+  --color-brand-700: oklch(0.412 0.028 80);
+  --color-brand-800: oklch(0.322 0.023 78);
+  --color-brand-900: oklch(0.248 0.018 76);
+  --color-brand-950: oklch(0.172 0.014 74);
+
+  /* Accent: interactive elements, links, emphasis. */
+  --color-accent-50:  oklch(0.972 0.019 240);
+  --color-accent-100: oklch(0.938 0.038 240);
+  --color-accent-200: oklch(0.882 0.070 242);
+  --color-accent-300: oklch(0.808 0.108 244);
+  --color-accent-400: oklch(0.718 0.145 248);
+  --color-accent-500: oklch(0.628 0.168 252);
+  --color-accent-600: oklch(0.542 0.172 256);
+  --color-accent-700: oklch(0.458 0.150 258);
+  --color-accent-800: oklch(0.382 0.118 258);
+  --color-accent-900: oklch(0.312 0.088 258);
+  --color-accent-950: oklch(0.218 0.062 260);
+
+  /* Typography. A site points these at its own faces — ideally at the
+     `cssVariable` emitted by Astro's `fonts` config. */
+  --font-display: ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid display sizes. Everything smaller uses Tailwind's default scale. */
+  --text-display: clamp(2.25rem, 1.5rem + 3.4vw, 4.5rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+
+  --text-title: clamp(1.75rem, 1.35rem + 1.8vw, 2.75rem);
+  --text-title--line-height: 1.12;
+  --text-title--letter-spacing: -0.015em;
+  --text-title--font-weight: 700;
+
+  /* Layout widths → `max-w-page`, `max-w-reading`. */
+  --container-page: 72rem;
+  --container-reading: 40rem;
+
+  --radius-card: 0.75rem;
+  --radius-pill: 9999px;
+
+  --shadow-lift: 0 1px 2px -1px oklch(0 0 0 / 0.08), 0 2px 8px -2px oklch(0 0 0 / 0.08);
+  --shadow-lift-lg: 0 2px 4px -2px oklch(0 0 0 / 0.10), 0 12px 28px -8px oklch(0 0 0 / 0.14);
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Semantic roles. Light is defined on bare :root so a page always has
+ *    a complete palette even when no theme preference is expressed.
+ * ------------------------------------------------------------------ */
+
+@layer base {
+  :root {
+    --surface: var(--color-brand-50);
+    --surface-raised: oklch(1 0 0);
+    --surface-muted: var(--color-brand-100);
+    --surface-inverted: var(--color-brand-950);
+
+    --ink: var(--color-brand-950);
+    --ink-muted: var(--color-brand-600);
+    --ink-inverted: var(--color-brand-50);
+
+    --line: var(--color-brand-200);
+    --line-strong: var(--color-brand-300);
+
+    --accent: var(--color-accent-600);
+    --accent-hover: var(--color-accent-700);
+    --accent-muted: var(--color-accent-100);
+    --accent-contrast: oklch(1 0 0);
+
+    --focus: var(--color-accent-500);
+  }
+
+  /* Only the roles are redefined for dark — never the primitives.
+     Three blocks, because the toggle has to beat the system setting in both
+     directions: bare :root above (light), this (system dark), and the
+     explicit attribute below. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface: var(--color-brand-950);
+      --surface-raised: var(--color-brand-900);
+      --surface-muted: var(--color-brand-900);
+      --surface-inverted: var(--color-brand-50);
+
+      --ink: var(--color-brand-100);
+      --ink-muted: var(--color-brand-400);
+      --ink-inverted: var(--color-brand-950);
+
+      --line: var(--color-brand-800);
+      --line-strong: var(--color-brand-700);
+
+      --accent: var(--color-accent-400);
+      --accent-hover: var(--color-accent-300);
+      --accent-muted: var(--color-accent-950);
+      --accent-contrast: var(--color-brand-950);
+
+      --focus: var(--color-accent-400);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --surface: var(--color-brand-950);
+    --surface-raised: var(--color-brand-900);
+    --surface-muted: var(--color-brand-900);
+    --surface-inverted: var(--color-brand-50);
+
+    --ink: var(--color-brand-100);
+    --ink-muted: var(--color-brand-400);
+    --ink-inverted: var(--color-brand-950);
+
+    --line: var(--color-brand-800);
+    --line-strong: var(--color-brand-700);
+
+    --accent: var(--color-accent-400);
+    --accent-hover: var(--color-accent-300);
+    --accent-muted: var(--color-accent-950);
+    --accent-contrast: var(--color-brand-950);
+
+    --focus: var(--color-accent-400);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Roles as utilities. `inline` keeps the var() reference live at
+ *    runtime instead of resolving it at build time.
+ * ------------------------------------------------------------------ */
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-inverted: var(--surface-inverted);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-inverted: var(--ink-inverted);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --color-focus: var(--focus);
+}

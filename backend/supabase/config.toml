@@ -1,0 +1,7 @@
+# Only what the edge functions need. A plain HTML form cannot send a login
+# token, so JWT verification is off for the public form function; it defends
+# itself (honeypot + size cap + whitelist, see _shared/validate.ts).
+project_id = "amarti"
+
+[functions.request]
+verify_jwt = false

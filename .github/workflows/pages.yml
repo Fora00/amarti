@@ -1,0 +1,70 @@
+# Builds the public site and publishes it on GitHub Pages (Settings → Pages →
+# Source: GitHub Actions). Runs on every push to main, or by hand.
+#
+# It is still a PREVIEW build (PUBLIC_DEMO=1): noindex on every page, robots
+# `Disallow: /`, no sitemap — `siteUrl` and prices are placeholders. Drop the
+# flag once the real domain and prices are in.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version from `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Refuses a hand-edited vendor/ (it must come from `pnpm sync amarti`).
+      - run: pnpm vendor:check
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # base_path is "/<repo>" on github.io, "" on a custom domain.
+      - name: Build site
+        run: pnpm --filter amarti build
+        env:
+          SITE_BASE: ${{ steps.pages.outputs.base_path }}/
+          PUBLIC_DEMO: "1"
+
+      # No hosted backend yet: the sign-up form and its thank-you page would
+      # post nowhere. Nothing links to them. Remove once the backend is live.
+      - name: Drop pages that need the backend
+        working-directory: site/dist
+        run: rm -rf contatti grazie en/contatti en/grazie
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

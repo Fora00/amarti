@@ -1,0 +1,30 @@
+---
+import type { EventTiming } from "@factory/common/calendar";
+import { dateTile } from "../lib/when.ts";
+
+/**
+ * The big hand-lettered day number of her monthly posters. Colour follows the
+ * month: `data-month` picks that month's Wada swatch through the `--tile`
+ * roles in global.css (CSS only). Decorative: the real date is in a <time>
+ * next to it, so this is hidden from assistive tech.
+ */
+interface Props {
+  timing: EventTiming;
+  size?: "md" | "lg";
+}
+
+const { timing, size = "md" } = Astro.props;
+const { day, weekday, month, monthNumber } = dateTile(timing);
+const box = size === "lg" ? "w-28 py-3" : "w-20 py-2";
+const number = size === "lg" ? "text-7xl" : "text-5xl";
+---
+
+<span
+  aria-hidden="true"
+  data-month={monthNumber}
+  class:list={["flex shrink-0 flex-col items-center rounded-card border border-tile-ink/15 bg-tile text-tile-ink leading-none", box]}
+>
+  <span class="text-xs font-semibold uppercase tracking-widest">{weekday}</span>
+  <span class:list={["font-display", number]}>{day}</span>
+  <span class="text-xs font-semibold uppercase tracking-widest">{month}</span>
+</span>

@@ -1,0 +1,118 @@
+/*
+ * @factory/design-system — element defaults
+ *
+ * Only things that should be true on every page of every site. Anything
+ * component-shaped belongs in src/components/ instead.
+ * Import AFTER theme.css.
+ */
+
+@layer base {
+  html {
+    /* Roles, not primitives — see theme.css. */
+    background-color: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Smooth in-page jumps, but never for people who asked us not to move. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Anchor targets shouldn't land under a sticky header. */
+  :target {
+    scroll-margin-block-start: 5rem;
+  }
+
+  /* Visible only for keyboard users; uses the focus role so a site's theme
+     carries through automatically. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  /* Headings get balanced ragging, body copy gets orphan protection.
+     :where() keeps specificity at 0 so anything overrides these. */
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap: balance;
+    font-family: var(--font-display);
+  }
+  :where(p, li, figcaption, dd) {
+    text-wrap: pretty;
+  }
+
+  /* Media never overflows its column. */
+  :where(img, svg, video, canvas, audio, iframe, embed, object) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Honour the OS setting rather than animating anyway. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Tell the browser both palettes exist so form controls, scrollbars and
+     the address bar follow the theme. */
+  :root {
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+}
+
+@utility sr-only-focusable {
+  /* Skip links: hidden until focused. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  &:focus-visible {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    overflow: visible;
+    clip-path: none;
+    background-color: var(--surface-raised);
+    color: var(--ink);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-lift-lg);
+    z-index: 100;
+  }
+}

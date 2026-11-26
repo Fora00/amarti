@@ -1,0 +1,11 @@
+{
+  "extends": "../vendor/tsconfig.base.json",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
+  "exclude": [
+    "dist",
+    "ispiration"
+  ]
+}

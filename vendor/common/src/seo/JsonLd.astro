@@ -1,0 +1,16 @@
+---
+import { serializeJsonLd, type JsonLdNode } from "../jsonld/index.ts";
+
+/**
+ * One structured-data script. Prefer a single `graph(...)` node per page over
+ * several of these — extractors resolve `@id` references across a graph, but
+ * treat competing top-level entities as competing claims.
+ */
+interface Props {
+  data: JsonLdNode;
+}
+
+const { data } = Astro.props;
+---
+
+<script type="application/ld+json" set:html={serializeJsonLd(data)} is:inline />

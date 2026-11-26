@@ -1,0 +1,69 @@
+---
+/**
+ * The frame of a private app: slim top bar, page title with an actions slot, a
+ * status line, and a tab bar — fixed to the bottom on a phone (thumb reach, like
+ * a native app), a row under the top bar on a wide screen. Zero client JS: the
+ * app's own script fills the tab badges (`[data-badge-for="<id>"]`) and the
+ * offline pill (`#offline`).
+ *
+ * The page's <html>/<head> stay in the app's layout (PWA tags, theme colour,
+ * service worker are the app's business). Styles: `@factory/design-system/app.css`.
+ */
+export interface NavItem {
+  id: string;
+  label: string;
+  /** Absolute path, base included. */
+  href: string;
+  icon: "today" | "dogs" | "inbox" | "hours" | "more";
+}
+interface Props {
+  title: string;
+  brand: string;
+  nav: NavItem[];
+  active?: string;
+  /** Link of the brand in the top bar. */
+  homeHref: string;
+  /** A banner under the top bar, e.g. "demo mode". */
+  banner?: string;
+  /** Small line above the title. A script may fill `#eyebrow` later (today's date is not known at build time). */
+  eyebrow?: string;
+}
+const { title, brand, nav, active = "", homeHref, banner, eyebrow } = Astro.props;
+
+// 24x24, stroke only, so they follow `currentColor` in both themes.
+const icons: Record<NavItem["icon"], string> = {
+  today: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9.5 15 2 2 3.5-4"/>',
+  dogs: '<circle cx="7" cy="9" r="1.9"/><circle cx="17" cy="9" r="1.9"/><circle cx="10.3" cy="5.6" r="1.8"/><circle cx="13.7" cy="5.6" r="1.8"/><path d="M12 11.5c-3 0-5.5 2.6-5.5 5 0 1.6 1.3 2.5 2.8 2.5 1 0 1.8-.5 2.7-.5s1.7.5 2.7.5c1.5 0 2.8-.9 2.8-2.5 0-2.4-2.5-5-5.5-5Z"/>',
+  inbox: '<path d="M3.5 13.5 6 5.5h12l2.5 8"/><path d="M3.5 13.5V18a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5v-4.5h-5a3.5 3.5 0 0 1-7 0h-5Z"/>',
+  hours: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  more: '<circle cx="5.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18.5" cy="12" r="1.2"/>',
+};
+---
+
+<header class="topbar">
+  <a href={homeHref} class="brand">{brand}</a>
+  <span id="offline" class="pill" hidden>Senza connessione</span>
+</header>
+{banner && <p role="note" class="banner">{banner}</p>}
+<main id="main">
+  <div class="pagehead">
+    <div>
+      <p class="eyebrow" id="eyebrow" hidden={!eyebrow}>{eyebrow}</p>
+      <h1>{title}</h1>
+    </div>
+    <div class="actions-slot"><slot name="actions" /></div>
+  </div>
+  <p id="status" role="status"></p>
+  <slot />
+</main>
+{nav.length > 0 && <nav class="tabbar" aria-label="Principale">
+  {nav.map((n) => (
+    <a href={n.href} aria-current={active === n.id ? "page" : undefined} data-nav={n.id}>
+      <span class="icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icons[n.icon]} />
+        <span class="tab-badge" data-badge-for={n.id} hidden></span>
+      </span>
+      <span class="label">{n.label}</span>
+    </a>
+  ))}
+</nav>}

@@ -1,0 +1,58 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { url } from "../lib/path.ts";
+import { getEntry } from "astro:content";
+import Card from "@factory/design-system/components/Card.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import { resolveTiming } from "@factory/common/calendar";
+
+import DateTile from "./DateTile.astro";
+import PriceTbd from "./PriceTbd.astro";
+import { dateTile, formatClock, formatWhen } from "../lib/when.ts";
+import { formatPrice } from "../lib/price.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+
+interface Props {
+  event: CollectionEntry<"eventi">;
+  /** Heading level, so the card fits whatever outline the page already has. */
+  level?: 2 | 3;
+}
+
+const { event, level = 3 } = Astro.props;
+const t = i18n.useTranslations("it");
+const { data } = event;
+const { startIso } = resolveTiming(data);
+const clock = formatClock(data);
+// The month's accent (global.css `[data-month]`) colours the tile and the time line.
+const { monthNumber } = dateTile(data);
+// The card is one big link, so the guest is a name here; the Instagram link
+// lives on the event page (no nested <a>).
+const host = data.host ? await getEntry(data.host) : undefined;
+---
+
+<Card as="li" href={url(`/eventi/${event.id}/`)} tone="raised" padding="sm">
+  <div class="flex items-start gap-4" data-month={monthNumber}>
+    <DateTile timing={data} />
+    <div class="flex min-w-0 flex-col gap-1">
+      <p class="text-sm font-semibold text-accent">
+        <time datetime={startIso}><span class="sr-only">{formatWhen(data)}</span><span aria-hidden="true">{clock}</span></time>
+        {data.status !== "scheduled" && <span> · {t(`events.status.${data.status}`)}</span>}
+        {data.soldOut && data.status === "scheduled" && <span> · {t("events.soldOut")}</span>}
+        {data.serie && <span> · {t("events.serieDay", { day: data.serie.day, of: data.serie.of })}</span>}
+      </p>
+      <Heading level={level} size="lg" class="text-heading! text-balance">{data.title}</Heading>
+      {host && <p class="text-ink-muted">{t("events.with", { host: host.data.name })}</p>}
+      <p class="mt-1">
+        {
+          data.price ? (
+            <span class="font-semibold">{formatPrice(data.price)}</span>
+          ) : data.free ? (
+            <span class="font-semibold">{t("events.free")}</span>
+          ) : (
+            <PriceTbd label={t("events.priceTbd")} compact />
+          )
+        }
+      </p>
+    </div>
+  </div>
+</Card>

@@ -1,0 +1,25 @@
+{
+  "name": "amarti-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "aMarti ceramics — private dashboard.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@factory/common": "workspace:*",
+    "@factory/design-system": "workspace:*",
+    "@supabase/supabase-js": "^2.58.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.2.10",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "6.0.3"
+  }
+}

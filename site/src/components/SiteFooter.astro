@@ -1,0 +1,27 @@
+---
+import Container from "@factory/design-system/components/Container.astro";
+import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
+import { site } from "../site.config.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+
+const t = i18n.useTranslations("it");
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-line py-10">
+  <Container>
+    <div class="flex flex-wrap items-baseline justify-between gap-4 text-sm text-ink-muted">
+      <p>aMarticeramics Lab · {t("home.where")}</p>
+      <ul class="flex list-none gap-5 p-0">
+        {
+          site.links.map((link) => (
+            <li>
+              <ExternalLink href={link.url}>{link.label}</ExternalLink>
+            </li>
+          ))
+        }
+      </ul>
+      <p>© {year} {site.name}</p>
+    </div>
+  </Container>
+</footer>

@@ -1,0 +1,31 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+/**
+ * Questions that open on tap: native `<details>`, so zero JS and every answer
+ * is in the HTML for crawlers and AI extractors. The heading stays with the
+ * page (its level and face are the page's business).
+ *
+ * Promoted from annina + amarti (2026-11-26), whose markup was identical.
+ * Feed it the same array the page's llms.txt lists. Deliberately no
+ * `FAQPage` JSON-LD here: Google no longer shows FAQ rich results
+ * (plan/DECISIONS.md, 2026-11-26).
+ */
+interface Props extends HTMLAttributes<"div"> {
+  items: readonly { question: string; answer: string }[];
+}
+
+const { items, class: className, ...rest } = Astro.props;
+---
+
+<div class={cx("grid gap-3", className)} {...rest}>
+  {
+    items.map((item) => (
+      <details class="rounded-lg border border-line bg-surface-raised p-4">
+        <summary class="cursor-pointer font-semibold text-ink">{item.question}</summary>
+        <p class="mt-2 text-ink-muted text-pretty">{item.answer}</p>
+      </details>
+    ))
+  }
+</div>

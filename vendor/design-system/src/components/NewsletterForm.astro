@@ -1,0 +1,79 @@
+---
+import { cx } from "../cx.ts";
+
+/**
+ * Newsletter signup with **no client JavaScript**.
+ *
+ * The usual implementation intercepts `submit` and calls `window.open` with the
+ * address appended. That is a script for something the platform already does:
+ * a `method="get"` form serialises its fields into the query string of
+ * `action` on its own. So this is a plain form pointed at the provider's
+ * subscribe endpoint, and it keeps working with JS disabled or still loading.
+ *
+ * Copy is passed in rather than baked here — the design system holds no
+ * dictionary. See `common` for i18n.
+ */
+interface Props {
+  /** The provider's subscribe endpoint, e.g. `https://x.substack.com/subscribe`. */
+  action: string;
+  /** Query parameter the provider reads the address from. Usually `email`. */
+  emailField?: string;
+  label: string;
+  placeholder: string;
+  submitLabel: string;
+  /** Small print under the form: "Gratis · Niente spam · Disdici quando vuoi". */
+  note?: string;
+  class?: string;
+}
+
+const {
+  action,
+  emailField = "email",
+  label,
+  placeholder,
+  submitLabel,
+  note,
+  class: className,
+} = Astro.props;
+
+// Deterministic enough for one form per page; a second instance would need a
+// caller-supplied id, which is why this is not exposed as a prop yet.
+const id = "newsletter-email";
+---
+
+<form
+  action={action}
+  method="get"
+  target="_blank"
+  rel="noopener noreferrer"
+  class={cx("w-full", className)}
+>
+  <label for={id} class="sr-only">{label}</label>
+
+  <div class="flex flex-col gap-3 sm:flex-row">
+    <input
+      type="email"
+      id={id}
+      name={emailField}
+      required
+      autocomplete="email"
+      placeholder={placeholder}
+      class={cx(
+        "min-w-0 flex-1 rounded-pill border border-line-strong bg-surface-raised",
+        "px-5 py-3 text-ink placeholder:text-ink-muted",
+      )}
+    />
+    <button
+      type="submit"
+      class={cx(
+        "inline-flex items-center justify-center rounded-pill px-7 py-3",
+        "font-semibold whitespace-nowrap bg-accent text-accent-contrast",
+        "transition-colors duration-150 ease-out-soft hover:bg-accent-hover",
+      )}
+    >
+      {submitLabel}
+    </button>
+  </div>
+
+  {note && <p class="mt-3 text-xs text-ink-muted">{note}</p>}
+</form>

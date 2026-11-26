@@ -1,0 +1,51 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+/**
+ * Semantic level and visual size are separate props on purpose.
+ *
+ * The convention is one <h1> per page and no skipped levels — but documents
+ * often need an h3 that *looks* like a lead. Without this split, the usual fix
+ * is to pick the heading tag by how big it should look, which quietly wrecks
+ * the outline that search engines and screen readers rely on. Set `level` for
+ * meaning, `size` for appearance; `size` defaults to matching `level`.
+ */
+interface Props extends HTMLAttributes<"h2"> {
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: "display" | "title" | "xl" | "lg" | "md" | "sm";
+  tone?: "default" | "muted" | "accent";
+}
+
+const { level, size, tone = "default", class: className, ...rest } = Astro.props;
+
+const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+const sizeForLevel = {
+  1: "display",
+  2: "title",
+  3: "xl",
+  4: "lg",
+  5: "md",
+  6: "sm",
+} as const;
+
+const sizes = {
+  display: "text-display",
+  title: "text-title",
+  xl: "text-2xl/tight font-bold tracking-tight sm:text-3xl/tight",
+  lg: "text-xl/snug font-bold tracking-tight sm:text-2xl/snug",
+  md: "text-lg/snug font-semibold",
+  sm: "text-base/snug font-semibold",
+} as const;
+
+const tones = {
+  default: "text-ink",
+  muted: "text-ink-muted",
+  accent: "text-accent",
+} as const;
+---
+
+<Tag class={cx(sizes[size ?? sizeForLevel[level]], tones[tone], className)} {...rest}>
+  <slot />
+</Tag>

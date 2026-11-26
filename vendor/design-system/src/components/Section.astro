@@ -1,0 +1,37 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+interface Props extends HTMLAttributes<"section"> {
+  /** Vertical rhythm. `flush` is for sections that manage their own padding. */
+  space?: "sm" | "md" | "lg" | "flush";
+  /** Background role. Alternating `muted` gives a page visible structure. */
+  tone?: "default" | "muted" | "inverted";
+  as?: "section" | "div" | "article" | "aside" | "footer" | "header";
+}
+
+const {
+  space = "md",
+  tone = "default",
+  as: Tag = "section",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const spaces = {
+  sm: "py-10 sm:py-14",
+  md: "py-16 sm:py-24",
+  lg: "py-24 sm:py-36",
+  flush: "",
+} as const;
+
+const tones = {
+  default: "bg-surface text-ink",
+  muted: "bg-surface-muted text-ink",
+  inverted: "bg-surface-inverted text-ink-inverted",
+} as const;
+---
+
+<Tag class={cx(spaces[space], tones[tone], className)} {...rest}>
+  <slot />
+</Tag>

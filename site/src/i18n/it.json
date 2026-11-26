@@ -1,0 +1,114 @@
+{
+  "nav": {
+    "skip": "Vai al contenuto",
+    "home": "Home",
+    "events": "Laboratori",
+    "shop": "Negozio",
+    "write": "Scrivimi",
+    "contact": "Contatti"
+  },
+  "home": {
+    "eyebrow": "Piazza Malfatti 10 · Rovereto",
+    "lead": "Hai sempre voluto modellare o decorare la ceramica? Questo è il posto che fa per te! Partecipa ai miei workshop creativi.",
+    "quote": "In una società frenetica qui si rallenta e ci si conosce.",
+    "quoteBy": "Martina, aMarticeramics Lab",
+    "eventsTitle": "Prossimi laboratori",
+    "eventsCta": "Tutto il programma",
+    "writeCta": "Scrivimi su Instagram",
+    "spaceTitle": "Lo spazio",
+    "space": {
+      "customTitle": "Ceramiche personalizzate",
+      "custom": "Realizzo ceramiche personalizzate, made in Italy.",
+      "labsTitle": "Laboratori ogni settimana",
+      "labs": "Ceramica, ma non solo: nella sala si alternano artigiane e artisti ospiti, con gioielli, macramè, candele, carta, astrologia e decorazioni di Natale.",
+      "storeTitle": "Concept store",
+      "store": "Accanto al laboratorio, le ceramiche di aMarti e le creazioni di artigiane e artiste del territorio, in vendita in negozio.",
+      "roomTitle": "Affitta la sala",
+      "room": "Workshop, eventi e team building: scrivimi e ne parliamo."
+    },
+    "whereTitle": "Dove siamo",
+    "where": "Piazza Malfatti 10, Rovereto (TN)",
+    "contact": "Info e prenotazioni in DM su Instagram.",
+    "shopTitle": "Il negozio",
+    "shopLead": "Le ceramiche si trovano in negozio; alcuni pezzi sono anche online su Vinted.",
+    "shopCta": "Vedi i pezzi su Vinted",
+    "faqTitle": "Domande frequenti",
+    "contactCta": "Scrivici"
+  },
+  "events": {
+    "title": "Laboratori ed eventi",
+    "lead": "Il programma dei laboratori all'aMarticeramics Lab di Rovereto, mese per mese. Info e prenotazioni in DM su Instagram.",
+    "empty": "Nessun evento in programma al momento.",
+    "months": "Per mese",
+    "monthTitle": "Laboratori di {month}",
+    "calendar": "Calendario di {month}",
+    "previousMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "when": "Quando",
+    "where": "Dove",
+    "price": "Prezzo",
+    "free": "Gratuito",
+    "seats": "Posti",
+    "book": {
+      "instagram": "Prenota in DM su Instagram",
+      "whatsapp": "Prenota su WhatsApp",
+      "stripe": "Paga e prenota",
+      "email": "Prenota via email",
+      "other": "Prenota"
+    },
+    "addToCalendar": "Aggiungi al calendario",
+    "subscribe": "Iscriviti al calendario",
+    "status": {
+      "cancelled": "Annullato",
+      "postponed": "Rimandato"
+    },
+    "bookingMessage": "Ciao! Vorrei prenotare «{title}» ({when}).",
+    "copyHint": "Cliccando copiamo per te un messaggio: incollalo nella chat.",
+    "copied": "Messaggio copiato: incollalo nella chat.",
+    "soldOut": "Posti esauriti",
+    "with": "con {host}",
+    "priceTbd": "Prezzo da definire",
+    "serieDay": "Day {day} di {of}",
+    "serieNext": "Continua con il day {day}:",
+    "seriePrevious": "Fa seguito al day {day}:",
+    "serieBookFirst": "Si prenota insieme al day 1.",
+    "pay": "Paga e prenota",
+    "payDemo": "Il pagamento online non è ancora attivo: per ora si prenota in DM.",
+    "photoPlaceholder": "Qui andrà la foto del laboratorio",
+    "withLabel": "con"
+  },
+  "shop": {
+    "title": "Negozio",
+    "lead": "Le ceramiche di aMarti e le creazioni di artigiane e artiste del territorio si trovano in negozio, in Piazza Malfatti 10 a Rovereto. Alcuni pezzi sono anche online su Vinted.",
+    "empty": "Nessun pezzo disponibile al momento.",
+    "soldTitle": "Già venduti",
+    "sold": "Venduto",
+    "price": "Prezzo",
+    "buy": {
+      "stripe": "Acquista",
+      "vinted": "Acquista su Vinted",
+      "other": "Acquista"
+    },
+    "buyNote": "Il pagamento e la spedizione avvengono sul sito del venditore.",
+    "vinted": "Vedi i pezzi su Vinted"
+  },
+  "contact": {
+    "title": "Scrivici",
+    "lead": "Compila il modulo: ti rispondiamo appena possibile.",
+    "name": "Il tuo nome",
+    "email": "Email",
+    "phone": "Telefono (facoltativo)",
+    "message": "Il tuo messaggio",
+    "submit": "Invia il messaggio",
+    "privacy": "Usiamo questi dati solo per risponderti.",
+    "fallback": "Se non vedi la conferma, riprova o scrivici direttamente."
+  },
+  "thanks": {
+    "title": "Grazie!",
+    "lead": "Abbiamo ricevuto quello che ci hai inviato e ti risponderemo presto.",
+    "back": "Torna alla home"
+  },
+  "form": {
+    "error": "Non siamo riusciti a inviare il messaggio. Controlla i campi obbligatori e riprova."
+  }
+}

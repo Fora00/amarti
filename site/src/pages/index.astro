@@ -1,0 +1,123 @@
+---
+import { getCollection } from "astro:content";
+import { url } from "../lib/path.ts";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Faq from "@factory/design-system/components/Faq.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import { isUpcoming, resolveTiming } from "@factory/common/calendar";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import EventCard from "../components/EventCard.astro";
+import Logo from "../components/Logo.astro";
+import { site, instagramDm, vintedUrl } from "../site.config.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+import { faq } from "../faq.ts";
+
+/**
+ * Copy: the lead and "Ceramiche personalizzate" / "Affitta la sala" are her own
+ * words (Instagram bio and pinned post); the quote is from the Il Dolomiti
+ * article (sponsored). The rest is a draft for her to correct — BRIEF.md.
+ */
+const t = i18n.useTranslations("it");
+
+const upcoming = (await getCollection("eventi"))
+  .filter((event) => isUpcoming(event.data))
+  .sort((a, b) => resolveTiming(a.data).start.getTime() - resolveTiming(b.data).start.getTime())
+  .slice(0, 4);
+
+const space = ["custom", "labs", "store", "room"] as const;
+---
+
+<BaseLayout title={`aMarticeramics Lab — ${t("home.eyebrow")}`} description={site.description} bareTitle>
+  <main id="main">
+    <section class="bg-hero text-hero-ink">
+      <Container>
+        <div class="flex flex-col items-start gap-6 py-14 sm:flex-row sm:items-center sm:gap-10 sm:py-20">
+          <Logo variant="ring" class="size-32 sm:size-40" />
+          <Stack gap="md" align="start">
+            <p class="text-sm font-semibold uppercase tracking-widest">{t("home.eyebrow")}</p>
+            <Heading level={1} class="text-hero-ink! font-display">aMarticeramics Lab</Heading>
+            <p class="max-w-reading text-lg text-pretty">{t("home.lead")}</p>
+            <div class="flex flex-wrap gap-3">
+              <Button href={url("/eventi/")}>{t("home.eventsCta")}</Button>
+              <Button href={instagramDm} external variant="ghost" class="text-hero-ink! hover:bg-transparent! underline">
+                {t("home.writeCta")}
+              </Button>
+            </div>
+          </Stack>
+        </div>
+      </Container>
+    </section>
+
+    {
+      upcoming.length > 0 && (
+        <Section space="md">
+          <Container>
+            <Stack gap="lg">
+              <Heading level={2} class="text-heading! font-display">{t("home.eventsTitle")}</Heading>
+              <ul class="grid list-none gap-4 p-0 md:grid-cols-2">
+                {upcoming.map((event) => <EventCard event={event} />)}
+              </ul>
+              <Button href={url("/eventi/")} variant="secondary">{t("home.eventsCta")}</Button>
+            </Stack>
+          </Container>
+        </Section>
+      )
+    }
+
+    <Section space="md" tone="muted">
+      <Container>
+        <Stack gap="lg">
+          <Heading level={2} class="text-heading! font-display">{t("home.spaceTitle")}</Heading>
+          <ul class="grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4">
+            {
+              space.map((key) => (
+                <li>
+                  <Stack gap="xs">
+                    <Heading level={3} size="md">{t(`home.space.${key}Title`)}</Heading>
+                    <p class="text-ink-muted text-pretty">{t(`home.space.${key}`)}</p>
+                  </Stack>
+                </li>
+              ))
+            }
+          </ul>
+          <figure class="max-w-reading border-l-4 border-accent pl-5">
+            <blockquote class="font-display text-3xl/tight text-heading">“{t("home.quote")}”</blockquote>
+            <figcaption class="mt-2 text-sm text-ink-muted">— {t("home.quoteBy")}</figcaption>
+          </figure>
+        </Stack>
+      </Container>
+    </Section>
+
+    <Section space="md">
+      <Container>
+        <div class="grid gap-10 md:grid-cols-2">
+          <Stack gap="sm" align="start">
+            <Heading level={2} size="xl" class="text-heading!">{t("home.shopTitle")}</Heading>
+            <p class="text-ink-muted text-pretty">{t("home.shopLead")}</p>
+            <Button href={vintedUrl} external variant="secondary">{t("home.shopCta")}</Button>
+          </Stack>
+          <Stack gap="sm" align="start">
+            <Heading level={2} size="xl" class="text-heading!">{t("home.whereTitle")}</Heading>
+            <p>
+              aMarticeramics Lab<br />
+              {t("home.where")}
+            </p>
+            <p class="text-ink-muted">{t("home.contact")}</p>
+          </Stack>
+        </div>
+      </Container>
+    </Section>
+    <Section space="md" id="faq" tone="muted">
+      <Container width="reading">
+        <Stack gap="md">
+          <Heading level={2} class="text-heading! font-display">{t("home.faqTitle")}</Heading>
+          <Faq items={faq} />
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

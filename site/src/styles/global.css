@@ -1,0 +1,254 @@
+/*
+ * aMarti ceramics — brand tokens.
+ *
+ * "Country, Copenhagen minimal" in wood tones (2026-11-26, replaces the poster
+ * palette at the owner's request). Anchored on Sanzo Wada, *A Dictionary of
+ * Color Combinations* (Vol. 1 hex values as digitised in
+ * github.com/mattdesl/dictionary-of-colour-combinations; no Vol. 2 data was
+ * available): Ecru for oak, Pale Raw Umber for walnut, Isabella for honey,
+ * Raw Sienna for teak, Blackish Olive / Dark Greenish Glaucous for sage, and
+ * one Wada colour per month. The page itself is a plain linen, not Wada.
+ *
+ * WCAG 2.x contrast, computed with a script (sRGB relative luminance):
+ *   light: ink 950 on paper 15.8 · ink-muted 600 on paper 6.0 / on muted 5.4 ·
+ *          accent (Pale Raw Umber) on paper 6.6 / on muted 6.0 · white on it 7.3 ·
+ *          heading (Blackish Olive) on paper 7.5 / on white card 8.3 ·
+ *          hero: ink 950 on Ecru 8.1 · focus (Raw Sienna) on paper 3.5 (UI).
+ *   dark:  ink 100 on 950 14.3 · ink-muted (Ecru) on 950 8.1 / on card 900 7.2 ·
+ *          accent (Isabella) on 950 7.5 / on 900 6.6 · 950 on it 7.5 ·
+ *          heading (Glaucous) on 950 9.4 / on 900 8.3 · hero: 100 on 800 10.5.
+ *   months: tile ink on the Wada tile ≥ 4.6 · deep text on paper/muted/pale
+ *          ≥ 4.6 · pale text on 950/900/dusk ≥ 10 (full table in
+ *          plan/DECISIONS.md).
+ *
+ * Order is load-bearing: the design system declares the primitives, then this
+ * file overrides them. No `@source` line here on purpose — theme.css has one.
+ */
+@import "@factory/design-system/theme.css";
+@import "@factory/design-system/base.css";
+
+@theme {
+  /* Neutrals — linen, birch, oak, down to smoked walnut. */
+  --color-brand-50: #f7f3ec; /* linen: the page */
+  --color-brand-100: #efe8dc;
+  --color-brand-200: #e2d8c7; /* birch: lines */
+  --color-brand-300: #cfc1aa;
+  --color-brand-400: #c2ae93; /* Wada Ecru: light oak, the hero */
+  --color-brand-500: #8e7a5f;
+  --color-brand-600: #6b5a45;
+  --color-brand-700: #524333;
+  --color-brand-800: #3b3026;
+  --color-brand-900: #2a231c;
+  --color-brand-950: #1e1915; /* smoked walnut: the ink */
+
+  /* Accent — honey and teak to walnut. */
+  --color-accent-50: #f8f1e8;
+  --color-accent-100: #f0e2cf;
+  --color-accent-200: #e3c9a6;
+  --color-accent-300: #d6b086;
+  --color-accent-400: #c5a56e; /* Wada Isabella Color: honey, dark-mode accent */
+  --color-accent-500: #bb7125; /* Wada Raw Sienna: teak, the focus ring */
+  --color-accent-600: #71502f; /* Wada Pale Raw Umber: walnut, links + buttons */
+  --color-accent-700: #5c4126;
+  --color-accent-800: #4b3317; /* Wada Vandyke Brown */
+  --color-accent-900: #3d2818;
+  --color-accent-950: #2a1c11;
+
+  /* Site-only secondary: sage, for headings. */
+  --color-sage-200: #b7c2a9; /* Wada Dark Greenish Glaucous */
+  --color-sage-700: #42533e; /* Wada Blackish Olive */
+
+  /* Month accents, a year of wood, one Wada colour each. Per month: the tile
+     (the Wada swatch), a deep tone for text on light grounds, a pale tone for
+     light-mode cells and dark-mode text, a dusk tone for dark-mode cells.
+     Consumed only through the `[data-month]` roles below, never directly. */
+  /* gennaio: Wada Andover Green #6d7e77, nudged for AA */
+  --color-month-1: #768780;
+  --color-month-1-deep: #5b6a64;
+  --color-month-1-pale: #e5ebe8;
+  --color-month-1-dusk: #2f3834;
+  /* febbraio: Wada Light Grayish Olive #848061, nudged for AA */
+  --color-month-2: #898566;
+  --color-month-2-deep: #6b674c;
+  --color-month-2-pale: #ebeade;
+  --color-month-2-dusk: #383626;
+  /* marzo: Wada Rainette Green #8fa071 */
+  --color-month-3: #8fa071;
+  --color-month-3-deep: #5e6c44;
+  --color-month-3-pale: #e6eddb;
+  --color-month-3-dusk: #313921;
+  /* aprile: Wada Chromium Green #719470 */
+  --color-month-4: #719470;
+  --color-month-4-deep: #516f50;
+  --color-month-4-pale: #e1eee0;
+  --color-month-4-dusk: #293b28;
+  /* maggio: Wada Olive Green #6b7140 */
+  --color-month-5: #6b7140;
+  --color-month-5-deep: #656a3f;
+  --color-month-5-pale: #e9ecd9;
+  --color-month-5-dusk: #35381e;
+  /* giugno: Wada Maple #c59f6b */
+  --color-month-6: #c59f6b;
+  --color-month-6-deep: #816134;
+  --color-month-6-pale: #f5e7d5;
+  --color-month-6-dusk: #443116;
+  /* luglio: Wada Khaki #bc892b */
+  --color-month-7: #bc892b;
+  --color-month-7-deep: #8b5f00;
+  --color-month-7-pale: #f9e7cc;
+  --color-month-7-dusk: #46310b;
+  /* agosto: Wada Raw Sienna #bb7125, nudged for AA */
+  --color-month-8: #bc7226;
+  --color-month-8-deep: #97570f;
+  --color-month-8-pale: #fee4cf;
+  --color-month-8-dusk: #4b2e11;
+  /* settembre: Wada Sudan Brown #a36752, nudged for AA */
+  --color-month-9: #9a5f4a;
+  --color-month-9-deep: #8e5a47;
+  --color-month-9-pale: #fce4db;
+  --color-month-9-dusk: #4b2c21;
+  /* ottobre: Wada Brown #7c4226 */
+  --color-month-10: #7c4226;
+  --color-month-10-deep: #78442c;
+  --color-month-10-pale: #fde4d8;
+  --color-month-10-dusk: #4c2c1d;
+  /* novembre: Wada Vandyke Brown #4b3317 */
+  --color-month-11: #4b3317;
+  --color-month-11-deep: #49341b;
+  --color-month-11-pale: #f2e8dc;
+  --color-month-11-dusk: #413223;
+  /* dicembre: Wada Dusky Green #004f46 */
+  --color-month-12: #004f46;
+  --color-month-12-deep: #104e46;
+  --color-month-12-pale: #d9efeb;
+  --color-month-12-dusk: #1a3c37;
+
+  /* Hand-lettered display face, a stand-in for her lettering. Loaded by
+     Astro's `fonts` config (astro.config.mjs), one weight only. */
+  --font-display: var(--font-caveat), "Comic Sans MS", cursive;
+}
+
+/* Site semantic roles, three blocks like theme.css (CONVENTIONS → Tokens). */
+@layer base {
+  :root {
+    --heading: var(--color-sage-700);
+    --hero: var(--color-brand-400);
+    --hero-ink: var(--color-brand-950);
+    /* Outside any month the tile falls back to the site accent. */
+    --tile: var(--color-accent-100);
+    --tile-ink: var(--color-accent-700);
+    --cell: var(--color-accent-50);
+    --cell-ink: var(--color-accent-700);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --heading: var(--color-sage-200);
+      --hero: var(--color-brand-800);
+      --hero-ink: var(--color-brand-100);
+      --tile: var(--color-accent-800);
+      --tile-ink: var(--color-accent-100);
+      --cell: var(--color-accent-900);
+      --cell-ink: var(--color-accent-100);
+    }
+  }
+  :root[data-theme="dark"] {
+    --heading: var(--color-sage-200);
+    --hero: var(--color-brand-800);
+    --hero-ink: var(--color-brand-100);
+    --tile: var(--color-accent-800);
+    --tile-ink: var(--color-accent-100);
+    --cell: var(--color-accent-900);
+    --cell-ink: var(--color-accent-100);
+  }
+
+  /*
+   * Month accents. `data-month="1".."12"` on any element (the calendar page,
+   * an event card, a date tile) picks that month's tones; the roles below then
+   * remap `--accent`, the tile and the calendar cell for everything inside it.
+   * The tile is the Wada swatch in both modes (like a printed poster); text
+   * and cells flip for dark. Same three blocks as above.
+   */
+  [data-month="1"] {
+    --month: var(--color-month-1); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-1-deep); --month-pale: var(--color-month-1-pale); --month-dusk: var(--color-month-1-dusk);
+  }
+  [data-month="2"] {
+    --month: var(--color-month-2); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-2-deep); --month-pale: var(--color-month-2-pale); --month-dusk: var(--color-month-2-dusk);
+  }
+  [data-month="3"] {
+    --month: var(--color-month-3); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-3-deep); --month-pale: var(--color-month-3-pale); --month-dusk: var(--color-month-3-dusk);
+  }
+  [data-month="4"] {
+    --month: var(--color-month-4); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-4-deep); --month-pale: var(--color-month-4-pale); --month-dusk: var(--color-month-4-dusk);
+  }
+  [data-month="5"] {
+    --month: var(--color-month-5); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-5-deep); --month-pale: var(--color-month-5-pale); --month-dusk: var(--color-month-5-dusk);
+  }
+  [data-month="6"] {
+    --month: var(--color-month-6); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-6-deep); --month-pale: var(--color-month-6-pale); --month-dusk: var(--color-month-6-dusk);
+  }
+  [data-month="7"] {
+    --month: var(--color-month-7); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-7-deep); --month-pale: var(--color-month-7-pale); --month-dusk: var(--color-month-7-dusk);
+  }
+  [data-month="8"] {
+    --month: var(--color-month-8); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-8-deep); --month-pale: var(--color-month-8-pale); --month-dusk: var(--color-month-8-dusk);
+  }
+  [data-month="9"] {
+    --month: var(--color-month-9); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-9-deep); --month-pale: var(--color-month-9-pale); --month-dusk: var(--color-month-9-dusk);
+  }
+  [data-month="10"] {
+    --month: var(--color-month-10); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-10-deep); --month-pale: var(--color-month-10-pale); --month-dusk: var(--color-month-10-dusk);
+  }
+  [data-month="11"] {
+    --month: var(--color-month-11); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-11-deep); --month-pale: var(--color-month-11-pale); --month-dusk: var(--color-month-11-dusk);
+  }
+  [data-month="12"] {
+    --month: var(--color-month-12); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-12-deep); --month-pale: var(--color-month-12-pale); --month-dusk: var(--color-month-12-dusk);
+  }
+
+  [data-month] {
+    --accent: var(--month-deep);
+    --accent-hover: var(--color-brand-950);
+    --tile: var(--month);
+    --tile-ink: var(--month-ink);
+    --cell: var(--month-pale);
+    --cell-ink: var(--month-deep);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) [data-month] {
+      --accent: var(--month-pale);
+      --accent-hover: var(--color-brand-50);
+      --cell: var(--month-dusk);
+      --cell-ink: var(--month-pale);
+    }
+  }
+  :root[data-theme="dark"] [data-month] {
+    --accent: var(--month-pale);
+    --accent-hover: var(--color-brand-50);
+    --cell: var(--month-dusk);
+    --cell-ink: var(--month-pale);
+  }
+}
+
+@theme inline {
+  --color-heading: var(--heading);
+  --color-hero: var(--hero);
+  --color-hero-ink: var(--hero-ink);
+  --color-tile: var(--tile);
+  --color-tile-ink: var(--tile-ink);
+  --color-cell: var(--cell);
+  --color-cell-ink: var(--cell-ink);
+}

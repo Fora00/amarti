@@ -1,0 +1,37 @@
+---
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import { breadcrumbsLd } from "@factory/common";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { site, vintedUrl } from "../../site.config.ts";
+import { i18n } from "../../i18n/dictionaries.ts";
+
+/**
+ * For now the shop is a pointer to Vinted (the user's call, 2026-11-20). The
+ * `prodotti` collection and `/negozio/<slug>/` stay in place, empty, for the
+ * day she wants pieces listed here.
+ */
+const t = i18n.useTranslations("it");
+
+const jsonLd = [
+  breadcrumbsLd(site, [{ name: t("nav.home"), path: "/" }, { name: t("shop.title") }]),
+];
+---
+
+<BaseLayout title={t("shop.title")} description={t("shop.lead")} jsonLd={jsonLd}>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="md" align="start">
+          <Heading level={1} class="text-heading! font-display">{t("shop.title")}</Heading>
+          <p class="text-lg text-ink-muted text-pretty">{t("shop.lead")}</p>
+          <Button href={vintedUrl} external>{t("shop.vinted")}</Button>
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

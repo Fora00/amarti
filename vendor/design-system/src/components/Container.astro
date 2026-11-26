@@ -1,0 +1,22 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+interface Props extends HTMLAttributes<"div"> {
+  /** `reading` narrows to a comfortable measure for long-form prose. */
+  width?: "page" | "reading" | "full";
+  as?: "div" | "main" | "article" | "section" | "header" | "footer" | "nav";
+}
+
+const { width = "page", as: Tag = "div", class: className, ...rest } = Astro.props;
+
+const widths = {
+  page: "max-w-page",
+  reading: "max-w-reading",
+  full: "max-w-none",
+} as const;
+---
+
+<Tag class={cx("mx-auto w-full px-5 sm:px-8", widths[width], className)} {...rest}>
+  <slot />
+</Tag>

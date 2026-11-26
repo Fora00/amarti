@@ -1,0 +1,42 @@
+{
+  "name": "@factory/common",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared behaviour: site config, SEO, JSON-LD, i18n, content schemas, AI-search surfaces. Node-only build tooling lives under ./demo and ./og.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./site": "./src/site/config.ts",
+    "./astro": "./src/site/astro.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./jsonld": "./src/jsonld/index.ts",
+    "./content": "./src/content/schemas.ts",
+    "./ai": "./src/ai/index.ts",
+    "./calendar": "./src/calendar/index.ts",
+    "./components/*": "./src/seo/*",
+    "./demo": "./src/demo/index.ts",
+    "./og": "./src/og/index.ts",
+    "./pwa": "./src/pwa/index.ts",
+    "./pwa-client": "./src/pwa/client.ts",
+    "./pwa-icons": "./src/pwa/icons.ts",
+    "./app": "./src/app/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "zod": "^4.5.4",
+    "sharp": "^0.35.4"
+  },
+  "peerDependencies": {
+    "astro": ">=7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "astro": "^7.2.10"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

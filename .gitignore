@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.astro/
+.output/
+
+.DS_Store
+*.log
+
+# Secrets: only the .env.example templates are committed.
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state (linked project id, CLI version).
+supabase/.temp/
+**/supabase/.temp/
+
+.vscode/
+.idea/
+
+# Local build output and demo state (`build:site`, `demo`).
+deploy/
+
+# Project notes about the client (brief, open questions, payments): local only,
+# never in the public repo. Back them up some other way.
+/plan/

@@ -1,0 +1,247 @@
+---
+import type { GetStaticPaths } from "astro";
+import { url } from "../../lib/path.ts";
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import { getCollection, getEntry, render } from "astro:content";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Prose from "@factory/design-system/components/Prose.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
+import { eventLd, breadcrumbsLd, faqPageLd } from "@factory/common";
+import { resolveTiming } from "@factory/common/calendar";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DateTile from "../../components/DateTile.astro";
+import PriceTbd from "../../components/PriceTbd.astro";
+import { dateTile, formatWhen } from "../../lib/when.ts";
+import { formatPrice } from "../../lib/price.ts";
+import { site } from "../../site.config.ts";
+import { i18n } from "../../i18n/dictionaries.ts";
+
+/** Astro types `Astro.props` from this interface; without it `event` is `unknown`. */
+interface Props {
+  event: CollectionEntry<"eventi">;
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const events = await getCollection("eventi");
+  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+};
+
+const { event } = Astro.props;
+const t = i18n.useTranslations("it");
+const { Content } = await render(event);
+
+const { data } = event;
+const path = `/eventi/${event.id}/`;
+const { startIso } = resolveTiming(data);
+
+// Instagram cannot prefill a DM, so the button copies this to the clipboard and
+// the visitor pastes it into the chat. Needs the one inline script below.
+const copyMessage =
+  data.bookingProvider === "instagram" && data.bookingUrl
+    ? t("events.bookingMessage", { title: data.title, when: formatWhen(data) })
+    : undefined;
+// Day 2 of a two-evening course is booked with day 1, so only day 1 books.
+const laterDay = Boolean(data.serie && data.serie.day > 1);
+const bookable = Boolean(data.bookingUrl) && data.status === "scheduled" && !data.soldOut && !laterDay;
+const host = data.host ? await getEntry(data.host) : undefined;
+// `reference()` does not check that the id exists: getEntry just returns
+// undefined and the guest would vanish silently. Fail the build instead.
+if (data.host && !host) throw new Error(`${event.id}: host "${data.host.id}" is not in src/content/ospiti.yaml`);
+const other = data.serie ? await getEntry(data.serie.with) : undefined;
+if (data.serie && !other) throw new Error(`${event.id}: serie.with points at a missing event`);
+
+const jsonLd = [
+  eventLd(site, {
+    name: data.title,
+    description: data.summary,
+    path,
+    timing: data,
+    status: data.status,
+    location: data.location,
+    price: data.price,
+    bookingUrl: data.bookingUrl,
+    soldOut: data.soldOut,
+  }),
+  breadcrumbsLd(site, [
+    { name: t("nav.home"), path: "/" },
+    { name: t("events.title"), path: "/eventi/" },
+    { name: data.title },
+  ]),
+  ...(data.faq.length > 0 ? [faqPageLd(data.faq)] : []),
+];
+---
+
+<BaseLayout title={data.title} description={data.summary} jsonLd={jsonLd} noindex={data.noindex}>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading" as="article">
+        <Stack gap="lg">
+          <Stack gap="sm">
+            <div class="flex items-center gap-5" data-month={dateTile(data).monthNumber}>
+              <DateTile timing={data} size="lg" />
+              <p class="font-semibold text-accent">
+                <time datetime={startIso}>{formatWhen(data)}</time>
+                {data.status !== "scheduled" && <span> · {t(`events.status.${data.status}`)}</span>}
+                {data.serie && <span class="block text-ink-muted">{t("events.serieDay", { day: data.serie.day, of: data.serie.of })}</span>}
+              </p>
+            </div>
+            <Heading level={1} size="title" class="text-heading! text-balance">{data.title}</Heading>
+            {
+              host && (
+                <p class="text-lg font-semibold">
+                  {t("events.withLabel")}{" "}
+                  {host.data.instagram ? (
+                    <ExternalLink href={`https://www.instagram.com/${host.data.instagram}/`}>
+                      {host.data.name} <span class="font-normal text-ink-muted">@{host.data.instagram}</span>
+                    </ExternalLink>
+                  ) : (
+                    host.data.name
+                  )}
+                </p>
+              )
+            }
+            <p class="text-lg text-ink-muted text-pretty">{data.summary}</p>
+            {
+              data.serie && other && (
+                <p class="rounded-card border border-line bg-surface-muted px-4 py-3">
+                  {t(other.data.serie!.day > data.serie.day ? "events.serieNext" : "events.seriePrevious", {
+                    day: other.data.serie!.day,
+                  })}{" "}
+                  <a href={url(`/eventi/${other.id}/`)}>{formatWhen(other.data)}</a>
+                </p>
+              )
+            }
+          </Stack>
+
+          {
+            data.cover && (
+              <Image
+                src={data.cover}
+                alt={data.coverAlt ?? ""}
+                width={960}
+                height={540}
+                widths={[480, 960]}
+                sizes="(min-width: 768px) 42rem, 100vw"
+                class="w-full rounded-card"
+              />
+            )
+          }
+          {
+            !data.cover && (
+              <div class="grid aspect-[16/9] w-full place-items-center rounded-card border-2 border-dashed border-line-strong bg-surface-muted text-sm text-ink-muted">
+                {t("events.photoPlaceholder")}
+              </div>
+            )
+          }
+
+          <dl class="grid gap-x-8 gap-y-3 sm:grid-cols-[auto_1fr]">
+            {
+              data.location && (
+                <>
+                  <dt class="font-semibold">{t("events.where")}</dt>
+                  <dd>
+                    {data.location.name}
+                    {data.location.address && <span class="text-ink-muted"> — {data.location.address}</span>}
+                  </dd>
+                </>
+              )
+            }
+            <dt class="font-semibold">{t("events.price")}</dt>
+            <dd>
+              {data.price ? formatPrice(data.price) : data.free ? t("events.free") : <PriceTbd label={t("events.priceTbd")} />}
+            </dd>
+            {
+              data.capacity && (
+                <>
+                  <dt class="font-semibold">{t("events.seats")}</dt>
+                  <dd>{data.capacity}</dd>
+                </>
+              )
+            }
+          </dl>
+
+          <Stack direction="row" gap="sm" wrap align="center">
+            {
+              bookable && data.bookingUrl && (
+                <Button
+                  href={data.bookingUrl}
+                  external={data.bookingUrl.startsWith("http")}
+                  data-copy={copyMessage}
+                >
+                  {t(`events.book.${data.bookingProvider}`)}
+                </Button>
+              )
+            }
+            {
+              // Demo only: online payment is not decided yet (plan/BOOKING-FLOW.md).
+              // A plain disabled <button> (the design-system Button does not type `disabled`),
+              // so it cannot be followed or focused by mistake.
+              bookable && !data.free && (
+                <button
+                  type="button"
+                  disabled
+                  class="inline-flex cursor-not-allowed items-center justify-center rounded-pill border border-line-strong bg-surface-muted px-5 py-2.5 font-semibold text-ink-muted opacity-60"
+                >
+                  {t("events.pay")}
+                </button>
+              )
+            }
+            {
+              data.soldOut && data.status === "scheduled" && (
+                <p class="rounded-pill bg-surface-muted px-5 py-2.5 font-semibold">{t("events.soldOut")}</p>
+              )
+            }
+            <Button href={url(`/eventi/${event.id}.ics`)} variant="secondary">
+              {t("events.addToCalendar")}
+            </Button>
+          </Stack>
+
+          {bookable && !data.free && <p class="text-sm text-ink-muted">{t("events.payDemo")}</p>}
+          {laterDay && <p class="text-ink-muted">{t("events.serieBookFirst")}</p>}
+
+          {
+            bookable && copyMessage && (
+              <>
+                {/* Shown by the script, so it never promises a copy that cannot happen. */}
+                <p class="text-sm text-ink-muted" data-copy-hint hidden>
+                  {t("events.copyHint")}
+                </p>
+                <p
+                  class="text-sm font-semibold text-accent"
+                  role="status"
+                  data-copy-status
+                  data-copied={t("events.copied")}
+                />
+                {/* Inline on purpose: an external file would be a second request.
+                    Progressive enhancement — without it the button is a plain link. */}
+                <script is:inline>
+                  (function () {
+                    if (!navigator.clipboard) return;
+                    var link = document.querySelector("a[data-copy]");
+                    var status = document.querySelector("[data-copy-status]");
+                    var hint = document.querySelector("[data-copy-hint]");
+                    if (!link || !status) return;
+                    if (hint) hint.hidden = false;
+                    link.addEventListener("click", function () {
+                      navigator.clipboard.writeText(link.dataset.copy).then(function () {
+                        status.textContent = status.dataset.copied;
+                      });
+                    });
+                  })();
+                </script>
+              </>
+            )
+          }
+
+          <Prose><Content /></Prose>
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

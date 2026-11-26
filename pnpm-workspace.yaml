@@ -1,0 +1,16 @@
+# Standalone project: everything it needs is inside this folder.
+# vendor/ is the factory's shared code, copied by `pnpm sync amarti` in the factory — never edit it here.
+packages:
+  - site
+  - app
+  - backend
+  - vendor/common
+  - vendor/design-system
+
+# pnpm 11: `allowBuilds` (a map), not `onlyBuiltDependencies` (silently ignored).
+# Every package with an install script needs an explicit true/false, or `pnpm exec` fails.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  # Astro watches through Vite; the native binary is never loaded.
+  '@parcel/watcher': false

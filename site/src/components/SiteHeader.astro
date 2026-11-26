@@ -1,0 +1,43 @@
+---
+import Container from "@factory/design-system/components/Container.astro";
+import { url } from "../lib/path.ts";
+import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
+
+import Logo from "./Logo.astro";
+import { site, instagramDm } from "../site.config.ts";
+import { i18n } from "../i18n/dictionaries.ts";
+
+const t = i18n.useTranslations("it");
+
+const links = [
+  { href: url("/eventi/"), label: t("nav.events") },
+  { href: url("/negozio/"), label: t("nav.shop") },
+];
+const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-accent";
+---
+
+<header class="border-b border-line">
+  <Container>
+    <nav class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3" aria-label="Principale">
+      <a href={url("/")} class="flex items-center gap-3 text-ink no-underline">
+        <Logo class="h-7 w-auto" />
+        <span class="sr-only">{site.name} — {t("nav.home")}</span>
+      </a>
+
+      <ul class="flex list-none flex-wrap items-center gap-6 p-0">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href} class={linkClass}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <ExternalLink href={instagramDm} class={linkClass}>{t("nav.write")}</ExternalLink>
+        </li>
+      </ul>
+    </nav>
+  </Container>
+</header>

@@ -1,0 +1,50 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+/**
+ * An inline link that leaves the site.
+ *
+ * `target="_blank"` without `rel="noopener noreferrer"` hands the opened page a
+ * `window.opener` handle, and a tab that opens silently is disorienting for
+ * anyone not watching the viewport. Both are handled here so no caller has to
+ * remember, and so the whole factory says it the same way.
+ */
+interface Props extends HTMLAttributes<"a"> {
+  href: string | URL;
+  /** Set false for a link that stays in the same tab. */
+  newTab?: boolean;
+  /** Appends a `↗` affordance. Off for links inside running prose. */
+  icon?: boolean;
+  /**
+   * Screen-reader note for the new tab. Override per locale — the default is
+   * Italian because that is the factory's default locale.
+   */
+  newTabLabel?: string;
+}
+
+const {
+  href,
+  newTab = true,
+  icon = false,
+  newTabLabel = "si apre in una nuova finestra",
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<a
+  href={href.toString()}
+  class={cx(
+    "text-accent underline underline-offset-2 hover:text-accent-hover",
+    "focus-visible:rounded-xs",
+    className,
+  )}
+  target={newTab ? "_blank" : undefined}
+  rel={newTab ? "noopener noreferrer" : undefined}
+  {...rest}
+>
+  <slot />
+  {icon && <span aria-hidden="true"> ↗</span>}
+  {newTab && <span class="sr-only"> ({newTabLabel})</span>}
+</a>

@@ -1,0 +1,21 @@
+{
+  "name": "amarti-project",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "pnpm --filter amarti dev",
+    "dev:app": "pnpm --filter amarti-app dev",
+    "build": "pnpm --filter amarti --filter amarti-app build",
+    "check": "pnpm -r --if-present check",
+    "test": "pnpm -r --if-present test",
+    "vendor:check": "node vendor/scripts/vendor-check.mjs"
+  },
+  "devDependencies": {
+    "astro": "^7.2.10",
+    "typescript": "^7.0.2"
+  }
+}

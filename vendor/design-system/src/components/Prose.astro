@@ -1,0 +1,135 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+/**
+ * Typographic defaults for rendered Markdown.
+ *
+ * Hand-written rather than @tailwindcss/typography: that plugin ships a large
+ * set of rules for elements these sites never use, and re-theming it means
+ * fighting its own colour variables instead of using our roles. This is ~40
+ * lines and reads from the same tokens as everything else.
+ *
+ * Descendant rules use :global() because slotted content comes from the parent
+ * component and so is not scoped to this one. :where() holds specificity at 0,
+ * so any utility class on the markup itself still wins.
+ */
+interface Props extends HTMLAttributes<"div"> {
+  size?: "sm" | "md";
+}
+
+const { size = "md", class: className, ...rest } = Astro.props;
+---
+
+<div class={cx("prose-root", size === "sm" && "text-sm", className)} {...rest}>
+  <slot />
+</div>
+
+<style>
+  .prose-root {
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* Vertical rhythm via the lobotomised-owl selector: space between siblings
+     only, so the block never carries a stray leading or trailing margin. */
+  .prose-root :global(:where(* + *)) {
+    margin-block-start: 1.1em;
+  }
+
+  .prose-root :global(:where(h2, h3, h4) + *) {
+    margin-block-start: 0.6em;
+  }
+  .prose-root :global(:where(* + h2)) {
+    margin-block-start: 2em;
+  }
+  .prose-root :global(:where(* + h3, * + h4)) {
+    margin-block-start: 1.6em;
+  }
+
+  .prose-root :global(:where(a)) {
+    color: var(--accent);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .prose-root :global(:where(a):hover) {
+    text-decoration-thickness: 2px;
+  }
+
+  .prose-root :global(:where(strong)) {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .prose-root :global(:where(ul, ol)) {
+    padding-inline-start: 1.4em;
+  }
+  .prose-root :global(:where(ul)) {
+    list-style-type: disc;
+  }
+  .prose-root :global(:where(ol)) {
+    list-style-type: decimal;
+  }
+  .prose-root :global(:where(li + li)) {
+    margin-block-start: 0.4em;
+  }
+  .prose-root :global(:where(li)::marker) {
+    color: var(--ink-muted);
+  }
+
+  .prose-root :global(:where(blockquote)) {
+    border-inline-start: 3px solid var(--accent);
+    padding-inline-start: 1.1em;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+
+  .prose-root :global(:where(hr)) {
+    border: 0;
+    border-block-start: 1px solid var(--line);
+    margin-block: 2.5em;
+  }
+
+  .prose-root :global(:where(code)) {
+    background-color: var(--surface-muted);
+    border-radius: 0.25rem;
+    padding: 0.15em 0.35em;
+    font-size: 0.9em;
+  }
+  .prose-root :global(:where(pre)) {
+    background-color: var(--surface-muted);
+    border-radius: var(--radius-card);
+    padding: 1em 1.15em;
+    overflow-x: auto;
+  }
+  .prose-root :global(:where(pre code)) {
+    background-color: transparent;
+    padding: 0;
+  }
+
+  .prose-root :global(:where(img, figure)) {
+    border-radius: var(--radius-card);
+  }
+  .prose-root :global(:where(figcaption)) {
+    color: var(--ink-muted);
+    font-size: 0.875em;
+    margin-block-start: 0.6em;
+  }
+
+  /* Tables are the most common thing to break a narrow viewport. */
+  .prose-root :global(:where(table)) {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+  }
+  .prose-root :global(:where(th, td)) {
+    border-block-end: 1px solid var(--line);
+    padding: 0.5em 0.75em;
+    text-align: start;
+  }
+  .prose-root :global(:where(th)) {
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cx } from "../cx.ts";
+
+/**
+ * Renders an <a> when `href` is present, a <button> otherwise. Ships no JS —
+ * anything needing an onclick handler belongs in the site, not here.
+ */
+interface Props extends Omit<HTMLAttributes<"a">, "type"> {
+  href?: string | URL;
+  type?: "button" | "submit" | "reset";
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
+  /** Fills the container. Useful on narrow viewports. */
+  block?: boolean;
+  /**
+   * Opens in a new tab, with `rel="noopener noreferrer"` and a visually hidden
+   * note so screen-reader users are told before they follow it. A prop rather
+   * than caller-supplied attributes because `target="_blank"` without `rel` is
+   * a security footgun, and the silent tab-switch is an accessibility one.
+   */
+  external?: boolean;
+  /**
+   * Screen-reader note for the new tab. Defaults to Italian because that is the
+   * factory's default locale; a site should pass `t(...)` on localised pages.
+   * The design system holds no dictionary of its own — that is `common`'s job.
+   */
+  externalLabel?: string;
+}
+
+const {
+  href,
+  type = "button",
+  variant = "primary",
+  size = "md",
+  block = false,
+  external = false,
+  externalLabel = "si apre in una nuova finestra",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const variants = {
+  primary: "bg-accent text-accent-contrast hover:bg-accent-hover",
+  secondary:
+    "bg-surface-raised text-ink border border-line-strong hover:bg-surface-muted",
+  ghost: "bg-transparent text-accent hover:bg-accent-muted",
+} as const;
+
+const sizes = {
+  sm: "gap-1.5 px-3 py-1.5 text-sm",
+  md: "gap-2 px-5 py-2.5 text-base",
+  lg: "gap-2.5 px-7 py-3.5 text-lg",
+} as const;
+
+const classes = cx(
+  "inline-flex items-center justify-center rounded-pill font-semibold no-underline",
+  "transition-colors duration-150 ease-out-soft",
+  "disabled:pointer-events-none disabled:opacity-50",
+  variants[variant],
+  sizes[size],
+  block && "w-full",
+  className,
+);
+---
+
+{
+  href ? (
+    <a
+      href={href.toString()}
+      class={classes}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      {...rest}
+    >
+      <slot />
+      {external && <span class="sr-only"> ({externalLabel})</span>}
+    </a>
+  ) : (
+    <button type={type} class={classes} {...rest}>
+      <slot />
+    </button>
+  )
+}

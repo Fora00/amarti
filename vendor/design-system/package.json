@@ -1,0 +1,29 @@
+{
+  "name": "@factory/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared look-and-feel: tokens and UI primitives. Zero client JS.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./theme.css": "./src/theme.css",
+    "./base.css": "./src/base.css",
+    "./components/*": "./src/components/*",
+    "./app.css": "./src/app.css"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "astro": ">=7",
+    "tailwindcss": ">=4"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "astro": "^7.2.9",
+    "tailwindcss": "^4.3.3"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json"
+  }
+}

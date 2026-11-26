@@ -1,0 +1,34 @@
+---
+import "../styles/global.css";
+import AppShell from "@factory/design-system/components/AppShell.astro";
+import { mode } from "../lib/env";
+
+interface Props { title: string; active?: "richieste" | ""; eyebrow?: string; plain?: boolean }
+const { title, active = "", eyebrow, plain = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+// Add a tab here when you add a page: { id, label, href, icon } (icons: today, dogs, inbox, hours, more).
+const nav = [{ id: "richieste", label: "Richieste", href: `${base}/`, icon: "inbox" }] as const;
+---
+
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover: the whole screen of an installed app; the CSS keeps clear of the notch -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Private app: behind a login, never to be indexed. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="any" />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
+    <!-- Installable app (PWA): see annina/app for the manifest, the service worker and the icons;
+         the pieces are in @factory/common/pwa, @factory/common/pwa-client and `pnpm pwa-icons`. -->
+    <title>{title} · Area aMarti ceramics</title>
+  </head>
+  <body>
+    <AppShell
+      title={title} eyebrow={eyebrow} active={active} nav={plain ? [] : [...nav]} brand="aMarti ceramics · Area riservata" homeHref={`${base}/`}
+      banner={mode === "mock" ? "Modalità demo · dati di prova" : undefined}>
+      <slot name="actions" slot="actions" />
+      <slot />
+    </AppShell>
+  </body>
+</html>

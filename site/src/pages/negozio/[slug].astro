@@ -1,0 +1,101 @@
+---
+import type { GetStaticPaths } from "astro";
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import { getCollection, render } from "astro:content";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Prose from "@factory/design-system/components/Prose.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import { productLd, breadcrumbsLd, faqPageLd } from "@factory/common";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { formatPrice } from "../../lib/price.ts";
+import { site } from "../../site.config.ts";
+import { i18n } from "../../i18n/dictionaries.ts";
+
+/** Astro types `Astro.props` from this interface; without it `product` is `unknown`. */
+interface Props {
+  product: CollectionEntry<"prodotti">;
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const products = await getCollection("prodotti");
+  return products.map((product) => ({ params: { slug: product.id }, props: { product } }));
+};
+
+const { product } = Astro.props;
+const t = i18n.useTranslations("it");
+const { Content } = await render(product);
+
+const { data } = product;
+const path = `/negozio/${product.id}/`;
+const sold = data.availability === "sold";
+
+const jsonLd = [
+  productLd(site, {
+    name: data.title,
+    description: data.summary,
+    path,
+    sku: data.sku,
+    price: data.price,
+    availability: data.availability,
+  }),
+  breadcrumbsLd(site, [
+    { name: t("nav.home"), path: "/" },
+    { name: t("shop.title"), path: "/negozio/" },
+    { name: data.title },
+  ]),
+  ...(data.faq.length > 0 ? [faqPageLd(data.faq)] : []),
+];
+---
+
+<BaseLayout title={data.title} description={data.summary} jsonLd={jsonLd} noindex={data.noindex}>
+  <main id="main">
+    <Section space="md">
+      <Container>
+        <div class="grid gap-10 md:grid-cols-2">
+          {
+            data.photo ? (
+              <Image
+                src={data.photo}
+                alt={data.photoAlt ?? ""}
+                width={800}
+                height={800}
+                widths={[400, 800]}
+                sizes="(min-width: 768px) 50vw, 100vw"
+                loading="eager"
+                class="aspect-square w-full rounded-card object-cover"
+              />
+            ) : (
+              <div class="aspect-square w-full rounded-card bg-surface-muted" aria-hidden="true" />
+            )
+          }
+
+          <article>
+          <Stack gap="md" align="start">
+            <Heading level={1}>{data.title}</Heading>
+            <p class="text-lg text-ink-muted text-pretty">{data.summary}</p>
+            <p class="text-2xl font-bold">{sold ? t("shop.sold") : formatPrice(data.price)}</p>
+
+            {
+              !sold && (
+                <>
+                  <Button href={data.buyUrl} external size="lg">
+                    {t(`shop.buy.${data.provider}`)}
+                  </Button>
+                  <p class="text-sm text-ink-muted">{t("shop.buyNote")}</p>
+                </>
+              )
+            }
+
+            <Prose><Content /></Prose>
+          </Stack>
+          </article>
+        </div>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>
