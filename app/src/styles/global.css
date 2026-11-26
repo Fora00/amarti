@@ -1,12 +1,14 @@
 /*
- * aMarti ceramics — brand tokens.
+ * aMarti ceramics — brand tokens for the private app.
  *
- * PLACEHOLDER PALETTE (keep in sync with the public site's global.css — the two
- * packages share a look but not a file). A warm neutral ramp and a terracotta accent, chosen so
- * the scaffold looks intentional before a brand exists. Replace both ramps by
- * sampling the client's own logo/assets, then re-check contrast: accent-600
- * carries white text in light mode and accent-400 carries dark text in dark
- * mode (vendor/plan/CONVENTIONS.md → Tokens).
+ * COPY of the public site's palette (site/src/styles/global.css, "the studio", 2026-11-27):
+ * the two packages share a look but not a file, so a change there is copied here
+ * by hand. Same primitives, so the same contrast table holds (site file header,
+ * plan/DECISIONS.md): accent 600 carries white text in light mode, accent 400
+ * carries dark text in dark mode. Left out on purpose: the hero and calendar-cell
+ * roles and the display face — the app has no hero, calendar or lettering.
+ * Kept: sage headings and the month accents (`data-month` on a course card:
+ * `--accent` and `--tile` follow the month).
  *
  * Order is load-bearing: the design system declares the primitives, then this
  * file overrides them. No `@source` line here on purpose — theme.css has one.
@@ -16,31 +18,191 @@
 @import "@factory/design-system/app.css";
 
 @theme {
-  /* Neutrals — paper. */
-  --color-brand-50: oklch(0.988 0.004 60);
-  --color-brand-100: oklch(0.966 0.008 60);
-  --color-brand-200: oklch(0.928 0.013 60);
-  --color-brand-300: oklch(0.868 0.019 60);
-  --color-brand-400: oklch(0.742 0.026 60);
-  --color-brand-500: oklch(0.62 0.03 60);
-  --color-brand-600: oklch(0.508 0.033 59);
-  --color-brand-700: oklch(0.415 0.035 58);
-  --color-brand-800: oklch(0.326 0.037 57);
-  --color-brand-900: oklch(0.258 0.039 56);
-  --color-brand-950: oklch(0.194 0.04 55);
+  /* Neutrals — the studio: plaster walls, pale pine shelves, dark wood ink. */
+  --color-brand-50: #faf3ea; /* plaster: the page */
+  --color-brand-100: #f5e9dc;
+  --color-brand-200: #e9d6bf; /* pale pine: lines */
+  --color-brand-300: #e6cfaa;
+  --color-brand-400: #dfc393; /* pine shelf / table: the hero */
+  --color-brand-500: #a5865f;
+  --color-brand-600: #76593d;
+  --color-brand-700: #584330;
+  --color-brand-800: #3d3024;
+  --color-brand-900: #2b2219;
+  --color-brand-950: #1f1813; /* dark wood: the ink */
 
-  /* Terracotta — accent. */
-  --color-accent-50: oklch(0.972 0.014 45);
-  --color-accent-100: oklch(0.94 0.031 45);
-  --color-accent-200: oklch(0.882 0.058 45);
-  --color-accent-300: oklch(0.802 0.086 45);
-  --color-accent-400: oklch(0.7 0.107 45);
-  --color-accent-500: oklch(0.56 0.122 42);
-  --color-accent-600: oklch(0.43 0.12 40);
-  --color-accent-700: oklch(0.36 0.115 38);
-  --color-accent-800: oklch(0.3 0.105 36);
-  --color-accent-900: oklch(0.252 0.095 35);
-  --color-accent-950: oklch(0.205 0.082 34);
+  /* Accent — the autumn garland and leaves: orange to rust. */
+  --color-accent-50: #fdf2e7;
+  --color-accent-100: #fae1c8;
+  --color-accent-200: #f6c99c;
+  --color-accent-300: #f3ad6a;
+  --color-accent-400: #ef8a2c; /* paper garland orange: dark-mode accent */
+  --color-accent-500: #c8532a; /* autumn leaves: the focus ring */
+  --color-accent-600: #a3441d; /* rust, darkened for white text: links + buttons */
+  --color-accent-700: #853618;
+  --color-accent-800: #6a2b14;
+  --color-accent-900: #4f2010;
+  --color-accent-950: #33150b;
+
+  /* Secondary: the ivy on the shelves, for headings. */
+  --color-sage-200: #b9cdb0; /* pale ivy: dark-mode headings */
+  --color-sage-700: #33502f; /* ivy */
+
+  /* Month accents, a year of wood, one Wada colour each. Per month: the tile
+     (the Wada swatch), a deep tone for text on light grounds, a pale tone for
+     light-mode cells and dark-mode text, a dusk tone for dark-mode cells.
+     Consumed only through the `[data-month]` roles below, never directly. */
+  /* gennaio: Wada Andover Green #6d7e77, nudged for AA */
+  --color-month-1: #768780;
+  --color-month-1-deep: #5b6a64;
+  --color-month-1-pale: #e5ebe8;
+  --color-month-1-dusk: #2f3834;
+  /* febbraio: Wada Light Grayish Olive #848061, nudged for AA */
+  --color-month-2: #898566;
+  --color-month-2-deep: #6b674c;
+  --color-month-2-pale: #ebeade;
+  --color-month-2-dusk: #383626;
+  /* marzo: Wada Rainette Green #8fa071 */
+  --color-month-3: #8fa071;
+  --color-month-3-deep: #5e6c44;
+  --color-month-3-pale: #e6eddb;
+  --color-month-3-dusk: #313921;
+  /* aprile: Wada Chromium Green #719470 */
+  --color-month-4: #719470;
+  --color-month-4-deep: #516f50;
+  --color-month-4-pale: #e1eee0;
+  --color-month-4-dusk: #293b28;
+  /* maggio: Wada Olive Green #6b7140 */
+  --color-month-5: #6b7140;
+  --color-month-5-deep: #656a3f;
+  --color-month-5-pale: #e9ecd9;
+  --color-month-5-dusk: #35381e;
+  /* giugno: Wada Maple #c59f6b */
+  --color-month-6: #c59f6b;
+  --color-month-6-deep: #816134;
+  --color-month-6-pale: #f5e7d5;
+  --color-month-6-dusk: #443116;
+  /* luglio: Wada Khaki #bc892b */
+  --color-month-7: #bc892b;
+  --color-month-7-deep: #8b5f00;
+  --color-month-7-pale: #f9e7cc;
+  --color-month-7-dusk: #46310b;
+  /* agosto: Wada Raw Sienna #bb7125, nudged for AA */
+  --color-month-8: #bc7226;
+  --color-month-8-deep: #97570f;
+  --color-month-8-pale: #fee4cf;
+  --color-month-8-dusk: #4b2e11;
+  /* settembre: Wada Sudan Brown #a36752, nudged for AA */
+  --color-month-9: #9a5f4a;
+  --color-month-9-deep: #8e5a47;
+  --color-month-9-pale: #fce4db;
+  --color-month-9-dusk: #4b2c21;
+  /* ottobre: Wada Brown #7c4226 */
+  --color-month-10: #7c4226;
+  --color-month-10-deep: #78442c;
+  --color-month-10-pale: #fde4d8;
+  --color-month-10-dusk: #4c2c1d;
+  /* novembre: Wada Vandyke Brown #4b3317 */
+  --color-month-11: #4b3317;
+  --color-month-11-deep: #49341b;
+  --color-month-11-pale: #f2e8dc;
+  --color-month-11-dusk: #413223;
+  /* dicembre: Wada Dusky Green #004f46 */
+  --color-month-12: #004f46;
+  --color-month-12-deep: #104e46;
+  --color-month-12-pale: #d9efeb;
+  --color-month-12-dusk: #1a3c37;
+
 }
+
+/* App roles: sage headings (like the site), then the month remap. */
+@layer base {
+  :root { --heading: var(--color-sage-700); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --heading: var(--color-sage-200); }
+  }
+  :root[data-theme="dark"] { --heading: var(--color-sage-200); }
+
+  /*
+   * Month accents. `data-month="1".."12"` on any element (the calendar page,
+   * an event card, a date tile) picks that month's tones; the roles below then
+   * remap `--accent`, the tile and the calendar cell for everything inside it.
+   * The tile is the Wada swatch in both modes (like a printed poster); text
+   * and cells flip for dark. Same three blocks as above.
+   */
+  [data-month="1"] {
+    --month: var(--color-month-1); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-1-deep); --month-pale: var(--color-month-1-pale); --month-dusk: var(--color-month-1-dusk);
+  }
+  [data-month="2"] {
+    --month: var(--color-month-2); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-2-deep); --month-pale: var(--color-month-2-pale); --month-dusk: var(--color-month-2-dusk);
+  }
+  [data-month="3"] {
+    --month: var(--color-month-3); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-3-deep); --month-pale: var(--color-month-3-pale); --month-dusk: var(--color-month-3-dusk);
+  }
+  [data-month="4"] {
+    --month: var(--color-month-4); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-4-deep); --month-pale: var(--color-month-4-pale); --month-dusk: var(--color-month-4-dusk);
+  }
+  [data-month="5"] {
+    --month: var(--color-month-5); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-5-deep); --month-pale: var(--color-month-5-pale); --month-dusk: var(--color-month-5-dusk);
+  }
+  [data-month="6"] {
+    --month: var(--color-month-6); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-6-deep); --month-pale: var(--color-month-6-pale); --month-dusk: var(--color-month-6-dusk);
+  }
+  [data-month="7"] {
+    --month: var(--color-month-7); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-7-deep); --month-pale: var(--color-month-7-pale); --month-dusk: var(--color-month-7-dusk);
+  }
+  [data-month="8"] {
+    --month: var(--color-month-8); --month-ink: var(--color-brand-950);
+    --month-deep: var(--color-month-8-deep); --month-pale: var(--color-month-8-pale); --month-dusk: var(--color-month-8-dusk);
+  }
+  [data-month="9"] {
+    --month: var(--color-month-9); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-9-deep); --month-pale: var(--color-month-9-pale); --month-dusk: var(--color-month-9-dusk);
+  }
+  [data-month="10"] {
+    --month: var(--color-month-10); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-10-deep); --month-pale: var(--color-month-10-pale); --month-dusk: var(--color-month-10-dusk);
+  }
+  [data-month="11"] {
+    --month: var(--color-month-11); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-11-deep); --month-pale: var(--color-month-11-pale); --month-dusk: var(--color-month-11-dusk);
+  }
+  [data-month="12"] {
+    --month: var(--color-month-12); --month-ink: var(--color-brand-50);
+    --month-deep: var(--color-month-12-deep); --month-pale: var(--color-month-12-pale); --month-dusk: var(--color-month-12-dusk);
+  }
+
+  [data-month] {
+    --accent: var(--month-deep);
+    --accent-hover: var(--color-brand-950);
+    --tile: var(--month);
+    --tile-ink: var(--month-ink);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) [data-month] {
+      --accent: var(--month-pale);
+      --accent-hover: var(--color-brand-50);
+    }
+  }
+  :root[data-theme="dark"] [data-month] {
+    --accent: var(--month-pale);
+    --accent-hover: var(--color-brand-50);
+  }
+}
+
+@theme inline {
+  --color-heading: var(--heading);
+}
+
+/* Page titles in sage, like the headings on the site. */
+.pagehead h1 { color: var(--heading); }
 
 /* The components (shell, tab bar, cards, forms, buttons, confirm sheet) are in design-system/src/app.css. */

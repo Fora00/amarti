@@ -1,25 +1,22 @@
 /*
  * aMarti ceramics — brand tokens.
  *
- * "Country, Copenhagen minimal" in wood tones (2026-11-26, replaces the poster
- * palette at the owner's request). Anchored on Sanzo Wada, *A Dictionary of
- * Color Combinations* (Vol. 1 hex values as digitised in
- * github.com/mattdesl/dictionary-of-colour-combinations; no Vol. 2 data was
- * available): Ecru for oak, Pale Raw Umber for walnut, Isabella for honey,
- * Raw Sienna for teak, Blackish Olive / Dark Greenish Glaucous for sage, and
- * one Wada colour per month. The page itself is a plain linen, not Wada.
+ * "The studio" palette (2026-11-27): read from a photo of her lab in Rovereto —
+ * warm plaster walls, pale pine shelving and table, an orange/yellow paper
+ * garland with autumn leaves, ivy. Values estimated by eye from a phone photo
+ * under warm light (re-sample from a file when available). Replaces the Wada
+ * wood palette's neutrals/accent/sage; the 12 Wada month accents are unchanged.
  *
  * WCAG 2.x contrast, computed with a script (sRGB relative luminance):
- *   light: ink 950 on paper 15.8 · ink-muted 600 on paper 6.0 / on muted 5.4 ·
- *          accent (Pale Raw Umber) on paper 6.6 / on muted 6.0 · white on it 7.3 ·
- *          heading (Blackish Olive) on paper 7.5 / on white card 8.3 ·
- *          hero: ink 950 on Ecru 8.1 · focus (Raw Sienna) on paper 3.5 (UI).
- *   dark:  ink 100 on 950 14.3 · ink-muted (Ecru) on 950 8.1 / on card 900 7.2 ·
- *          accent (Isabella) on 950 7.5 / on 900 6.6 · 950 on it 7.5 ·
- *          heading (Glaucous) on 950 9.4 / on 900 8.3 · hero: 100 on 800 10.5.
+ *   light: ink 950 on paper 15.9 · ink-muted 600 on paper 5.8 / on muted 5.4 ·
+ *          accent (rust 600) on paper 5.6 / on muted 5.2 · white on it 6.2 ·
+ *          heading (ivy) on paper 8.2 / on white card 9.0 ·
+ *          hero: ink 950 on pine 10.3 · focus (leaves 500) on paper 4.0 (UI).
+ *   dark:  ink 100 on 950 14.7 · ink-muted (pine) on 950 10.3 / on card 900 9.2 ·
+ *          accent (garland 400) on 950 7.0 / on 900 6.2 · 950 on it 7.0 ·
+ *          heading (pale ivy) on 950 10.4 / on 900 9.2 · hero: 100 on 800 10.7.
  *   months: tile ink on the Wada tile ≥ 4.6 · deep text on paper/muted/pale
- *          ≥ 4.6 · pale text on 950/900/dusk ≥ 10 (full table in
- *          plan/DECISIONS.md).
+ *          ≥ 4.6 · pale text on 950/900/dusk ≥ 10 (plan/DECISIONS.md).
  *
  * Order is load-bearing: the design system declares the primitives, then this
  * file overrides them. No `@source` line here on purpose — theme.css has one.
@@ -28,35 +25,35 @@
 @import "@factory/design-system/base.css";
 
 @theme {
-  /* Neutrals — linen, birch, oak, down to smoked walnut. */
-  --color-brand-50: #f7f3ec; /* linen: the page */
-  --color-brand-100: #efe8dc;
-  --color-brand-200: #e2d8c7; /* birch: lines */
-  --color-brand-300: #cfc1aa;
-  --color-brand-400: #c2ae93; /* Wada Ecru: light oak, the hero */
-  --color-brand-500: #8e7a5f;
-  --color-brand-600: #6b5a45;
-  --color-brand-700: #524333;
-  --color-brand-800: #3b3026;
-  --color-brand-900: #2a231c;
-  --color-brand-950: #1e1915; /* smoked walnut: the ink */
+  /* Neutrals — the studio: plaster walls, pale pine shelves, dark wood ink. */
+  --color-brand-50: #faf3ea; /* plaster: the page */
+  --color-brand-100: #f5e9dc;
+  --color-brand-200: #e9d6bf; /* pale pine: lines */
+  --color-brand-300: #e6cfaa;
+  --color-brand-400: #dfc393; /* pine shelf / table: the hero */
+  --color-brand-500: #a5865f;
+  --color-brand-600: #76593d;
+  --color-brand-700: #584330;
+  --color-brand-800: #3d3024;
+  --color-brand-900: #2b2219;
+  --color-brand-950: #1f1813; /* dark wood: the ink */
 
-  /* Accent — honey and teak to walnut. */
-  --color-accent-50: #f8f1e8;
-  --color-accent-100: #f0e2cf;
-  --color-accent-200: #e3c9a6;
-  --color-accent-300: #d6b086;
-  --color-accent-400: #c5a56e; /* Wada Isabella Color: honey, dark-mode accent */
-  --color-accent-500: #bb7125; /* Wada Raw Sienna: teak, the focus ring */
-  --color-accent-600: #71502f; /* Wada Pale Raw Umber: walnut, links + buttons */
-  --color-accent-700: #5c4126;
-  --color-accent-800: #4b3317; /* Wada Vandyke Brown */
-  --color-accent-900: #3d2818;
-  --color-accent-950: #2a1c11;
+  /* Accent — the autumn garland and leaves: orange to rust. */
+  --color-accent-50: #fdf2e7;
+  --color-accent-100: #fae1c8;
+  --color-accent-200: #f6c99c;
+  --color-accent-300: #f3ad6a;
+  --color-accent-400: #ef8a2c; /* paper garland orange: dark-mode accent */
+  --color-accent-500: #c8532a; /* autumn leaves: the focus ring */
+  --color-accent-600: #a3441d; /* rust, darkened for white text: links + buttons */
+  --color-accent-700: #853618;
+  --color-accent-800: #6a2b14;
+  --color-accent-900: #4f2010;
+  --color-accent-950: #33150b;
 
-  /* Site-only secondary: sage, for headings. */
-  --color-sage-200: #b7c2a9; /* Wada Dark Greenish Glaucous */
-  --color-sage-700: #42533e; /* Wada Blackish Olive */
+  /* Secondary: the ivy on the shelves, for headings. */
+  --color-sage-200: #b9cdb0; /* pale ivy: dark-mode headings */
+  --color-sage-700: #33502f; /* ivy */
 
   /* Month accents, a year of wood, one Wada colour each. Per month: the tile
      (the Wada swatch), a deep tone for text on light grounds, a pale tone for
