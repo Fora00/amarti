@@ -1,6 +1,6 @@
 ---
 import { useLocale } from "../lib/locale.ts";
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -11,56 +11,84 @@ import { isUpcoming, resolveTiming } from "@factory/common/calendar";
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import EventCard from "../components/EventCard.astro";
-import Logo from "../components/Logo.astro";
 import { site, instagramDm } from "../site.config.ts";
 import { faqByLang } from "../faq.ts";
+import { dateTile, eventTitle, formatClock } from "../lib/when.ts";
 
 /**
- * Copy: the lead and "Ceramiche personalizzate" / "Affitta la sala" are her own
- * words (Instagram bio and pinned post); the quote is from the Il Dolomiti
- * article (sponsored). The rest is a draft for her to correct — BRIEF.md.
+ * Home, after the design review of 2026-11-27 (ROADMAP "Design review"): no
+ * template hero (logo-in-a-circle + eyebrow + two buttons), no 4-equal-columns
+ * "Lo spazio" grid. Instead: her own line + one action on the left, and the
+ * NEXT workshop as a poster on the right — the date tile is the one element
+ * that is really hers (her monthly posters). Photos come later (her files).
+ *
+ * Copy: the lead is her pinned post; the quote is from the Il Dolomiti article
+ * (sponsored); "about" is a draft for her to correct — BRIEF.md.
  */
-const { t, href, lang } = useLocale(Astro);
+const { t, href, lang, intl } = useLocale(Astro);
 
 const upcoming = (await getCollection("eventi"))
   .filter((event) => isUpcoming(event.data))
-  .sort((a, b) => resolveTiming(a.data).start.getTime() - resolveTiming(b.data).start.getTime())
-  .slice(0, 4);
-
-const space = ["custom", "labs", "store", "room"] as const;
+  .sort((a, b) => resolveTiming(a.data).start.getTime() - resolveTiming(b.data).start.getTime());
+const next = upcoming[0];
+const nextTile = next ? dateTile(next.data, intl) : undefined;
+const nextHost = next?.data.host ? await getEntry(next.data.host) : undefined;
+const more = upcoming.slice(1, 5);
 ---
 
 <BaseLayout title={`aMarticeramics Lab — ${t("home.eyebrow")}`} description={lang === "en" ? t("home.description") : site.description} bareTitle>
   <main id="main">
     <section class="bg-hero text-hero-ink">
       <Container>
-        <div class="flex flex-col items-start gap-6 py-14 sm:flex-row sm:items-center sm:gap-10 sm:py-20">
-          <Logo variant="ring" class="size-32 sm:size-40" />
+        <div class="grid items-center gap-10 py-12 md:grid-cols-[1.3fr_1fr] md:py-20">
           <Stack gap="md" align="start">
-            <p class="text-sm font-semibold uppercase tracking-widest">{t("home.eyebrow")}</p>
-            <Heading level={1} class="text-hero-ink! font-display">aMarticeramics Lab</Heading>
-            <p class="max-w-reading text-lg text-pretty">{t("home.lead")}</p>
-            <div class="flex flex-wrap gap-3">
-              <Button href={href("/eventi/")}>{t("home.eventsCta")}</Button>
-              <Button href={instagramDm} external variant="ghost" class="text-hero-ink! hover:bg-transparent! underline">
+            <Heading level={1} class="text-hero-ink! font-hand text-6xl/none sm:text-7xl/none">aMarticeramics Lab</Heading>
+            <p class="max-w-reading text-xl text-pretty">{t("home.lead")}</p>
+            <p class="text-sm">{t("home.where")}</p>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Button href={href("/eventi/")} size="lg">{t("home.eventsCta")}</Button>
+              <a href={instagramDm} class="font-semibold text-hero-ink underline underline-offset-4" target="_blank" rel="noopener noreferrer">
                 {t("home.writeCta")}
-              </Button>
+              </a>
             </div>
           </Stack>
+
+          {
+            next && nextTile && (
+              <a
+                href={href(`/eventi/${next.id}/`)}
+                data-month={nextTile.monthNumber}
+                class="group block rotate-1 rounded-card bg-tile p-6 text-tile-ink no-underline shadow-lg transition-transform hover:rotate-0 sm:p-8"
+              >
+                <p class="text-xs font-semibold uppercase tracking-widest">{t("home.nextTitle")}</p>
+                <p class="mt-3 flex items-end gap-4 leading-none">
+                  <span class="font-hand text-8xl">{nextTile.day}</span>
+                  <span class="pb-2 text-sm font-semibold uppercase tracking-widest">
+                    {nextTile.weekday} · {nextTile.month}<br />{formatClock(next.data, intl)}
+                  </span>
+                </p>
+                <p class="mt-4 font-hand text-3xl/tight text-balance">{eventTitle(next.data, lang)}</p>
+                {nextHost && <p class="mt-1 text-sm">{t("events.with", { host: nextHost.data.name })}</p>}
+                <p class="mt-5 text-sm font-semibold underline underline-offset-4 group-hover:no-underline">{t("home.nextCta")} →</p>
+              </a>
+            )
+          }
         </div>
       </Container>
     </section>
 
     {
-      upcoming.length > 0 && (
+      more.length > 0 && (
         <Section space="md">
           <Container>
             <Stack gap="lg">
-              <Heading level={2} class="text-heading! font-display">{t("home.eventsTitle")}</Heading>
+              <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <Heading level={2} class="text-heading!">{t("home.eventsTitle")}</Heading>
+                <a href={href("/eventi/")} class="font-semibold">{t("home.eventsCta")} →</a>
+              </div>
               <ul class="grid list-none gap-4 p-0 md:grid-cols-2">
-                {upcoming.map((event) => <EventCard event={event} />)}
+                {more.map((event) => <EventCard event={event} />)}
               </ul>
-              <Button href={href("/eventi/")} variant="secondary">{t("home.eventsCta")}</Button>
             </Stack>
           </Container>
         </Section>
@@ -69,58 +97,31 @@ const space = ["custom", "labs", "store", "room"] as const;
 
     <Section space="md" tone="muted">
       <Container>
-        <Stack gap="lg">
-          <Heading level={2} class="text-heading! font-display">{t("home.spaceTitle")}</Heading>
-          <ul class="grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4">
-            {
-              space.map((key) => (
-                <li>
-                  <Stack gap="xs">
-                    <Heading level={3} size="md">
-                      {key === "room" ? (
-                        <a href={href("/servizi/#room")} class="text-ink no-underline hover:text-accent hover:underline">{t(`home.space.${key}Title`)}</a>
-                      ) : (
-                        t(`home.space.${key}Title`)
-                      )}
-                    </Heading>
-                    <p class="text-ink-muted text-pretty">{t(`home.space.${key}`)}</p>
-                  </Stack>
-                </li>
-              ))
-            }
-          </ul>
-          <figure class="max-w-reading border-l-4 border-accent pl-5">
-            <blockquote class="font-display text-3xl/tight text-heading">“{t("home.quote")}”</blockquote>
-            <figcaption class="mt-2 text-sm text-ink-muted">— {t("home.quoteBy")}</figcaption>
+        <div class="grid gap-10 md:grid-cols-[1fr_1.2fr] md:items-center">
+          <figure>
+            <blockquote class="font-hand text-4xl/tight text-heading sm:text-5xl/tight">“{t("home.quote")}”</blockquote>
+            <figcaption class="mt-3 text-sm text-ink-muted">— {t("home.quoteBy")}</figcaption>
           </figure>
-        </Stack>
-      </Container>
-    </Section>
-
-    <Section space="md">
-      <Container>
-        <div class="grid gap-10 md:grid-cols-2">
           <Stack gap="sm" align="start">
-            <Heading level={2} size="xl" class="text-heading!">{t("home.shopTitle")}</Heading>
-            <p class="text-ink-muted text-pretty">{t("home.shopLead")}</p>
-            <Button href={href("/negozio/")} variant="secondary">{t("home.shopCta")}</Button>
-          </Stack>
-          <Stack gap="sm" align="start">
-            <Heading level={2} size="xl" class="text-heading!">{t("home.whereTitle")}</Heading>
-            <p>
-              aMarticeramics Lab<br />
-              {t("home.where")}
+            <p class="text-lg text-pretty">{t("home.about")}</p>
+            <p class="flex flex-wrap gap-x-6 gap-y-2 font-semibold">
+              <a href={href("/servizi/")}>{t("home.aboutServices")} →</a>
+              <a href={href("/negozio/")}>{t("home.shopCta")} →</a>
+              <a href={href("/chi-sono/")}>{t("nav.about")} →</a>
             </p>
-            <p class="text-ink-muted">{t("home.contact")}</p>
           </Stack>
         </div>
       </Container>
     </Section>
-    <Section space="md" id="faq" tone="muted">
+
+    <Section space="md" id="faq">
       <Container width="reading">
         <Stack gap="md">
-          <Heading level={2} class="text-heading! font-display">{t("home.faqTitle")}</Heading>
+          <Heading level={2} class="text-heading!">{t("home.faqTitle")}</Heading>
           <Faq items={[...faqByLang[lang]]} />
+          <p class="text-ink-muted">
+            aMarticeramics Lab · {t("home.where")} · <a href={instagramDm} target="_blank" rel="noopener noreferrer">{t("home.contact")}</a>
+          </p>
         </Stack>
       </Container>
     </Section>

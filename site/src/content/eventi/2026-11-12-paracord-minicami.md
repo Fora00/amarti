@@ -15,4 +15,3 @@ en:
   summary: "A paracord workshop with Minicami, Thursday 12 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

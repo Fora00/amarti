@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Erbesapienti to make your own scented bath bomb, Tuesday 15 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
-Info e prenotazioni in DM su Instagram.

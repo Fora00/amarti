@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Lorenzo Bicelli to make your own autumn wreath, Wednesday 11 November at 5:30 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Nebulosa Lab to make a personalised paper picture, Friday 11 December from 6 to 8 pm at aMarticeramics Lab."
 ---
 
-Info e prenotazioni in DM su Instagram.

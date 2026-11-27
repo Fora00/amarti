@@ -14,4 +14,3 @@ en:
   summary: "A macramé workshop with Artemisya Creations, Saturday 28 November at 10 am at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

@@ -50,7 +50,7 @@ const jsonLd = [
         <Stack gap="lg">
           <Stack gap="sm">
             <p><a href={href("/eventi/")}>← {t("events.title")}</a></p>
-            <Heading level={1} class="text-heading! font-display">{t("events.tagTitle", { tag: label })}</Heading>
+            <Heading level={1} class="text-heading! font-hand">{t("events.tagTitle", { tag: label })}</Heading>
           </Stack>
 
           <TagFilter tags={allTags} current={tag} />
@@ -60,7 +60,7 @@ const jsonLd = [
           {
             [...byMonth].map(([key, list]) => (
               <Stack gap="md">
-                <Heading level={2} size="xl" class="text-heading! font-display capitalize">
+                <Heading level={2} size="xl" class="text-heading! font-hand capitalize">
                   <a href={href(`/calendario/${key}/`)} class="no-underline hover:underline">{monthLabel(key, intl)}</a>
                 </Heading>
                 <Stack as="ul" gap="md" class="list-none p-0">

@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Artlab to decorate your own autumn candle, Thursday 5 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

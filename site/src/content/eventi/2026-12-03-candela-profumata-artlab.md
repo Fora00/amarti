@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Artlab to make your own scented candle, Thursday 3 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
-Info e prenotazioni in DM su Instagram.

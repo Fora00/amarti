@@ -14,4 +14,3 @@ en:
   summary: "First evening of the beginners' ceramics course, on shaping clay: Tuesday 10 November at 6:30 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

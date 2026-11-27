@@ -18,4 +18,3 @@ en:
   summary: "Second evening: decorate the Christmas mug shaped on 14 December, Friday 18 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
-Info e prenotazioni in DM su Instagram.

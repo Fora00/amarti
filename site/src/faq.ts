@@ -1,5 +1,5 @@
 /**
- * Domande frequenti — DRAFT (2026-11-26; EN added 2026-11-27, same answers), written only from what the site and
+ * Domande frequenti — DRAFT, trimmed to 5 in the design review of 2026-11-27 (where/what/updates are already on the page) — (2026-11-26; EN added 2026-11-27, same answers), written only from what the site and
  * her posts already say. Deliberately absent until Martina answers: prices,
  * whether experience is needed, what's included, payment, cancellations.
  *
@@ -31,24 +31,9 @@ export const faqByLang = {
       "Alcuni corsi di ceramica si svolgono in due serate: nella prima si modella l'argilla, nella seconda si decora il pezzo modellato. Si prenotano insieme, dal day 1.",
   },
   {
-    question: "I laboratori sono solo di ceramica?",
-    answer:
-      "No. Oltre alla ceramica, nella sala si alternano artigiane e artisti ospiti con laboratori di gioielli, macramè, candele, carta, astrologia e decorazioni di Natale.",
-  },
-  {
-    question: "Dove si trova l'aMarticeramics Lab?",
-    answer:
-      "In Piazza Malfatti 10 a Rovereto (TN). Accanto al laboratorio c'è il concept store con le ceramiche di aMarti e le creazioni di artigiane del territorio.",
-  },
-  {
     question: "Si può affittare la sala?",
     answer:
       "Sì, per compleanni, workshop, eventi e team building: i dettagli sono nella pagina Servizi. Si scrive a Martina in DM su Instagram per parlarne.",
-  },
-  {
-    question: "Come resto aggiornato sul programma?",
-    answer:
-      "Il programma completo è sulla pagina Laboratori, mese per mese. Dalla stessa pagina si possono aggiungere i laboratori al calendario del telefono, oppure seguire @amarticeramics su Instagram.",
   },
 ],
   en: [
@@ -73,24 +58,9 @@ export const faqByLang = {
       "Some ceramics courses run over two evenings: on the first you shape the clay, on the second you decorate the piece. You book both together, from day 1.",
   },
   {
-    question: "Are the workshops only about ceramics?",
-    answer:
-      "No. Besides ceramics, guest makers and artists run workshops on jewellery, macramé, candles, paper, astrology and Christmas decorations.",
-  },
-  {
-    question: "Where is aMarticeramics Lab?",
-    answer:
-      "At Piazza Malfatti 10 in Rovereto (Trentino, Italy). Next to the studio is the concept store with aMarti's ceramics and work by local women makers.",
-  },
-  {
     question: "Can I rent the room?",
     answer:
       "Yes, for birthdays, workshops, events and team building: see the Services page. Send Martina a DM on Instagram to talk about it.",
-  },
-  {
-    question: "How do I keep up with the programme?",
-    answer:
-      "The full programme is on the Workshops page, month by month. From there you can add workshops to your phone's calendar, or follow @amarticeramics on Instagram.",
   },
 ],
 } as const;

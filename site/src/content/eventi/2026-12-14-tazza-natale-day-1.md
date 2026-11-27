@@ -18,4 +18,3 @@ en:
   summary: "First evening: shape your own Christmas-themed ceramic mug, Monday 14 December 6:30-9 pm. Decorating is day 2, Friday 18 December."
 ---
 
-Info e prenotazioni in DM su Instagram.

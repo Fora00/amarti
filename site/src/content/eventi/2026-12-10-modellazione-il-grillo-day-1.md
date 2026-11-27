@@ -19,4 +19,3 @@ en:
   summary: "First evening of the ceramics course with Il Grillo: shaping clay on Thursday 10 December, 6:30-9 pm. Decorating is day 2, Thursday 17 December."
 ---
 
-Info e prenotazioni in DM su Instagram.

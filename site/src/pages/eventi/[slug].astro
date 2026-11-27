@@ -52,7 +52,7 @@ const copyMessage =
     : undefined;
 // Day 2 of a two-evening course is booked with day 1, so only day 1 books.
 const laterDay = Boolean(data.serie && data.serie.day > 1);
-const bookable = Boolean(data.bookingUrl) && data.status === "scheduled" && !data.soldOut && !laterDay;
+const bookable = Boolean(data.bookingUrl) && data.status === "scheduled" && !data.soldOut && !laterDay && isUpcoming(data);
 // The free sign-up form (→ `signups`, see backend/supabase/functions/signup).
 // Not on day 2+, not once the event is over (decided at build time: a rebuild
 // removes it), not when cancelled, postponed or sold out. Instagram stays as the
@@ -104,7 +104,7 @@ const jsonLd = [
                 {data.serie && <span class="block text-ink-muted">{t("events.serieDay", { day: data.serie.day, of: data.serie.of })}</span>}
               </p>
             </div>
-            <Heading level={1} size="title" class="text-heading! text-balance">{title}</Heading>
+            <Heading level={1} size="title" class="text-heading! font-hand text-balance">{title}</Heading>
             {
               host && (
                 <p class="text-lg font-semibold">
@@ -196,14 +196,16 @@ const jsonLd = [
             )
           }
 
+          {/* Design review 2026-11-27: ONE action. With the sign-up form open, the
+              button goes to the form and Instagram lives as a text link inside it;
+              the calendar is a text link. */}
           <Stack direction="row" gap="sm" wrap align="center">
-            {signupOpen && <Button href="#prenota">{t("signup.cta")}</Button>}
+            {signupOpen && <Button href="#prenota" size="lg">{t("signup.cta")}</Button>}
             {
-              bookable && data.bookingUrl && (
+              bookable && !signupOpen && data.bookingUrl && (
                 <Button
                   href={data.bookingUrl}
                   external={data.bookingUrl.startsWith("http")}
-                  variant={signupOpen ? "secondary" : "primary"}
                   data-copy={copyMessage}
                 >
                   {t(`events.book.${data.bookingProvider}`)}
@@ -229,16 +231,16 @@ const jsonLd = [
                 <p class="rounded-pill bg-surface-muted px-5 py-2.5 font-semibold">{t("events.soldOut")}</p>
               )
             }
-            <Button href={url(`/eventi/${event.id}.ics`)} variant="secondary">
-              {t("events.addToCalendar")}
-            </Button>
           </Stack>
+          <p class="-mt-3 text-sm">
+            <a href={url(`/eventi/${event.id}.ics`)} class="font-semibold text-accent underline underline-offset-4">{t("events.addToCalendar")}</a>
+          </p>
 
           {bookable && !data.free && !signupOpen && <p class="text-sm text-ink-muted">{t("events.payDemo")}</p>}
           {laterDay && <p class="text-ink-muted">{t("events.serieBookFirst")}</p>}
 
           {
-            bookable && copyMessage && (
+            bookable && !signupOpen && copyMessage && (
               <>
                 {/* Shown by the script, so it never promises a copy that cannot happen. */}
                 <p class="text-sm text-ink-muted" data-copy-hint hidden>
@@ -272,7 +274,7 @@ const jsonLd = [
           }
 
           {/* The Markdown body is written in Italian only: left out of /en/ rather than shown untranslated. */}
-          {lang === "it" && <Prose><Content /></Prose>}
+          {lang === "it" && event.body?.trim() && <Prose><Content /></Prose>}
 
           {signupOpen && <SignupForm eventId={event.id} />}
         </Stack>

@@ -45,11 +45,7 @@ const tags = tagsOf(event, await loadCourseTags());
       {host && <p class="text-ink-muted">{t("events.with", { host: host.data.name })}</p>}
       {
         tags.length > 0 && (
-          <p class="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <span class="rounded-pill bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">{tagLabel(tag, lang)}</span>
-            ))}
-          </p>
+          <p class="text-sm text-ink-muted">{tags.map((tag) => tagLabel(tag, lang)).join(" · ")}</p>
         )
       }
       {/* No price and not free = nothing shown (every field is optional). */}

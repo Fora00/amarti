@@ -39,7 +39,7 @@ const jsonLd = [
       <Container>
         <Stack gap="lg">
           <Stack gap="sm">
-            <Heading level={1} class="text-heading! font-display">{t("events.title")}</Heading>
+            <Heading level={1} class="text-heading! font-hand">{t("events.title")}</Heading>
             <p class="max-w-reading text-lg text-ink-muted text-pretty">{t("events.lead")}</p>
           </Stack>
 
@@ -50,7 +50,7 @@ const jsonLd = [
           {
             [...upcoming].map(([key, events]) => (
               <Stack gap="md">
-                <Heading level={2} size="xl" class="text-heading! font-display capitalize">
+                <Heading level={2} size="xl" class="text-heading! font-hand capitalize">
                   <a href={href(`/calendario/${key}/`)} class="no-underline hover:underline">
                     {monthLabel(key, intl)}
                   </a>

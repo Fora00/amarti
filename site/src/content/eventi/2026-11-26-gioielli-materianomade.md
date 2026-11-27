@@ -14,4 +14,3 @@ en:
   summary: "An evening workshop to make your own jewellery with Materianomade, Thursday 26 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

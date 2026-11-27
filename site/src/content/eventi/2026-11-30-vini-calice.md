@@ -13,4 +13,3 @@ en:
   summary: "An evening of wine tasting and buffet where everyone decorates their own wine glass: Monday 30 November at 6:30 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

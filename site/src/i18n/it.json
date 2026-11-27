@@ -38,7 +38,11 @@
     "shopLead": "Le ceramiche di aMarti e le creazioni di artigiane del territorio si trovano in negozio, in Piazza Malfatti 10.",
     "shopCta": "Vai al negozio",
     "faqTitle": "Domande frequenti",
-    "contactCta": "Scrivici"
+    "contactCta": "Scrivici",
+    "nextTitle": "Il prossimo laboratorio",
+    "nextCta": "Scopri e prenota",
+    "about": "Un laboratorio di ceramica e un concept store in centro a Rovereto. Ogni mese laboratori miei e di artigiane e artisti ospiti, per adulti e bambini; in negozio le mie ceramiche e le creazioni di artigiane del territorio. La sala si prenota anche per feste e compleanni.",
+    "aboutServices": "Servizi e sala"
   },
   "events": {
     "title": "Laboratori ed eventi",

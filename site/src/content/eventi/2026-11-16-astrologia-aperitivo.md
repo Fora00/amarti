@@ -15,4 +15,3 @@ en:
   summary: "An astrology evening with an aperitivo, with Dialogoconitarocchi, Monday 16 November at 7 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

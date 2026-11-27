@@ -102,16 +102,18 @@
   --color-month-10-deep: #78442c;
   --color-month-10-pale: #fde4d8;
   --color-month-10-dusk: #4c2c1d;
-  /* novembre: Wada Vandyke Brown #4b3317 */
-  --color-month-11: #4b3317;
-  --color-month-11-deep: #49341b;
-  --color-month-11-pale: #f2e8dc;
-  --color-month-11-dusk: #413223;
-  /* dicembre: Wada Dusky Green #004f46 */
-  --color-month-12: #004f46;
-  --color-month-12-deep: #104e46;
-  --color-month-12-pale: #d9efeb;
-  --color-month-12-dusk: #1a3c37;
+  /* novembre: her November poster — rust ground, cream lettering (2026-11-27, replaced Wada Vandyke Brown).
+     cream on tile 5.6 · deep on paper 7.2 / muted 6.6 / pale 6.4 · pale on dusk 10.9 */
+  --color-month-11: #a3441d;
+  --color-month-11-deep: #8a3816;
+  --color-month-11-pale: #f8e3d6;
+  --color-month-11-dusk: #4a2414;
+  /* dicembre: her December poster — brick-red ground, dark-green titles (2026-11-27, replaced Wada Dusky Green teal).
+     cream on tile 6.9 · deep (green) on paper 8.9 / muted 8.2 / pale 8.2 · pale on dusk 11.2 */
+  --color-month-12: #9b2c22;
+  --color-month-12-deep: #2f4a2b;
+  --color-month-12-pale: #e6ede2;
+  --color-month-12-dusk: #24331f;
 
 }
 

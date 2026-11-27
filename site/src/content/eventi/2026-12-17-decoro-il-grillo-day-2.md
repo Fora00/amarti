@@ -19,4 +19,3 @@ en:
   summary: "Second evening of the course with Il Grillo: decorate the piece shaped on 10 December, Thursday 17 December from 6:30 to 8 pm."
 ---
 
-Info e prenotazioni in DM su Instagram.

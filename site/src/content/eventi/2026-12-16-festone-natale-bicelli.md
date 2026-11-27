@@ -15,4 +15,3 @@ en:
   summary: "A workshop with Lorenzo Bicelli to make your own Christmas garland, Wednesday 16 December from 5:30 to 8 pm at aMarticeramics Lab in Rovereto."
 ---
 
-Info e prenotazioni in DM su Instagram.

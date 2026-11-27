@@ -55,12 +55,15 @@ const jsonLd = [
     <Section space="md">
       <Container>
         <Stack gap="lg">
-          <Heading level={1} class="text-accent! font-display">{t("events.monthTitle", { month: label })}</Heading>
-
-          <nav class="flex justify-between gap-4" aria-label={t("events.months")}>
-            {previous ? <a class="text-accent hover:text-accent-hover" href={href(`/calendario/${previous}/`)}>← {monthLabel(previous, intl)}</a> : <span />}
-            {next ? <a class="text-accent hover:text-accent-hover" href={href(`/calendario/${next}/`)}>{monthLabel(next, intl)} →</a> : <span />}
-          </nav>
+          {/* Like her monthly Instagram poster: the month's colour as the ground,
+              big hand-lettered title in cream (design review 2026-11-27). */}
+          <header class="rounded-card bg-tile px-6 py-8 text-tile-ink sm:px-10 sm:py-12">
+            <Heading level={1} class="text-tile-ink! font-hand text-5xl/none sm:text-7xl/none">{t("events.monthTitle", { month: label })}</Heading>
+            <nav class="mt-6 flex justify-between gap-4 text-sm font-semibold" aria-label={t("events.months")}>
+              {previous ? <a class="text-tile-ink underline underline-offset-4 hover:no-underline" href={href(`/calendario/${previous}/`)}>← {monthLabel(previous, intl)}</a> : <span />}
+              {next ? <a class="text-tile-ink underline underline-offset-4 hover:no-underline" href={href(`/calendario/${next}/`)}>{monthLabel(next, intl)} →</a> : <span />}
+            </nav>
+          </header>
 
           {/* A grid is unreadable on a phone, so it only appears from md up;
               the list below carries the same events at every width. */}
