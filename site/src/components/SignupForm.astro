@@ -58,6 +58,12 @@ const instagram = site.links.find((link) => link.label === "Instagram")?.url;
         </label>
       </div>
 
+      <!-- Optional, separate, NOT pre-ticked (GDPR consent for suggestions/light profiling). -->
+      <div class="flex items-start gap-3">
+        <input id="consigli" name="consigli" type="checkbox" value="si" class="mt-1 size-5 shrink-0 accent-accent" />
+        <label for="consigli" class="text-sm text-ink">{t("signup.suggestions")}</label>
+      </div>
+
       <!-- Honeypot: humans never see it; a bot that fills it is dropped. -->
       <div class="sr-only" aria-hidden="true">
         <label>Non compilare <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>

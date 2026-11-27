@@ -68,6 +68,32 @@ create index if not exists signups_event_idx on signups (event_id, created_at);
 alter table signups add column if not exists privacy_version text
   check (privacy_version is null or length(privacy_version) <= 40);
 
+-- Optional, separate consent (unticked box on the sign-up form) to receive
+-- course suggestions based on what the person likes (marketing + light
+-- profiling: GDPR art. 6.1.a / 21-22; privacy text "consigli"). False = never
+-- suggest anything to them.
+alter table signups add column if not exists consenso_consigli boolean not null default false;
+
+-- One row per person the owner has looked at, keyed by lower-case email (the
+-- same person signs up many times). Only what SHE adds: interests (tags) and a
+-- note; `consigli_revocati_at` = the person asked for no more suggestions
+-- (wins over any older consent). Staff-only, never written by the site.
+create table if not exists persone (
+  email                text primary key check (email = lower(email)),
+  interessi            text[] not null default '{}',
+  note                 text check (note is null or length(note) <= 1000),
+  consigli_revocati_at timestamptz,
+  updated_at           timestamptz not null default now()
+);
+
+-- Which suggestion was sent to whom, so nobody gets the same course twice.
+create table if not exists consigli_inviati (
+  email    text not null check (email = lower(email)),
+  event_id text not null,
+  sent_at  timestamptz not null default now(),
+  primary key (email, event_id)
+);
+
 -- What the owner sets per course in the dashboard. Keyed by the course id =
 -- the site's day-1 event id (same as `signups.event_id` for day 1). No row =
 -- nothing set yet. Written only by staff through the app.
@@ -75,8 +101,12 @@ create table if not exists corsi (
   event_id   text primary key,
   -- The SumUp payment link she sends to the confirmed attendees of this course.
   sumup_link text check (sumup_link is null or sumup_link ~ '^https://[^[:space:]]{4,300}$'),
+  -- Preference tags ("ceramica", "candele", "bambini"…): match courses to people.
+  tags       text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
+
+alter table corsi add column if not exists tags text[] not null default '{}';
 
 -- The shop's price list (pieces with a fixed price), edited in the dashboard.
 -- The ONLY table the public may read: the site fetches the visible rows at
@@ -138,7 +168,7 @@ create index if not exists richieste_sala_idx on richieste_sala (stato, created_
 do $$
 declare t text;
 begin
-  foreach t in array array['staff', 'inbox', 'signups', 'corsi', 'listino', 'disponibilita', 'richieste_sala'] loop
+  foreach t in array array['staff', 'inbox', 'signups', 'corsi', 'listino', 'disponibilita', 'richieste_sala', 'persone', 'consigli_inviati'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists staff_only on %I', t);
     if t = 'staff' then

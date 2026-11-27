@@ -27,6 +27,8 @@ export interface SignupRow {
   telefono: string;
   note: string | null;
   privacy_at: string;
+  /** Ticked the optional "consigli" box: may receive course suggestions (unless revoked in `persone`). */
+  consenso_consigli: boolean;
   status: SignupStatus;
   created_at: string;
 }
@@ -36,7 +38,25 @@ export interface CorsoRow {
   event_id: string;
   /** Her SumUp payment link for this course; null = not set yet. */
   sumup_link: string | null;
+  /** Preference tags, lower-case ("ceramica", "candele"…). */
+  tags: string[];
   updated_at: string;
+}
+
+/** What she keeps about one person (`persone`, keyed by lower-case email). */
+export interface PersonaRow {
+  email: string;
+  interessi: string[];
+  note: string | null;
+  consigli_revocati_at: string | null;
+  updated_at: string;
+}
+
+/** A suggestion already sent (`consigli_inviati`). */
+export interface ConsiglioRow {
+  email: string;
+  event_id: string;
+  sent_at: string;
 }
 
 /** One row of `listino`: a shop item with a fixed price. Public once `visibile` (the site reads it at build time). */

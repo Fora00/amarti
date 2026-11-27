@@ -21,11 +21,27 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
 }));
 ---
 
-<AppLayout title="Corsi" active="corsi" eyebrow="Programma">
+<AppLayout title="Corsi e iscritti" active="corsi" eyebrow="Programma">
   <p class="muted">
-    I corsi in calendario sul sito, con chi si è iscritto dal modulo. Apri un corso per vedere i nomi e
-    cambiare lo stato di ogni iscrizione.
+    I corsi in calendario sul sito, con chi si è iscritto dal modulo. Apri un corso per vedere i nomi, cambiare lo
+    stato di ogni iscrizione, inserire il link SumUp e i tag.
   </p>
+
+  <!-- What needs her attention, as filters. Filled after login. -->
+  <section class="card filters" id="filters" hidden aria-label="Filtra i corsi">
+    <div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:.5rem">
+      <button type="button" class="btn secondary small" data-filter="all" aria-pressed="true">Tutti</button>
+      <button type="button" class="btn secondary small" data-filter="new" aria-pressed="false">Iscrizioni nuove <span data-count="new"></span></button>
+      <button type="button" class="btn secondary small" data-filter="nosumup" aria-pressed="false">Senza link SumUp <span data-count="nosumup"></span></button>
+      <button type="button" class="btn secondary small" data-filter="notags" aria-pressed="false">Senza tag <span data-count="notags"></span></button>
+      <button type="button" class="btn secondary small" data-filter="signups" aria-pressed="false">Con iscritti <span data-count="signups"></span></button>
+    </div>
+    <div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:.5rem;margin-top:.75rem">
+      <input type="search" id="q" class="input" placeholder="Cerca un corso o un ospite" aria-label="Cerca un corso" style="width:auto;flex:1;min-width:12rem" />
+      <select id="tag" class="input" aria-label="Filtra per tag" style="width:auto"><option value="">Tutti i tag</option></select>
+    </div>
+    <p class="muted" id="filter-empty" style="margin:.75rem 0 0" hidden>Nessun corso corrisponde ai filtri.</p>
+  </section>
 
   {months.map((m) => (
     <section class="section corsi-section" data-month={m.courses[0]?.month}>
@@ -33,7 +49,8 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
       <ul class="list">
         {m.courses.map((c) => (
           <li class="card corso" data-month={c.month} data-last-day={c.lastDay} data-course-id={c.id}
-            data-aliases={c.aliases.join(" ")} data-capacity={c.capacity ?? ""}>
+            data-aliases={c.aliases.join(" ")} data-capacity={c.capacity ?? ""} data-free={c.free ? "1" : ""}
+            data-search={`${c.title} ${c.host ?? ""}`.toLowerCase()}>
             <div class="row">
               <a class="corso-link" href={`${base}/corsi/${c.id}/`}><strong>{c.title}</strong></a>
               <span class="pill past-pill" hidden>Concluso</span>
@@ -50,6 +67,7 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
               {!c.free && <span><span class="muted">SumUp</span> <span class="n-sumup">…</span></span>}
               {c.free && <span>Gratuito</span>}
             </p>
+            <p class="corso-tags"></p>
           </li>
         ))}
       </ul>
@@ -68,7 +86,7 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
     import { requireStaff } from "../lib/guard";
     import { data } from "../lib/data";
     import { MINIMO_DEFAULT, isActive } from "../lib/corsi";
-    import { $, button, render, say } from "../lib/ui";
+    import { $, button, el, render, say } from "../lib/ui";
     import { attempt, signupItem } from "../lib/views";
     import type { SignupRow } from "../lib/types";
 
@@ -82,25 +100,49 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
       card.classList.add("past");
       card.querySelector<HTMLElement>(".past-pill")!.hidden = false;
     }
-    // Upcoming first: past courses are hidden behind a button, and a month with
-    // nothing left in it disappears with them.
-    const showPast = (on: boolean) => {
-      document.body.classList.toggle("show-past", on);
-      for (const section of document.querySelectorAll<HTMLElement>(".corsi-section")) {
-        section.hidden = !on && [...section.querySelectorAll(".corso")].every((c) => c.classList.contains("past"));
-      }
+
+    // -- filters ---------------------------------------------------------------
+    // One function decides every card: past toggle + quick filter + search + tag.
+    let showPast = false;
+    let quick = "all";
+    const matches = (card: HTMLElement) => {
+      if (card.classList.contains("past") && !showPast) return false;
+      if (quick !== "all" && card.dataset[quick] !== "1") return false;
+      const q = ($("#q") as HTMLInputElement).value.trim().toLowerCase();
+      if (q && !(card.dataset.search ?? "").includes(q)) return false;
+      const tag = ($("#tag") as HTMLSelectElement).value;
+      if (tag && !(card.dataset.tags ?? "").split("|").includes(tag)) return false;
+      return true;
     };
+    function apply() {
+      let shown = 0;
+      for (const card of cards) { const on = matches(card); card.hidden = !on; if (on) shown++; }
+      for (const section of document.querySelectorAll<HTMLElement>(".corsi-section")) {
+        section.hidden = [...section.querySelectorAll<HTMLElement>(".corso")].every((c) => c.hidden);
+      }
+      $("#filter-empty").hidden = shown > 0;
+    }
+    for (const b of document.querySelectorAll<HTMLButtonElement>("[data-filter]")) {
+      b.addEventListener("click", () => {
+        quick = b.dataset.filter ?? "all";
+        for (const x of document.querySelectorAll<HTMLButtonElement>("[data-filter]")) x.setAttribute("aria-pressed", String(x === b));
+        apply();
+      });
+    }
+    $("#q").addEventListener("input", apply);
+    $("#tag").addEventListener("change", apply);
+
     if (past.length > 0) {
       const label = (on: boolean) => on ? "Nascondi i corsi conclusi" : `Mostra i corsi conclusi (${past.length})`;
       const btn = button(label(false), () => {
-        const on = !document.body.classList.contains("show-past");
-        showPast(on);
-        btn.textContent = label(on);
+        showPast = !showPast;
+        btn.textContent = label(showPast);
+        apply();
       }, "secondary");
       render($("#past-toggle"), btn);
       $("#past-toggle").hidden = false;
-      showPast(false);
     }
+    apply();
 
     // event_id → card (day 2 of a two-evening course points at day 1's card).
     const cardFor = new Map<string, HTMLElement>();
@@ -108,7 +150,7 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
 
     async function load() {
       const [rows, corsi] = await Promise.all([data.listSignups(), data.listCorsi()]);
-      const withSumup = new Set(corsi.filter((c) => c.sumup_link).map((c) => c.event_id));
+      const byId = new Map(corsi.map((c) => [c.event_id, c]));
       const byCard = new Map<HTMLElement, SignupRow[]>();
       const orphans: SignupRow[] = [];
       for (const row of rows) {
@@ -117,11 +159,15 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
         else orphans.push(row);
       }
 
+      const allTags = new Set<string>();
       for (const card of cards) {
         const list = byCard.get(card) ?? [];
         const active = list.filter(isActive).length;
         const waiting = list.filter((s) => s.status === "attesa").length;
         const fresh = list.filter((s) => s.status === "iscritta").length;
+        const corso = byId.get(card.dataset.courseId ?? "");
+        const tags = corso?.tags ?? [];
+        tags.forEach((t) => allTags.add(t));
         card.querySelector<HTMLElement>(".n-iscritti")!.textContent = String(active);
         card.querySelector<HTMLElement>(".n-attesa")!.textContent = String(waiting);
         if (MINIMO_DEFAULT != null) {
@@ -129,11 +175,31 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
             `${MINIMO_DEFAULT} · ${active >= MINIMO_DEFAULT ? "raggiunto" : `ne mancano ${MINIMO_DEFAULT - active}`}`;
         }
         const sumup = card.querySelector<HTMLElement>(".n-sumup");
-        if (sumup) sumup.textContent = withSumup.has(card.dataset.courseId ?? "") ? "link inserito" : "da inserire";
+        if (sumup) sumup.textContent = corso?.sumup_link ? "link inserito" : "da inserire";
+        render(card.querySelector<HTMLElement>(".corso-tags")!,
+          ...(tags.length ? tags.map((t) => el("span", { class: "pill" }, t)) : [el("span", { class: "muted" }, "Senza tag")]));
         const pill = card.querySelector<HTMLElement>(".new-pill")!;
         pill.textContent = fresh === 1 ? "1 nuova" : `${fresh} nuove`;
         pill.hidden = fresh === 0;
+        // Flags the quick filters read (data-new, data-nosumup, …). Past courses never count as "to do".
+        const upcoming = !card.classList.contains("past");
+        card.dataset.new = fresh > 0 ? "1" : "";
+        card.dataset.nosumup = upcoming && !card.dataset.free && !corso?.sumup_link ? "1" : "";
+        card.dataset.notags = tags.length === 0 ? "1" : "";
+        card.dataset.signups = list.length > 0 ? "1" : "";
+        card.dataset.tags = tags.join("|");
       }
+
+      for (const key of ["new", "nosumup", "notags", "signups"]) {
+        const n = cards.filter((c) => c.dataset[key] === "1" && (showPast || !c.classList.contains("past"))).length;
+        $(`[data-count="${key}"]`).textContent = `(${n})`;
+      }
+      const select = $<HTMLSelectElement>("#tag");
+      const chosen = select.value;
+      render(select, el("option", { value: "" }, "Tutti i tag"),
+        ...[...allTags].sort((a, b) => a.localeCompare(b, "it")).map((t) => el("option", { value: t, selected: t === chosen }, t)));
+      $("#filters").hidden = false;
+      apply();
 
       $("#altre").hidden = orphans.length === 0;
       render($("#altre-list"), ...orphans.map((row) => signupItem(row, undefined, load)));
@@ -152,7 +218,10 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
   /* The month's Wada swatch as a stripe, like the date tiles on the site. */
   .corso { border-left: .4rem solid var(--tile); }
   .corso.past { opacity: .6; }
-  :global(body:not(.show-past)) .corso.past { display: none; }
   .corso-link { color: inherit; text-decoration: underline; text-underline-offset: .2em; }
   .corso-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .5rem 0 0; }
+  .corso-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0 0; }
+  .corso[hidden], .corsi-section[hidden] { display: none; }
+  .filters { margin: 1rem 0; }
+  .filters [aria-pressed="true"] { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
 </style>

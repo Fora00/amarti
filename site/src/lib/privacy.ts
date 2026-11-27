@@ -8,4 +8,4 @@
  * "bozza-…" while the owner has not confirmed the text; drop the prefix the
  * day she (or her accountant) approves it.
  */
-export const PRIVACY_VERSION = "bozza-2026-11-27c";
+export const PRIVACY_VERSION = "bozza-2026-11-27d";

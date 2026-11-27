@@ -1,0 +1,13 @@
+---
+/**
+ * The programme as JSON for the page scripts (Persone, course page): ids,
+ * titles, dates — known at build time. Tags come from the database at run
+ * time (`corsi.tags`) and are merged by `readCourses()` in lib/courses-client.ts.
+ */
+import { loadCourses } from "../lib/programma";
+const courses = (await loadCourses()).map((c) => ({
+  id: c.id, aliases: c.aliases, title: c.title, dates: c.dates.join(" + "), lastDay: c.lastDay, tags: [] as string[],
+}));
+---
+
+<script is:inline type="application/json" id="courses-data" set:html={JSON.stringify(courses).replace(/</g, "\\u003c")} />

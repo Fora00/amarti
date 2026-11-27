@@ -7,7 +7,7 @@
  * app always talks to Supabase; an unconfigured build is stopped by
  * `requireStaff()` with a message before any of these is called.
  */
-import type { CorsoRow, InboxRow, ListinoInput, ListinoRow, RoomRequestRow, RoomRequestState, SignupRow, SignupStatus, SlotRow } from "./types";
+import type { ConsiglioRow, CorsoRow, InboxRow, PersonaRow, ListinoInput, ListinoRow, RoomRequestRow, RoomRequestState, SignupRow, SignupStatus, SlotRow } from "./types";
 import { supabaseData } from "./data-supabase";
 
 export interface Data {
@@ -23,6 +23,14 @@ export interface Data {
   listCorsi(): Promise<CorsoRow[]>;
   /** Set (or clear, with null) the SumUp link of one course. */
   setCorsoSumup(eventId: string, link: string | null): Promise<void>;
+  setCorsoTags(eventId: string, tags: string[]): Promise<void>;
+  listPersone(): Promise<PersonaRow[]>;
+  /** Interests and note of one person (email lower-cased by the caller). */
+  savePersona(email: string, patch: { interessi?: string[]; note?: string | null }): Promise<void>;
+  /** "Basta consigli": records the revocation and deletes the interests (privacy text, art. 7.3). */
+  revokeConsigli(email: string): Promise<void>;
+  listConsigli(): Promise<ConsiglioRow[]>;
+  markConsiglio(email: string, eventId: string): Promise<void>;
   /** The shop price list, in display order. */
   listListino(): Promise<ListinoRow[]>;
   addListino(item: ListinoInput): Promise<void>;

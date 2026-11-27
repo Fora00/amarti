@@ -28,6 +28,8 @@ export const signupFields: FieldSpec = {
   privacy: { required: true, max: 4 },
   /** The version string of the privacy text the form linked to (/privacy/). Optional: an old cached page has none. */
   privacy_version: { max: 40 },
+  /** Optional, separate consent to course suggestions: "si" when ticked, absent otherwise. */
+  consigli: { max: 4 },
 };
 
 /** A privacy version as the site writes it, e.g. `2026-11-27` or `bozza-2026-11-27`. */
@@ -46,7 +48,8 @@ export function looksLikePhone(s: string): boolean {
 /** The checks a length cap cannot express. Pure: used by the function and the mock. */
 export function signupCheck(v: Record<string, string>): boolean {
   return EVENT_ID.test(v.event_id) && looksLikeEmail(v.email) && looksLikePhone(v.telefono) &&
-    v.privacy === PRIVACY_YES && (v.privacy_version === "" || PRIVACY_VERSION.test(v.privacy_version));
+    v.privacy === PRIVACY_YES && (v.privacy_version === "" || PRIVACY_VERSION.test(v.privacy_version)) &&
+    (v.consigli === "" || v.consigli === PRIVACY_YES);
 }
 
 /**
@@ -63,6 +66,7 @@ export function signupRow(v: Record<string, string>, now: Date) {
     note: v.note === "" ? null : v.note,
     privacy_at: now.toISOString(),
     privacy_version: v.privacy_version === "" ? null : v.privacy_version,
+    consenso_consigli: v.consigli === PRIVACY_YES,
   };
 }
 

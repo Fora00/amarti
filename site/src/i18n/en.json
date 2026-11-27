@@ -154,7 +154,8 @@
     "submit": "Sign up for the workshop",
     "error": "We couldn't record your sign-up. Check the fields (valid email and phone, privacy box ticked) and try again.",
     "orInstagram": "Prefer to write? You can also book by DM on Instagram.",
-    "fallback": "If you don't see the confirmation, try again or message us on Instagram."
+    "fallback": "If you don't see the confirmation, try again or message us on Instagram.",
+    "suggestions": "Optional: I'd like Martina to message me (WhatsApp or email) with suggestions for other workshops based on the ones I like. I can ask her to stop at any time."
   },
   "signupThanks": {
     "title": "You're on the list!",

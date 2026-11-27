@@ -1,7 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import type { Data } from "./data";
-import type { CorsoRow, InboxRow, ListinoRow, RoomRequestRow, SignupRow, SlotRow, SlotState } from "./types";
+import type { ConsiglioRow, CorsoRow, InboxRow, PersonaRow, ListinoRow, RoomRequestRow, SignupRow, SlotRow, SlotState } from "./types";
 
 /** Supabase returns `{ error }` instead of throwing; pages expect a rejection. */
 function ok<T>(result: { data: T; error: PostgrestError | null }): T {
@@ -45,6 +45,31 @@ export const supabaseData: Data = {
 
   async setCorsoSumup(eventId, link) {
     ok(await supabase.from("corsi").upsert({ event_id: eventId, sumup_link: link, updated_at: new Date().toISOString() }));
+  },
+
+  async setCorsoTags(eventId, tags) {
+    ok(await supabase.from("corsi").upsert({ event_id: eventId, tags, updated_at: new Date().toISOString() }));
+  },
+
+  async listPersone() {
+    return (ok(await supabase.from("persone").select("*")) ?? []) as PersonaRow[];
+  },
+
+  async savePersona(email, patch) {
+    ok(await supabase.from("persone").upsert({ email, ...patch, updated_at: new Date().toISOString() }));
+  },
+
+  async revokeConsigli(email) {
+    const now = new Date().toISOString();
+    ok(await supabase.from("persone").upsert({ email, interessi: [], consigli_revocati_at: now, updated_at: now }));
+  },
+
+  async listConsigli() {
+    return (ok(await supabase.from("consigli_inviati").select("*")) ?? []) as ConsiglioRow[];
+  },
+
+  async markConsiglio(email, eventId) {
+    ok(await supabase.from("consigli_inviati").upsert({ email, event_id: eventId, sent_at: new Date().toISOString() }));
   },
 
   async listListino() {

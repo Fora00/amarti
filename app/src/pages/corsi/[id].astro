@@ -6,6 +6,7 @@
  * the login guard.
  */
 import AppLayout from "../../layouts/AppLayout.astro";
+import CoursesData from "../../components/CoursesData.astro";
 import { loadCourses, type Course } from "../../lib/programma";
 import { MINIMO_DEFAULT } from "../../lib/corsi";
 
@@ -48,12 +49,33 @@ const dates = course.dates.join(" + ");
     </div>
   </form>
 
+  <section class="card" id="tags-box" style="margin-top:1rem" hidden>
+    <h2 style="margin-bottom:.5rem">Tag del corso</h2>
+    <p class="muted">Che tipo di corso è: servono a consigliarlo alle persone a cui sono piaciuti corsi simili.</p>
+    <div id="tags"></div>
+  </section>
+
   <div id="signups" style="margin-top:1rem"></div>
+
+  <section class="section" id="suggest-box" hidden>
+    <h2 class="day-title">Potrebbe interessare a</h2>
+    <p class="muted">
+      Persone che hanno dato il consenso ai consigli e hanno fatto corsi con tag in comune. Il messaggio è già
+      pronto; dopo averlo mandato, segna "inviato" così non lo ricevono due volte.
+    </p>
+    <ul class="list" id="suggest"></ul>
+  </section>
+  <CoursesData />
 
   <script>
     import { requireStaff } from "../../lib/guard";
     import { data } from "../../lib/data";
     import { cleanSumupLink, isActive, STATUS_LABELS } from "../../lib/corsi";
+    import { tagEditor } from "../../lib/tag-editor";
+    import { guessTags } from "../../lib/tags";
+    import { buildPeople, suggestFor, suggestionText } from "../../lib/people";
+    import { readCourses, siteUrl } from "../../lib/courses-client";
+    import { whatsappUrl } from "../../lib/views";
     import { $, el, render, say } from "../../lib/ui";
     import { attempt, signupItem, type CourseInfo } from "../../lib/views";
     import type { SignupStatus } from "../../lib/types";
@@ -98,6 +120,33 @@ const dates = course.dates.join(" + ");
     // Grouped in the order she works through them; empty groups are left out.
     const ORDER: SignupStatus[] = ["iscritta", "confermata", "pagato", "attesa", "annullata"];
 
+    /** People with consent whose interests match this course, not already signed up. */
+    async function loadSuggestions() {
+      const [signups, corsi, persone, sent] = await Promise.all([data.listSignups(), data.listCorsi(), data.listPersone(), data.listConsigli()]);
+      const courses = readCourses(corsi);
+      const me = courses.find((c) => c.id === courseId);
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      if (!me || me.lastDay < today) { $("#suggest-box").hidden = true; return; }
+      const site = siteUrl();
+      const rows = buildPeople(signups, persone, courses)
+        .map((p) => ({ p, s: suggestFor(p, courses, sent, today).find((x) => x.course.id === courseId) }))
+        .filter((x): x is { p: typeof x.p; s: NonNullable<typeof x.s> } => Boolean(x.s))
+        .sort((a, b) => Number(a.s.sent) - Number(b.s.sent) || b.s.score - a.s.score);
+      $("#suggest-box").hidden = false;
+      render($("#suggest"), ...(rows.length ? rows.map(({ p, s }) => {
+        const text = suggestionText(p, s, courses, site);
+        const mark = el("button", { type: "button", class: "btn secondary small", disabled: s.sent }, s.sent ? "Inviato" : "Segna inviato");
+        mark.onclick = () => void attempt(async () => { await data.markConsiglio(p.email, courseId); say(`Segnato: consiglio inviato a ${p.nome}.`); await loadSuggestions(); });
+        return el("li", { class: s.sent ? "card" : "card warn" },
+          el("div", { class: "row" }, el("strong", {}, `${p.nome} ${p.cognome}`), el("span", { class: "muted" }, `in comune: ${s.why.join(", ")}`)),
+          el("div", { class: "row", style: "justify-content:flex-start;flex-wrap:wrap;gap:.5rem;margin-top:.5rem" },
+            el("a", { href: whatsappUrl(p.telefono, text), class: "btn secondary small", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp"),
+            el("a", { href: `mailto:${encodeURIComponent(p.email).replace(/%40/g, "@")}?subject=${encodeURIComponent(`Un laboratorio per te: ${s.course.title}`)}&body=${encodeURIComponent(text)}`, class: "btn secondary small" }, "Email"),
+            mark));
+      }) : [el("li", { class: "muted" }, me.tags.length ? "Ancora nessuno con interessi in comune e il consenso ai consigli." : "Aggiungi dei tag al corso per vedere a chi consigliarlo.")]));
+    }
+
     async function load() {
       const rows = (await data.listSignups()).filter((r) => ids.has(r.event_id));
       $("#n-iscritti").textContent = String(rows.filter(isActive).length);
@@ -119,10 +168,19 @@ const dates = course.dates.join(" + ");
 
     void attempt(async () => {
       await requireStaff();
-      const corso = (await data.listCorsi()).find((c) => c.event_id === courseId);
+      const corsi = await data.listCorsi();
+      const corso = corsi.find((c) => c.event_id === courseId);
       showSumup(corso?.sumup_link ?? null);
       form.hidden = false;
+      render($("#tags"), tagEditor({
+        tags: corso?.tags ?? [],
+        proposed: guessTags(info.title),
+        label: "Nuovo tag per il corso",
+        save: async (next) => { await data.setCorsoTags(courseId, next); say("Tag salvati."); await loadSuggestions(); },
+      }));
+      $("#tags-box").hidden = false;
       await load();
+      await loadSuggestions();
     });
   </script>
 </AppLayout>

@@ -135,7 +135,8 @@
     "submit": "Iscriviti al laboratorio",
     "error": "Non siamo riusciti a registrare l'iscrizione. Controlla i campi (email e telefono validi, privacy spuntata) e riprova.",
     "orInstagram": "Preferisci scrivere? Puoi prenotare anche in DM su Instagram.",
-    "fallback": "Se non vedi la conferma, riprova o scrivici su Instagram."
+    "fallback": "Se non vedi la conferma, riprova o scrivici su Instagram.",
+    "suggestions": "Facoltativo: voglio che Martina mi scriva (WhatsApp o email) per consigliarmi altri laboratori in base a quelli che mi piacciono. Posso dire di smettere quando voglio."
   },
   "signupThanks": {
     "title": "Sei in lista!",

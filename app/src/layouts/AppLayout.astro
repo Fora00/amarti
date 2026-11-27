@@ -14,12 +14,13 @@ import ThemeToggle from "../components/ThemeToggle.astro";
  * The logo is the site's own component (one tracing, two packages: the app
  * already reads the site's content the same way).
  */
-interface Props { title: string; active?: "corsi" | "sala" | "richieste" | "listino" | "account" | ""; eyebrow?: string; plain?: boolean }
+interface Props { title: string; active?: "corsi" | "persone" | "sala" | "richieste" | "listino" | "account" | ""; eyebrow?: string; plain?: boolean }
 const { title, active = "", eyebrow, plain = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 // One line each, so she knows where to go: what the section is FOR, not just its name.
 const nav = [
   { id: "corsi", label: "Corsi e iscritti", href: `${base}/` },
+  { id: "persone", label: "Persone", href: `${base}/persone/` },
   { id: "sala", label: "Sala", href: `${base}/sala/` },
   { id: "richieste", label: "Messaggi", href: `${base}/richieste/` },
   { id: "listino", label: "Listino prezzi", href: `${base}/listino/` },
@@ -45,11 +46,14 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
   <body>
     <header class="border-b border-line bg-surface">
       <nav class="mx-auto flex max-w-[46rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3" aria-label="Dashboard">
-        <a href={`${base}/`} class="flex items-center gap-3 text-ink no-underline">
-          <Logo class="h-7 w-auto" />
-          <span class="text-sm font-semibold text-ink-muted">Dashboard</span>
-        </a>
-        <ul class="flex list-none flex-wrap items-center gap-x-5 gap-y-2 p-0 m-0">
+        <div class="flex items-center gap-3">
+          <a href={`${base}/`} class="flex items-center gap-3 text-ink no-underline">
+            <Logo class="h-7 w-auto" />
+            <span class="text-sm font-semibold text-ink-muted">Dashboard</span>
+          </a>
+          <ThemeToggle />
+        </div>
+        <ul class="flex list-none flex-wrap items-center gap-x-4 gap-y-2 p-0 m-0">
           {!plain && nav.map((n) => (
             <li>
               <a href={n.href} class:list={[linkClass, "app-nav-link"]} aria-current={active === n.id ? "page" : undefined}>
@@ -59,7 +63,6 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
           ))}
           <li><a href={siteHref} class={linkClass}>Sito ↗</a></li>
           {!plain && <li><button type="button" id="sign-out" class={`${linkClass} app-signout`} hidden>Esci</button></li>}
-          <li class="flex"><ThemeToggle /></li>
         </ul>
       </nav>
     </header>
@@ -110,9 +113,12 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
 <style is:global>
   /* No bottom tab bar any more: the room it kept free under the page goes. */
   main { padding-bottom: 3rem; }
+  /* Section titles are sentences here ("Apri un orario"), not dates: no Title Case. Month titles keep it (.corsi-month). */
+  .day-title { text-transform: none; }
+  .day-title::first-letter { text-transform: uppercase; }
   .app-nav-link { position: relative; display: inline-flex; align-items: center; gap: .35rem; }
   .app-nav-link[aria-current="page"] { color: var(--accent); text-decoration: underline; text-underline-offset: .35em; text-decoration-thickness: 2px; }
   .app-badge { position: static; }
   .app-badge[hidden] { display: none; }
-  .app-signout { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+  .app-signout { background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
 </style>

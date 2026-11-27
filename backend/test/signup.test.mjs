@@ -41,7 +41,14 @@ test("a complete sign-up is accepted, trimmed, and maps to the signups row", () 
     note: null,
     privacy_at: "2026-11-27T10:00:00.000Z",
     privacy_version: "2026-11-27",
+    consenso_consigli: false,
   });
+});
+
+test("suggestions consent: only an explicit 'si' counts; anything else is refused", () => {
+  assert.equal(signupRow(run({ consigli: "si" }).values, new Date()).consenso_consigli, true);
+  assert.equal(signupRow(run({ consigli: undefined }).values, new Date()).consenso_consigli, false);
+  for (const consigli of ["on", "yes", "true"]) assert.equal(run({ consigli }).result, "invalid", consigli);
 });
 
 test("the privacy version is optional (old cached pages) but checked by shape", () => {

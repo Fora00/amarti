@@ -1,0 +1,194 @@
+---
+/**
+ * Persone — one card per person (sign-ups grouped by email, lib/people.ts):
+ * contacts, the courses they did, and — only with their consent to
+ * suggestions — interests (tags of their courses + what she adds), her note,
+ * and the upcoming courses to suggest, with a ready WhatsApp/email message.
+ * "Basta consigli" records a revocation and deletes the interests.
+ */
+import AppLayout from "../../layouts/AppLayout.astro";
+import CoursesData from "../../components/CoursesData.astro";
+---
+
+<AppLayout title="Persone" active="persone" eyebrow="Iscritti">
+  <p class="muted">
+    Chi si è iscritto almeno una volta. Interessi e consigli compaiono solo per chi, iscrivendosi, ha dato il
+    consenso a ricevere consigli: agli altri non si scrive per proporre corsi.
+  </p>
+
+  <section class="card filters" id="filters" hidden aria-label="Filtra le persone">
+    <div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:.5rem">
+      <button type="button" class="btn secondary small" data-filter="all" aria-pressed="true">Tutte <span data-count="all"></span></button>
+      <button type="button" class="btn secondary small" data-filter="consent" aria-pressed="false">Accettano consigli <span data-count="consent"></span></button>
+      <button type="button" class="btn secondary small" data-filter="todo" aria-pressed="false">Con un consiglio da mandare <span data-count="todo"></span></button>
+    </div>
+    <div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:.5rem;margin-top:.75rem">
+      <input type="search" id="q" class="input" placeholder="Cerca per nome, email o telefono" aria-label="Cerca una persona" style="width:auto;flex:1;min-width:12rem" />
+      <select id="tag" class="input" aria-label="Filtra per interesse" style="width:auto"><option value="">Tutti gli interessi</option></select>
+    </div>
+  </section>
+
+  <ul class="list" id="people"></ul>
+  <CoursesData />
+
+  <script>
+    import { requireStaff } from "../../lib/guard";
+    import { data } from "../../lib/data";
+    import { $, confirmDialog, el, fmtFull, localDay, render, say } from "../../lib/ui";
+    import { attempt, whatsappUrl } from "../../lib/views";
+    import { STATUS_LABELS } from "../../lib/corsi";
+    import { tagEditor } from "../../lib/tag-editor";
+    import { buildPeople, suggestFor, suggestionText, type CourseLite, type Person, type Suggestion } from "../../lib/people";
+    import { readCourses, siteUrl } from "../../lib/courses-client";
+    import type { ConsiglioRow } from "../../lib/types";
+
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+    let people: Person[] = [];
+    let courses: CourseLite[] = [];
+    let sent: ConsiglioRow[] = [];
+    let quick = "all";
+    const open = new Set<string>(); // cards she has expanded, kept open across reloads
+    const today = localDay(new Date());
+
+    const suggestionsOf = (p: Person) => suggestFor(p, courses, sent, today);
+
+    function suggestionItem(p: Person, s: Suggestion) {
+      const text = suggestionText(p, s, courses, siteUrl());
+      const mark = el("button", { type: "button", class: "btn secondary small", disabled: s.sent }, s.sent ? "Inviato" : "Segna inviato");
+      mark.onclick = () => void attempt(async () => {
+        await data.markConsiglio(p.email, s.course.id);
+        say(`Segnato: "${s.course.title}" consigliato a ${p.nome}.`);
+        await load();
+      });
+      return el("li", { class: "row", style: "flex-wrap:wrap;gap:.5rem;padding:.4rem 0;border-top:1px solid var(--line)" },
+        el("span", {}, el("strong", {}, s.course.title), el("span", { class: "muted" }, ` · ${s.course.dates} · in comune: ${s.why.join(", ")}`)),
+        el("span", { class: "row", style: "gap:.4rem" },
+          el("a", { href: whatsappUrl(p.telefono, text), class: "btn secondary small", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp"),
+          el("a", { href: `mailto:${encodeURIComponent(p.email).replace(/%40/g, "@")}?subject=${encodeURIComponent(`Un laboratorio per te: ${s.course.title}`)}&body=${encodeURIComponent(text)}`, class: "btn secondary small" }, "Email"),
+          mark));
+    }
+
+    function personCard(p: Person) {
+      const sugg = suggestionsOf(p);
+      const toSend = sugg.filter((s) => !s.sent).length;
+      const history = p.signups.map((r) => {
+        const c = courses.find((x) => x.aliases.includes(r.event_id));
+        return el("li", {}, c ? el("a", { href: `${base}/corsi/${c.id}/` }, c.title) : r.event_id,
+          el("span", { class: "muted" }, ` · ${c?.dates ?? ""} · ${STATUS_LABELS[r.status] ?? r.status}`));
+      });
+
+      const details = el("details", { open: open.has(p.email) },
+        el("summary", { style: "cursor:pointer;font-weight:650;margin-top:.5rem" }, "Scheda"),
+        el("div", { style: "margin-top:.5rem" },
+          el("p", { class: "muted", style: "margin:0" }, p.email, " · ", p.telefono, " · ultima iscrizione ", fmtFull(p.signups[0].created_at)),
+          el("h3", { style: "margin-top:1rem" }, `Corsi (${p.courseIds.length})`),
+          el("ul", { style: "margin:0;padding-left:1.1rem" }, ...history),
+          ...(p.consent ? consentPart(p, sugg) : [
+            el("p", { class: "muted", style: "margin-top:1rem" },
+              "Non ha dato il consenso ai consigli (o l'ha revocato): niente interessi né messaggi promozionali."),
+          ])));
+      details.addEventListener("toggle", () => { if (details.open) open.add(p.email); else open.delete(p.email); });
+
+      const chips = [...p.interests.keys()].slice(0, 6).map((t) => el("span", { class: "pill" }, t));
+      return el("li", { class: toSend ? "card warn" : "card", "data-email": p.email },
+        el("div", { class: "row" },
+          el("strong", {}, `${p.nome} ${p.cognome}`),
+          el("span", { class: "row", style: "gap:.4rem" },
+            el("span", { class: "pill" }, `${p.courseIds.length} ${p.courseIds.length === 1 ? "corso" : "corsi"}`),
+            p.consent ? el("span", { class: "pill" }, "consigli ✓") : null,
+            toSend ? el("span", { class: "pill" }, `${toSend} da consigliare`) : null)),
+        chips.length ? el("p", { class: "row", style: "justify-content:flex-start;flex-wrap:wrap;gap:.35rem;margin:.5rem 0 0" }, ...chips) : null,
+        details);
+    }
+
+    function consentPart(p: Person, sugg: Suggestion[]) {
+      const note = el("textarea", { class: "input", rows: 2, "aria-label": `Nota su ${p.nome}`, maxlength: 1000 }, p.note ?? "");
+      const saveNote = el("button", { type: "button", class: "btn secondary small" }, "Salva nota");
+      saveNote.onclick = () => void attempt(async () => {
+        await data.savePersona(p.email, { note: note.value.trim() || null });
+        say("Nota salvata.");
+      });
+      const stop = el("button", { type: "button", class: "btn secondary small" }, "Basta consigli");
+      stop.onclick = () => void attempt(async () => {
+        if (!(await confirmDialog(`${p.nome} non vuole più consigli?`, {
+          confirmLabel: "Sì, basta consigli",
+          detail: "Registro la revoca e cancello i suoi interessi. Se in futuro si iscrive spuntando di nuovo la casella, il consenso torna.",
+        }))) return;
+        await data.revokeConsigli(p.email);
+        say(`Consenso ai consigli revocato per ${p.nome}.`);
+        await load();
+      });
+      const derived = [...p.interests.keys()].filter((t) => !p.manual.includes(t));
+      return [
+        el("h3", { style: "margin-top:1rem" }, "Cosa le piace"),
+        el("p", { class: "muted", style: "margin:0 0 .5rem" },
+          derived.length ? `Dai corsi fatti: ${derived.join(", ")}. Aggiungi qui quello che ti ha raccontato:` : "Aggiungi quello che ti ha raccontato:"),
+        tagEditor({
+          tags: p.manual,
+          label: `Nuovo interesse per ${p.nome}`,
+          save: async (next) => { await data.savePersona(p.email, { interessi: next }); say("Interessi salvati."); await load(); },
+        }),
+        el("h3", { style: "margin-top:1rem" }, "Nota"),
+        note,
+        el("div", { class: "row", style: "justify-content:flex-start;gap:.5rem;margin-top:.5rem" }, saveNote, stop),
+        el("h3", { style: "margin-top:1rem" }, "Corsi da consigliare"),
+        sugg.length
+          ? el("ul", { class: "list", style: "gap:0" }, ...sugg.slice(0, 5).map((s) => suggestionItem(p, s)))
+          : el("p", { class: "muted" }, "Nessun corso in programma con i suoi interessi (controlla che i corsi abbiano i tag)."),
+      ];
+    }
+
+    function matches(p: Person) {
+      if (quick === "consent" && !p.consent) return false;
+      if (quick === "todo" && !suggestionsOf(p).some((s) => !s.sent)) return false;
+      const q = ($("#q") as HTMLInputElement).value.trim().toLowerCase();
+      if (q && !`${p.nome} ${p.cognome} ${p.email} ${p.telefono}`.toLowerCase().includes(q)) return false;
+      const tag = ($("#tag") as HTMLSelectElement).value;
+      if (tag && !p.interests.has(tag)) return false;
+      return true;
+    }
+
+    function draw() {
+      const shown = people.filter(matches);
+      render($("#people"), ...(shown.length ? shown.map(personCard)
+        : [el("li", { class: "muted" }, people.length ? "Nessuna persona corrisponde ai filtri." : "Ancora nessuna iscrizione.")]));
+      $("[data-count='all']").textContent = `(${people.length})`;
+      $("[data-count='consent']").textContent = `(${people.filter((p) => p.consent).length})`;
+      $("[data-count='todo']").textContent = `(${people.filter((p) => suggestionsOf(p).some((s) => !s.sent)).length})`;
+    }
+
+    async function load() {
+      const [signups, corsi, persone, consigli] = await Promise.all([data.listSignups(), data.listCorsi(), data.listPersone(), data.listConsigli()]);
+      courses = readCourses(corsi);
+      sent = consigli;
+      people = buildPeople(signups, persone, courses);
+      const tags = new Set(people.flatMap((p) => [...p.interests.keys()]));
+      const select = $<HTMLSelectElement>("#tag");
+      const chosen = select.value;
+      render(select, el("option", { value: "" }, "Tutti gli interessi"),
+        ...[...tags].sort((a, b) => a.localeCompare(b, "it")).map((t) => el("option", { value: t, selected: t === chosen }, t)));
+      $("#filters").hidden = false;
+      draw();
+    }
+
+    for (const b of document.querySelectorAll<HTMLButtonElement>("[data-filter]")) {
+      b.addEventListener("click", () => {
+        quick = b.dataset.filter ?? "all";
+        for (const x of document.querySelectorAll<HTMLButtonElement>("[data-filter]")) x.setAttribute("aria-pressed", String(x === b));
+        draw();
+      });
+    }
+    $("#q").addEventListener("input", draw);
+    $("#tag").addEventListener("change", draw);
+
+    void attempt(async () => {
+      await requireStaff();
+      await load();
+    });
+  </script>
+</AppLayout>
+
+<style>
+  .filters { margin: 1rem 0; }
+  .filters [aria-pressed="true"] { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
+</style>
