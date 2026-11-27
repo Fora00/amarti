@@ -1,0 +1,76 @@
+---
+/**
+ * The programme filtered by one kind of workshop (a course tag set in the
+ * dashboard): one static page per tag that has upcoming courses, built from
+ * the tags read at build time. Zero JS. Same layout as /eventi/.
+ */
+import type { GetStaticPaths } from "astro";
+import type { CollectionEntry } from "astro:content";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import { breadcrumbsLd } from "@factory/common";
+import { groupByMonth } from "@factory/common/calendar";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EventCard from "../../../components/EventCard.astro";
+import TagFilter from "../../../components/TagFilter.astro";
+import { useLocale } from "../../../lib/locale.ts";
+import { tagLabel } from "../../../lib/tags.ts";
+import { tagPaths } from "../../../lib/paths.ts";
+import { monthLabel } from "../../../lib/when.ts";
+import { site } from "../../../site.config.ts";
+
+interface Props {
+  tag: string;
+  events: CollectionEntry<"eventi">[];
+  allTags: string[];
+}
+export const getStaticPaths: GetStaticPaths = tagPaths;
+
+const { tag, events, allTags } = Astro.props;
+const { t, href, lpath, lang, intl } = useLocale(Astro);
+const label = tagLabel(tag, lang);
+const byMonth = groupByMonth(events, (event) => event.data);
+
+const jsonLd = [
+  breadcrumbsLd(site, [
+    { name: t("nav.home"), path: lpath("/") },
+    { name: t("events.title"), path: lpath("/eventi/") },
+    { name: label },
+  ]),
+];
+---
+
+<BaseLayout title={t("events.tagTitle", { tag: label })} description={t("events.tagLead", { tag: label })} jsonLd={jsonLd}>
+  <main id="main">
+    <Section space="md">
+      <Container>
+        <Stack gap="lg">
+          <Stack gap="sm">
+            <p><a href={href("/eventi/")}>← {t("events.title")}</a></p>
+            <Heading level={1} class="text-heading! font-display">{t("events.tagTitle", { tag: label })}</Heading>
+          </Stack>
+
+          <TagFilter tags={allTags} current={tag} />
+
+          {events.length === 0 && <p class="text-ink-muted">{t("events.tagEmpty")}</p>}
+
+          {
+            [...byMonth].map(([key, list]) => (
+              <Stack gap="md">
+                <Heading level={2} size="xl" class="text-heading! font-display capitalize">
+                  <a href={href(`/calendario/${key}/`)} class="no-underline hover:underline">{monthLabel(key, intl)}</a>
+                </Heading>
+                <Stack as="ul" gap="md" class="list-none p-0">
+                  {list.map((event) => <EventCard event={event} />)}
+                </Stack>
+              </Stack>
+            ))
+          }
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

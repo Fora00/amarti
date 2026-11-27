@@ -6,8 +6,8 @@
  * automatically).
  */
 export const SUGGESTED = [
-  "ceramica", "modellazione", "decoro", "tornio", "candele", "gioielli", "macramè", "carta",
-  "natale", "astrologia", "bambini", "aperitivo", "cosmetica naturale", "fiori e piante",
+  "ceramica", "modellazione", "decorazione", "candele", "gioielli", "intrecci", "carta",
+  "natale", "bambini", "astrologia", "aperitivo", "cosmetica naturale", "fiori e piante",
 ] as const;
 
 export const normTag = (t: string) => t.trim().toLowerCase().replace(/^#/, "").replace(/\s+/g, " ").slice(0, 40);
@@ -16,21 +16,21 @@ export function normTags(list: string[]): string[] {
   return [...new Set(list.map(normTag).filter(Boolean))].sort((a, b) => a.localeCompare(b, "it"));
 }
 
+// Same vocabulary as backend/supabase/seed/2026-11-27-course-tags.sql.
 const KEYWORDS: [RegExp, string][] = [
   [/ceramic|argilla|tazz|modell/i, "ceramica"],
-  [/modell|argilla/i, "modellazione"],
-  // "decoro" (ceramic decorating), not "decora la tua candela".
-  [/\bdecoro\b/i, "decoro"],
-  [/tornio/i, "tornio"],
+  [/modell|argilla|tornio/i, "modellazione"],
+  // decorating ceramics or glass ("decoro"), not "decora la tua candela"
+  [/\bdecoro\b|calice/i, "decorazione"],
   [/candel/i, "candele"],
   [/gioiell/i, "gioielli"],
-  [/macram/i, "macramè"],
+  [/macram|paracord|intrecc/i, "intrecci"],
   [/carta|quadrett/i, "carta"],
   [/natal|alberell|festone/i, "natale"],
   [/astrolog|tarocch/i, "astrologia"],
   [/piccini|bambin/i, "bambini"],
-  [/aperitiv|vin[oi]|brindisi|calice/i, "aperitivo"],
-  [/bomba da bagno|saponi|erbe/i, "cosmetica naturale"],
+  [/aperitiv|vin[oi]\b|brindisi|degustazion/i, "aperitivo"],
+  [/bomba da bagno|sapon|erbe/i, "cosmetica naturale"],
   [/ghirland|fiori|piant/i, "fiori e piante"],
 ];
 

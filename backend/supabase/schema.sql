@@ -8,7 +8,8 @@
 --     signed-in user must be listed in `staff`. The public anon key can
 --     therefore read and write NOTHING by itself — with ONE exception: it may
 --     read the visible rows of `listino` (the shop's prices, public anyway)
---     and the free future slots of `disponibilita` (day + times, nothing else).
+--     the free future slots of `disponibilita` (day + times, nothing else) and
+--     `corsi.event_id` + `corsi.tags` (never `sumup_link`).
 --   * The public website never touches these tables. Its forms POST to the
 --     `request` edge function (an `inbox` row) and the `signup` edge function
 --     (a `signups` row), which write with the service role.
@@ -189,6 +190,12 @@ revoke all on all tables in schema public from anon;
 grant select on listino to anon;
 drop policy if exists public_read on listino;
 create policy public_read on listino for select to anon using (visibile);
+
+-- …the course tags (NOT the SumUp link: column-level grant), so the site can
+-- show "filter by kind of workshop" pages built at build time…
+grant select (event_id, tags) on corsi to anon;
+drop policy if exists public_read on corsi;
+create policy public_read on corsi for select to anon using (true);
 
 -- …and the FREE, FUTURE room slots, with only the columns the booking page needs.
 grant select (id, giorno, inizio, fine, stato) on disponibilita to anon;

@@ -78,7 +78,12 @@
     "serieBookFirst": "Si prenota insieme al day 1.",
     "pay": "Paga e prenota",
     "payDemo": "Il pagamento online non è ancora attivo: per ora si prenota in DM.",
-    "withLabel": "con"
+    "withLabel": "con",
+    "filterLabel": "Che laboratorio cerchi?",
+    "filterAll": "Tutti",
+    "tagTitle": "Laboratori: {tag}",
+    "tagLead": "I prossimi laboratori all'aMarticeramics Lab di Rovereto con il tag «{tag}».",
+    "tagEmpty": "Nessun laboratorio in programma con questo tag, per ora."
   },
   "shop": {
     "title": "Negozio",

@@ -9,6 +9,7 @@ import { resolveTiming } from "@factory/common/calendar";
 import DateTile from "./DateTile.astro";
 import { dateTile, eventTitle, formatClock, formatWhen } from "../lib/when.ts";
 import { formatPrice } from "../lib/price.ts";
+import { loadCourseTags, tagLabel, tagsOf } from "../lib/tags.ts";
 
 interface Props {
   event: CollectionEntry<"eventi">;
@@ -26,6 +27,8 @@ const { monthNumber } = dateTile(data, intl);
 // The card is one big link, so the guest is a name here; the Instagram link
 // lives on the event page (no nested <a>).
 const host = data.host ? await getEntry(data.host) : undefined;
+// Plain text, not links: the whole card is already one link (no nested <a>).
+const tags = tagsOf(event, await loadCourseTags());
 ---
 
 <Card as="li" href={href(`/eventi/${event.id}/`)} tone="raised" padding="sm">
@@ -40,6 +43,15 @@ const host = data.host ? await getEntry(data.host) : undefined;
       </p>
       <Heading level={level} size="lg" class="text-heading! text-balance">{eventTitle(data, lang)}</Heading>
       {host && <p class="text-ink-muted">{t("events.with", { host: host.data.name })}</p>}
+      {
+        tags.length > 0 && (
+          <p class="flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span class="rounded-pill bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">{tagLabel(tag, lang)}</span>
+            ))}
+          </p>
+        )
+      }
       {/* No price and not free = nothing shown (every field is optional). */}
       {
         (data.price || data.free) && (

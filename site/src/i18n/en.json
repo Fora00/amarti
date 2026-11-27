@@ -79,7 +79,12 @@
     "serieBookFirst": "Booked together with day 1.",
     "pay": "Pay and book",
     "payDemo": "Online payment is not active yet: for now, book by DM.",
-    "withLabel": "with"
+    "withLabel": "with",
+    "filterLabel": "What kind of workshop?",
+    "filterAll": "All",
+    "tagTitle": "Workshops: {tag}",
+    "tagLead": "Upcoming workshops at aMarticeramics Lab in Rovereto tagged “{tag}”.",
+    "tagEmpty": "No workshops with this tag scheduled right now."
   },
   "shop": {
     "title": "Shop",
@@ -195,5 +200,20 @@
     "lead": "I received your request for the room: the time is held for you.",
     "next": "I'll get back to you soon on WhatsApp or by email to confirm and talk about the details.",
     "back": "Back to services"
+  },
+  "tags": {
+    "ceramica": "ceramics",
+    "modellazione": "clay shaping",
+    "decorazione": "decorating",
+    "candele": "candles",
+    "gioielli": "jewellery",
+    "intrecci": "knots & weaving",
+    "carta": "paper",
+    "natale": "Christmas",
+    "bambini": "kids",
+    "astrologia": "astrology",
+    "aperitivo": "aperitivo",
+    "cosmetica-naturale": "natural cosmetics",
+    "fiori-e-piante": "flowers & plants"
   }
 }

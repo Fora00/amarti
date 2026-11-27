@@ -18,3 +18,21 @@ export async function monthPaths() {
     props: { events: months.get(key)!, previous: keys[index - 1], next: keys[index + 1] },
   }));
 }
+
+/**
+ * One page per course tag with at least one upcoming event (a day 2 carries
+ * its day 1's tags, as on /eventi/). Tags read at build time.
+ */
+export async function tagPaths() {
+  const { isUpcoming, resolveTiming } = await import("@factory/common/calendar");
+  const { loadCourseTags, tagsIn, tagsOf, tagSlug } = await import("./tags.ts");
+  const map = await loadCourseTags();
+  const upcoming = (await getCollection("eventi"))
+    .filter((e) => isUpcoming(e.data))
+    .sort((a, b) => resolveTiming(a.data).start.getTime() - resolveTiming(b.data).start.getTime());
+  const allTags = tagsIn(upcoming, map);
+  return allTags.map((tag) => ({
+    params: { tag: tagSlug(tag) },
+    props: { tag, events: upcoming.filter((e) => tagsOf(e, map).includes(tag)), allTags },
+  }));
+}

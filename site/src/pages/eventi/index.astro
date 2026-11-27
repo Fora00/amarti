@@ -11,6 +11,8 @@ import { groupByMonth, isUpcoming } from "@factory/common/calendar";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import EventCard from "../../components/EventCard.astro";
+import TagFilter from "../../components/TagFilter.astro";
+import { loadCourseTags, tagsIn } from "../../lib/tags.ts";
 import { monthLabel } from "../../lib/when.ts";
 import { site } from "../../site.config.ts";
 
@@ -21,6 +23,8 @@ const upcoming = groupByMonth(
   all.filter((event) => isUpcoming(event.data)),
   (event) => event.data,
 );
+// Kinds of workshop that have something coming up: the filter links.
+const filterTags = tagsIn(all.filter((event) => isUpcoming(event.data)), await loadCourseTags());
 // Every month with an event, including past ones, for the calendar pages.
 const months = [...groupByMonth(all, (event) => event.data).keys()];
 
@@ -38,6 +42,8 @@ const jsonLd = [
             <Heading level={1} class="text-heading! font-display">{t("events.title")}</Heading>
             <p class="max-w-reading text-lg text-ink-muted text-pretty">{t("events.lead")}</p>
           </Stack>
+
+          <TagFilter tags={filterTags} />
 
           {upcoming.size === 0 && <p class="text-ink-muted">{t("events.empty")}</p>}
 

@@ -1,0 +1,36 @@
+---
+/**
+ * "Filter by kind of workshop": one link per tag (to /eventi/tag/<slug>/) plus
+ * "Tutti". Plain links, zero JS; the current one is marked aria-current.
+ */
+import { useLocale } from "../lib/locale.ts";
+import { tagLabel, tagSlug } from "../lib/tags.ts";
+
+interface Props {
+  tags: string[];
+  /** The tag of the current page; undefined on /eventi/. */
+  current?: string;
+}
+const { tags, current } = Astro.props;
+const { t, href, lang } = useLocale(Astro);
+const chip =
+  "inline-flex min-h-10 items-center rounded-pill border border-line-strong bg-surface-raised px-4 py-1.5 text-sm font-semibold text-ink no-underline hover:border-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-accent-contrast";
+---
+
+{
+  tags.length > 0 && (
+    <nav aria-label={t("events.filterLabel")}>
+      <p class="mb-2 text-sm font-semibold text-ink-muted">{t("events.filterLabel")}</p>
+      <ul class="flex list-none flex-wrap gap-2 p-0">
+        <li><a href={href("/eventi/")} class={chip} aria-current={current ? undefined : "page"}>{t("events.filterAll")}</a></li>
+        {tags.map((tag) => (
+          <li>
+            <a href={href(`/eventi/tag/${tagSlug(tag)}/`)} class={chip} aria-current={tag === current ? "page" : undefined}>
+              {tagLabel(tag, lang)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

@@ -17,6 +17,7 @@ import { isUpcoming, resolveTiming } from "@factory/common/calendar";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { eventPaths } from "../../lib/paths.ts";
+import { loadCourseTags, tagLabel, tagSlug, tagsOf } from "../../lib/tags.ts";
 import DateTile from "../../components/DateTile.astro";
 import SignupForm from "../../components/SignupForm.astro";
 import { dateTile, eventLead, eventSummary, eventTitle, formatWhen } from "../../lib/when.ts";
@@ -63,6 +64,9 @@ const host = data.host ? await getEntry(data.host) : undefined;
 // undefined and the guest would vanish silently. Fail the build instead.
 if (data.host && !host) throw new Error(`${event.id}: host "${data.host.id}" is not in src/content/ospiti.yaml`);
 const other = data.serie ? await getEntry(data.serie.with) : undefined;
+// Links to the filter pages, which exist only for tags with upcoming courses: an upcoming event's tags always have one.
+const tags = tagsOf(event, await loadCourseTags());
+const tagLinks = isUpcoming(data);
 if (data.serie && !other) throw new Error(`${event.id}: serie.with points at a missing event`);
 
 const jsonLd = [
@@ -116,6 +120,23 @@ const jsonLd = [
               )
             }
             {lead && <p class="text-lg text-ink-muted text-pretty">{lead}</p>}
+            {
+              tags.length > 0 && (
+                <ul class="flex list-none flex-wrap gap-2 p-0">
+                  {tags.map((tag) => (
+                    <li>
+                      {tagLinks ? (
+                        <a href={href(`/eventi/tag/${tagSlug(tag)}/`)} class="inline-flex rounded-pill border border-line-strong px-3 py-1 text-sm font-semibold text-ink no-underline hover:border-accent">
+                          {tagLabel(tag, lang)}
+                        </a>
+                      ) : (
+                        <span class="inline-flex rounded-pill bg-surface-muted px-3 py-1 text-sm font-semibold text-ink-muted">{tagLabel(tag, lang)}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )
+            }
             {
               data.serie && other && (
                 <p class="rounded-card border border-line bg-surface-muted px-4 py-3">
