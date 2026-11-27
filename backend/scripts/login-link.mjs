@@ -59,8 +59,10 @@ if (!res.ok) {
   console.error("The account must exist in Auth (sign-up is off) and be listed in `staff`.");
   process.exit(1);
 }
+// Supabase returns the link HTML-escaped (`&amp;`): pasted as is, it fails.
+const link = String(body.action_link ?? "").replaceAll("&amp;", "&");
 console.log(`
 One-time sign-in (valid ~1 hour, one use; no email was sent):
-  Link: ${body.action_link}
+  Link: ${link}   (paste it into the browser you will use: the session stays there)
   Code: ${body.email_otp}   (or: login page → your email → "Ho già un codice")
 Then set a password from "Password" at the bottom of the dashboard.`);
