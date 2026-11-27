@@ -47,6 +47,7 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
               <span><span class="muted">Minimo</span> <span class="n-minimo">{MINIMO_DEFAULT ?? "da definire"}</span></span>
               {c.capacity == null && <span><span class="muted">Posti</span> da definire</span>}
               <span><span class="muted">In attesa</span> <span class="n-attesa">…</span></span>
+              {!c.free && <span><span class="muted">SumUp</span> <span class="n-sumup">…</span></span>}
               {c.free && <span>Gratuito</span>}
             </p>
           </li>
@@ -62,15 +63,13 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
   </section>
 
   <p id="past-toggle" style="margin-top:1.5rem" hidden></p>
-  <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../lib/guard";
     import { data } from "../lib/data";
-    import { supabase } from "../lib/supabase";
     import { MINIMO_DEFAULT, isActive } from "../lib/corsi";
     import { $, button, render, say } from "../lib/ui";
-    import { attempt, sessionButton, signupItem } from "../lib/views";
+    import { attempt, signupItem } from "../lib/views";
     import type { SignupRow } from "../lib/types";
 
     const cards = [...document.querySelectorAll<HTMLElement>(".corso")];
@@ -108,7 +107,8 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
     for (const card of cards) for (const id of (card.dataset.aliases ?? "").split(" ")) if (id) cardFor.set(id, card);
 
     async function load() {
-      const rows = await data.listSignups();
+      const [rows, corsi] = await Promise.all([data.listSignups(), data.listCorsi()]);
+      const withSumup = new Set(corsi.filter((c) => c.sumup_link).map((c) => c.event_id));
       const byCard = new Map<HTMLElement, SignupRow[]>();
       const orphans: SignupRow[] = [];
       for (const row of rows) {
@@ -128,6 +128,8 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
           card.querySelector<HTMLElement>(".n-minimo")!.textContent =
             `${MINIMO_DEFAULT} · ${active >= MINIMO_DEFAULT ? "raggiunto" : `ne mancano ${MINIMO_DEFAULT - active}`}`;
         }
+        const sumup = card.querySelector<HTMLElement>(".n-sumup");
+        if (sumup) sumup.textContent = withSumup.has(card.dataset.courseId ?? "") ? "link inserito" : "da inserire";
         const pill = card.querySelector<HTMLElement>(".new-pill")!;
         pill.textContent = fresh === 1 ? "1 nuova" : `${fresh} nuove`;
         pill.hidden = fresh === 0;
@@ -140,7 +142,6 @@ const months = [...new Set(courses.map((c) => c.monthKey))].map((key) => ({
 
     void attempt(async () => {
       await requireStaff();
-      sessionButton($("#session"), () => supabase.auth.signOut());
       await load();
     });
   </script>

@@ -14,7 +14,8 @@ function redirect(path: string): Response {
 
 export interface FormTarget {
   fields: FieldSpec;
-  okPath: string;
+  /** A fixed path, or one read from the raw form (e.g. the page's language). */
+  okPath: string | ((get: (name: string) => unknown) => string);
   /** A fixed path, or one read from the raw form (`undefined` when the body could not be read). */
   failPath: string | ((get: ((name: string) => unknown) | undefined) => string);
   extraCheck?: (v: Record<string, string>) => boolean;
@@ -37,9 +38,10 @@ export async function handlePost(req: Request, target: FormTarget): Promise<Resp
     return fail();
   }
   const get = (name: string) => form.get(name);
+  const ok = () => redirect(typeof target.okPath === "string" ? target.okPath : target.okPath(get));
 
   const verdict = validate(get, target.fields, target.extraCheck);
-  if (verdict.result === "spam") return redirect(target.okPath);
+  if (verdict.result === "spam") return ok();
   if (verdict.result === "invalid") return fail(get);
 
   const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -51,7 +53,7 @@ export async function handlePost(req: Request, target: FormTarget): Promise<Resp
     console.error(`${table} insert failed`, error.message);
     return fail(get);
   }
-  return redirect(target.okPath);
+  return ok();
 }
 
 /** Validates a form POST and stores it in `inbox`. Always answers with a redirect. */

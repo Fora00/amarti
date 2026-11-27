@@ -1,4 +1,5 @@
 ---
+import { useLocale } from "../../lib/locale.ts";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -7,18 +8,22 @@ import Button from "@factory/design-system/components/Button.astro";
 import { breadcrumbsLd } from "@factory/common";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { site, vintedUrl } from "../../site.config.ts";
-import { i18n } from "../../i18n/dictionaries.ts";
+import { site, showVinted, vintedUrl } from "../../site.config.ts";
+import { loadListino } from "../../lib/listino.ts";
+import { formatCents } from "../../lib/price.ts";
 
 /**
- * For now the shop is a pointer to Vinted (the user's call, 2026-11-20). The
- * `prodotti` collection and `/negozio/<slug>/` stay in place, empty, for the
- * day she wants pieces listed here.
+ * The shop: what is in the physical store, plus a price list of pieces with a
+ * fixed price. The list is edited by the owner in the dashboard (Listino) and
+ * read when the site is built (src/lib/listino.ts); empty = the section is not
+ * shown. Vinted is hidden for now (`showVinted` in site.config.ts). The
+ * `prodotti` collection and `/negozio/<slug>/` stay, empty, for later.
  */
-const t = i18n.useTranslations("it");
+const { t, lpath, intl } = useLocale(Astro);
+const listino = await loadListino();
 
 const jsonLd = [
-  breadcrumbsLd(site, [{ name: t("nav.home"), path: "/" }, { name: t("shop.title") }]),
+  breadcrumbsLd(site, [{ name: t("nav.home"), path: lpath("/") }, { name: t("shop.title") }]),
 ];
 ---
 
@@ -26,10 +31,36 @@ const jsonLd = [
   <main id="main">
     <Section space="md">
       <Container width="reading">
-        <Stack gap="md" align="start">
-          <Heading level={1} class="text-heading! font-display">{t("shop.title")}</Heading>
-          <p class="text-lg text-ink-muted text-pretty">{t("shop.lead")}</p>
-          <Button href={vintedUrl} external>{t("shop.vinted")}</Button>
+        <Stack gap="lg">
+          <Stack gap="md" align="start">
+            <Heading level={1} class="text-heading! font-display">{t("shop.title")}</Heading>
+            <p class="text-lg text-ink-muted text-pretty">{t("shop.lead")}</p>
+            {showVinted && <Button href={vintedUrl} external>{t("shop.vinted")}</Button>}
+          </Stack>
+
+          {
+            listino.length > 0 && (
+              <section aria-labelledby="listino-title">
+                <Stack gap="md">
+                  <Heading level={2} size="xl" id="listino-title" class="text-heading!">{t("shop.listTitle")}</Heading>
+                  <ul class="list-none divide-y divide-line border-y border-line p-0">
+                    {listino.map((item) => (
+                      <li class="flex items-baseline justify-between gap-6 py-4">
+                        <div class="min-w-0">
+                          <p class="font-semibold">{item.nome}</p>
+                          {item.descrizione && <p class="text-sm text-ink-muted text-pretty">{item.descrizione}</p>}
+                        </div>
+                        <p class="shrink-0 font-semibold tabular-nums">
+                          {item.prezzo_cents == null ? t("shop.onRequest") : formatCents(item.prezzo_cents, intl)}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="text-sm text-ink-muted">{t("shop.listNote")}</p>
+                </Stack>
+              </section>
+            )
+          }
         </Stack>
       </Container>
     </Section>

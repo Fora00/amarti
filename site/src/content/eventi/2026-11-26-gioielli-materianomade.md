@@ -9,6 +9,9 @@ host: "materianomade"
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Jewellery-making workshop"
+  summary: "An evening workshop to make your own jewellery with Materianomade, Thursday 26 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

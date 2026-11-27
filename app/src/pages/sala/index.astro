@@ -1,0 +1,186 @@
+---
+/**
+ * Sala — room bookings, "Calendly style" (DECISIONS 2026-11-27). She opens
+ * slots (day + from/to, optionally every week for N weeks); the public page
+ * /servizi/prenota/ shows the free future ones (read at build time: they
+ * appear on the site by the next morning); a visitor's request holds its slot
+ * and lands here, where she contacts the person and moves the request along.
+ */
+import AppLayout from "../../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Sala" active="sala" eyebrow="Feste, compleanni, attività">
+  <p class="muted">
+    Apri i giorni e gli orari in cui la sala è disponibile: le persone li scelgono dalla pagina
+    "Prenota la sala" del sito e la richiesta arriva qui. Gli orari nuovi compaiono sul sito entro il giorno dopo.
+  </p>
+
+  <section class="section">
+    <h2 class="day-title">Richieste</h2>
+    <ul class="list" id="requests"></ul>
+    <p id="past-requests" hidden></p>
+  </section>
+
+  <section class="section">
+    <h2 class="day-title">Apri un orario</h2>
+    <form id="add" class="card grid-form" hidden>
+      <div class="field">
+        <label for="f-giorno">Giorno</label>
+        <input id="f-giorno" name="giorno" class="input" type="date" required />
+      </div>
+      <div class="field">
+        <label for="f-ripeti">Ripeti ogni settimana per</label>
+        <select id="f-ripeti" name="ripeti" class="input">
+          <option value="1">solo questo giorno</option>
+          <option value="2">2 settimane</option>
+          <option value="4">4 settimane</option>
+          <option value="8">8 settimane</option>
+          <option value="12">12 settimane</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-inizio">Dalle</label>
+        <input id="f-inizio" name="inizio" class="input" type="time" step="900" required />
+      </div>
+      <div class="field">
+        <label for="f-fine">Alle</label>
+        <input id="f-fine" name="fine" class="input" type="time" step="900" required />
+      </div>
+      <div class="span-all"><button type="submit" class="btn">Apri l'orario</button></div>
+    </form>
+  </section>
+
+  <section class="section">
+    <h2 class="day-title">Orari aperti</h2>
+    <div id="slots"></div>
+  </section>
+
+  <script>
+    import { requireStaff } from "../../lib/guard";
+    import { data } from "../../lib/data";
+    import { $, confirmDialog, el, localDay, render, say } from "../../lib/ui";
+    import { attempt, whatsappUrl } from "../../lib/views";
+    import type { RoomRequestRow, RoomRequestState, SlotRow } from "../../lib/types";
+
+    const TIPI: Record<RoomRequestRow["tipo"], string> = { compleanno: "Compleanno o festa", attivita: "Attività o evento", altro: "Altro" };
+    const STATI: Record<RoomRequestState, string> = { nuova: "Nuova", contattata: "Contattata", confermata: "Confermata", annullata: "Annullata" };
+    const SLOT: Record<SlotRow["stato"], string> = { libero: "Libero", richiesto: "Richiesto", confermato: "Confermato" };
+
+    const dayFmt = new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+    const day = (d: string) => dayFmt.format(new Date(`${d}T12:00:00Z`));
+    const hhmm = (t: string) => t.slice(0, 5);
+    const when = (r: { giorno: string; inizio: string; fine: string }) => `${day(r.giorno)}, ${hhmm(r.inizio)}–${hhmm(r.fine)}`;
+    const today = () => localDay(new Date());
+
+    const mailto = (email: string, subject: string, body: string) =>
+      `mailto:${encodeURIComponent(email.trim()).replace(/%40/g, "@")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    function requestItem(row: RoomRequestRow) {
+      const select = el("select", { class: "input", "aria-label": `Stato della richiesta di ${row.nome} ${row.cognome}`, style: "width:auto" },
+        ...(Object.keys(STATI) as RoomRequestState[]).map((s) => el("option", { value: s, selected: s === row.stato }, STATI[s])));
+      select.addEventListener("change", () => attempt(async () => {
+        const next = select.value as RoomRequestState;
+        select.disabled = true;
+        try {
+          await data.setRoomRequestState(row, next);
+          say(next === "annullata" ? "Richiesta annullata: l'orario è di nuovo libero." : `Richiesta: ${STATI[next].toLowerCase()}.`);
+          await load();
+        } catch (e) {
+          select.value = row.stato;
+          throw e;
+        } finally {
+          select.disabled = false;
+        }
+      }));
+
+      const text = `Ciao ${row.nome}! Ho ricevuto la tua richiesta per la sala, ${when(row)}. Ne parliamo? Martina – aMarti ceramics`;
+      return el("li", { class: row.stato === "nuova" ? "card warn" : "card" },
+        el("div", { class: "row" },
+          el("strong", {}, `${row.nome} ${row.cognome}`),
+          el("span", { class: "pill" }, STATI[row.stato])),
+        el("p", { style: "margin:.35rem 0 0;font-weight:650" }, when(row)),
+        el("p", { class: "muted", style: "margin:.25rem 0 0" },
+          TIPI[row.tipo] ?? row.tipo, row.persone ? ` · circa ${row.persone} persone` : ""),
+        el("p", { class: "muted", style: "margin:.25rem 0 0" }, row.email, " · ", row.telefono),
+        row.note ? el("p", { style: "margin:.5rem 0 0;white-space:pre-wrap" }, row.note) : null,
+        el("div", { class: "row", style: "justify-content:flex-start;flex-wrap:wrap;gap:.5rem;margin-top:.75rem" },
+          select,
+          el("a", { href: whatsappUrl(row.telefono, text), class: "btn secondary small", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp"),
+          el("a", { href: mailto(row.email, "La tua richiesta per la sala", text), class: "btn secondary small" }, "Email")));
+    }
+
+    function slotsView(slots: SlotRow[]) {
+      if (slots.length === 0) return [el("p", { class: "muted" }, "Nessun orario aperto: aggiungine uno qui sopra.")];
+      const byDay = new Map<string, SlotRow[]>();
+      for (const s of slots) byDay.set(s.giorno, [...(byDay.get(s.giorno) ?? []), s]);
+      return [...byDay].map(([giorno, list]) =>
+        el("div", { class: "card", style: "margin-bottom:.75rem" },
+          el("p", { style: "margin:0 0 .5rem;font-weight:650;text-transform:capitalize" }, day(giorno)),
+          el("ul", { class: "list" }, ...list.map((s) => {
+            const del = el("button", { type: "button", class: "btn secondary small", disabled: s.stato !== "libero",
+              title: s.stato === "libero" ? undefined : "C'è una richiesta su questo orario" }, "Elimina");
+            del.addEventListener("click", () => void attempt(async () => {
+              if (!(await confirmDialog(`Togliere l'orario ${hhmm(s.inizio)}–${hhmm(s.fine)} di ${day(s.giorno)}?`, { confirmLabel: "Togli" }))) return;
+              await data.deleteSlot(s.id);
+              say("Orario tolto.");
+              await load();
+            }));
+            return el("li", { class: "row", style: "gap:.75rem" },
+              el("span", { style: "font-variant-numeric:tabular-nums" }, `${hhmm(s.inizio)} – ${hhmm(s.fine)}`),
+              el("span", { class: "row", style: "gap:.5rem" }, el("span", { class: "pill" }, SLOT[s.stato]), del));
+          }))));
+    }
+
+    function addForm() {
+      const form = $<HTMLFormElement>("#add");
+      ($("#f-giorno") as HTMLInputElement).min = today();
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const giorno = String(fd.get("giorno") ?? "");
+        const inizio = String(fd.get("inizio") ?? "");
+        const fine = String(fd.get("fine") ?? "");
+        const weeks = Number(fd.get("ripeti") ?? "1");
+        if (!giorno || !inizio || !fine) return say("Scegli giorno, ora di inizio e ora di fine.", true);
+        if (fine <= inizio) return say("L'ora di fine deve venire dopo quella di inizio.", true);
+        if (giorno < today()) return say("Scegli un giorno da oggi in poi.", true);
+        const slots = Array.from({ length: weeks }, (_, i) => {
+          const d = new Date(`${giorno}T12:00:00Z`);
+          d.setUTCDate(d.getUTCDate() + 7 * i);
+          return { giorno: d.toISOString().slice(0, 10), inizio, fine };
+        });
+        void attempt(async () => {
+          const added = await data.addSlots(slots);
+          const skipped = slots.length - added;
+          say(`${added === 1 ? "1 orario aperto" : `${added} orari aperti`}${skipped ? ` (${skipped} c'erano già)` : ""}.`);
+          await load();
+        });
+      };
+      form.hidden = false;
+    }
+
+    let showPast = false;
+    async function load() {
+      const [requests, slots] = await Promise.all([data.listRoomRequests(), data.listSlots(today())]);
+      // Open requests first (new, then contacted), then confirmed; past and cancelled ones behind a button.
+      const order: RoomRequestState[] = ["nuova", "contattata", "confermata", "annullata"];
+      const isOld = (r: RoomRequestRow) => r.giorno < today() || r.stato === "annullata";
+      const current = requests.filter((r) => !isOld(r)).sort((a, b) => order.indexOf(a.stato) - order.indexOf(b.stato) || a.giorno.localeCompare(b.giorno));
+      const old = requests.filter(isOld);
+      const shown = showPast ? [...current, ...old] : current;
+      render($("#requests"), ...(shown.length ? shown.map(requestItem) : [el("li", { class: "muted" }, "Nessuna richiesta in attesa.")]));
+      const toggle = $<HTMLElement>("#past-requests");
+      toggle.hidden = old.length === 0;
+      render(toggle, el("button", { type: "button", class: "btn secondary small" },
+        showPast ? "Nascondi passate e annullate" : `Mostra passate e annullate (${old.length})`));
+      (toggle.firstElementChild as HTMLButtonElement).onclick = () => { showPast = !showPast; void attempt(load); };
+      render($("#slots"), ...slotsView(slots));
+    }
+
+    void attempt(async () => {
+      await requireStaff();
+      addForm();
+      await load();
+    });
+  </script>
+</AppLayout>

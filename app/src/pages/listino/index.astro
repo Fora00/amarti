@@ -1,0 +1,153 @@
+---
+/**
+ * Listino — the shop's price list (table `listino`). She adds, edits, hides and
+ * removes items here; the public site reads the visible ones when it is built
+ * (site/src/lib/listino.ts), so a change shows on the site after the next
+ * build (every night, or on any push).
+ */
+import AppLayout from "../../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Listino" active="listino" eyebrow="Negozio">
+  <p class="muted">
+    I pezzi del negozio con un prezzo fisso. Quelli visibili compaiono nella pagina Negozio del sito entro il
+    giorno dopo (il sito si aggiorna ogni notte). Prezzo vuoto = "su richiesta".
+  </p>
+
+  <section class="section">
+    <h2 class="day-title">Aggiungi un pezzo</h2>
+    <form id="add" class="card grid-form" hidden></form>
+  </section>
+
+  <section class="section">
+    <h2 class="day-title">In listino</h2>
+    <ul class="list" id="items"></ul>
+  </section>
+
+
+  <script>
+    import { requireStaff } from "../../lib/guard";
+    import { data } from "../../lib/data";
+    import { $, confirmDialog, el, field, render, say, text } from "../../lib/ui";
+    import { attempt } from "../../lib/views";
+    import type { ListinoInput, ListinoRow } from "../../lib/types";
+
+    const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+    const showPrice = (cents: number | null) => (cents == null ? "su richiesta" : euro.format(cents / 100));
+
+    /** "12", "12,50", "12.5", "€ 12" → cents; "" → null; anything else → undefined (refused). */
+    function parsePrice(raw: string): number | null | undefined {
+      const s = raw.replace(/€/g, "").replace(/\s/g, "");
+      if (s === "") return null;
+      if (!/^\d{1,6}([.,]\d{1,2})?$/.test(s)) return undefined;
+      return Math.round(Number(s.replace(",", ".")) * 100);
+    }
+
+    /** The form's values, or null (with a message) when something is not valid. */
+    function read(form: HTMLFormElement): ListinoInput | null {
+      const fd = new FormData(form);
+      const nome = text(fd, "nome");
+      const prezzo = parsePrice(String(fd.get("prezzo") ?? ""));
+      if (!nome) { say("Scrivi il nome del pezzo.", true); return null; }
+      if (prezzo === undefined) { say("Prezzo non valido: scrivi ad esempio 25 oppure 12,50.", true); return null; }
+      const ordine = Number(String(fd.get("ordine") ?? "0").trim() || "0");
+      return {
+        nome,
+        descrizione: text(fd, "descrizione"),
+        prezzo_cents: prezzo,
+        ordine: Number.isInteger(ordine) ? ordine : 0,
+        visibile: fd.get("visibile") === "si",
+      };
+    }
+
+    const cents = (c: number | null) => (c == null ? "" : (c / 100).toFixed(2).replace(".", ","));
+
+    /** The same fields for "add" and "edit"; `prefix` keeps the ids unique on the page. */
+    function fields(prefix: string, item?: ListinoRow) {
+      const f = (name: string, label: string, value: string | number | null | undefined, opts = {}) => {
+        const box = field(name, label, value, opts);
+        const input = box.querySelector("input, textarea")!;
+        input.id = `${prefix}-${name}`;
+        box.querySelector("label")!.htmlFor = input.id;
+        return box;
+      };
+      const visible = el("input", { type: "checkbox", name: "visibile", value: "si", id: `${prefix}-visibile`, checked: item ? item.visibile : true });
+      return [
+        f("nome", "Nome", item?.nome, { required: true, span: true }),
+        f("descrizione", "Descrizione (facoltativa)", item?.descrizione, { multiline: true, span: true }),
+        f("prezzo", "Prezzo in euro", cents(item?.prezzo_cents ?? null), { inputmode: "decimal" }),
+        f("ordine", "Ordine (più basso = prima)", item?.ordine ?? 0, { type: "number", step: "1" }),
+        el("div", { class: "field span-all" },
+          el("label", { for: visible.id, class: "row", style: "justify-content:flex-start;gap:.5rem" }, visible, "Visibile sul sito")),
+      ];
+    }
+
+    function addForm() {
+      const form = $<HTMLFormElement>("#add");
+      render(form, ...fields("nuovo"), el("div", { class: "span-all" }, el("button", { type: "submit", class: "btn" }, "Aggiungi")));
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const item = read(form);
+        if (!item) return;
+        void attempt(async () => {
+          await data.addListino(item);
+          form.reset();
+          say(`"${item.nome}" aggiunto.`);
+          await load();
+        });
+      };
+      form.hidden = false;
+    }
+
+    function itemView(item: ListinoRow) {
+      const edit = el("form", { class: "grid-form", hidden: true, style: "margin-top:.75rem" },
+        ...fields(`m-${item.id}`, item),
+        el("div", { class: "row span-all", style: "justify-content:flex-start;gap:.5rem" },
+          el("button", { type: "submit", class: "btn small" }, "Salva"),
+          el("button", { type: "button", class: "btn secondary small", "data-cancel": true }, "Annulla")));
+      edit.onsubmit = (e) => {
+        e.preventDefault();
+        const next = read(edit);
+        if (!next) return;
+        void attempt(async () => {
+          await data.updateListino(item.id, next);
+          say(`"${next.nome}" salvato.`);
+          await load();
+        });
+      };
+
+      const editBtn = el("button", { type: "button", class: "btn secondary small" }, "Modifica");
+      const delBtn = el("button", { type: "button", class: "btn secondary small" }, "Elimina");
+      edit.querySelector<HTMLButtonElement>("[data-cancel]")!.onclick = () => { edit.hidden = true; editBtn.hidden = false; };
+      editBtn.onclick = () => { edit.hidden = false; editBtn.hidden = true; };
+      delBtn.onclick = () => void attempt(async () => {
+        if (!(await confirmDialog(`Eliminare "${item.nome}" dal listino?`, { confirmLabel: "Elimina" }))) return;
+        await data.deleteListino(item.id);
+        say(`"${item.nome}" eliminato.`);
+        await load();
+      });
+
+      return el("li", { class: "card" },
+        el("div", { class: "row" },
+          el("strong", {}, item.nome),
+          el("span", { class: "pill" }, showPrice(item.prezzo_cents))),
+        item.descrizione ? el("p", { class: "muted", style: "margin:.35rem 0 0;white-space:pre-wrap" }, item.descrizione) : null,
+        item.visibile ? null : el("p", { class: "muted", style: "margin:.35rem 0 0" }, "Nascosto: non compare sul sito."),
+        el("div", { class: "row", style: "justify-content:flex-start;gap:.5rem;margin-top:.75rem" }, editBtn, delBtn),
+        edit);
+    }
+
+    async function load() {
+      const items = await data.listListino();
+      render($("#items"), ...(items.length
+        ? items.map(itemView)
+        : [el("li", { class: "muted" }, "Il listino è vuoto: aggiungi il primo pezzo qui sopra.")]));
+    }
+
+    void attempt(async () => {
+      await requireStaff();
+      addForm();
+      await load();
+    });
+  </script>
+</AppLayout>

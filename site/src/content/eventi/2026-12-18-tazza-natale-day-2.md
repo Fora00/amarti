@@ -13,6 +13,9 @@ serie:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Decorating the Christmas mug (day 2)"
+  summary: "Second evening: decorate the Christmas mug shaped on 14 December, Friday 18 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
 Info e prenotazioni in DM su Instagram.

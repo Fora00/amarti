@@ -46,10 +46,18 @@ export const site = defineSiteConfig({
 export const instagramDm = "https://ig.me/m/amarticeramics";
 /** Her shop online. */
 export const vintedUrl = VINTED_URL;
+/**
+ * Vinted is HIDDEN for now, not removed (user, 2026-11-27, after meeting her):
+ * set to true and every Vinted link (footer, home, shop) comes back.
+ */
+export const showVinted = false;
+/** Off-site links shown in the footer: Vinted only while `showVinted`. */
+export const footerLinks = site.links.filter((link) => showVinted || link.label !== "Vinted");
 
 /**
- * Locales this site has actually published pages for. Italian only until
- * English copy exists — add "en" the day it lands, not before. Feeds
+ * Locales this site has actually published pages for. English since
+ * 2026-11-27 (every public page has an /en/ twin; contatti/grazie stay Italian
+ * and say `italianOnly`). Feeds
  * `getAlternates()`, `sitemapI18nConfig()` and `sitemapFilter()`.
  */
-export const builtLocales = ["it"] as const;
+export const builtLocales = ["it", "en"] as const;

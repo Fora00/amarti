@@ -1,20 +1,19 @@
 ---
+import { useLocale } from "../../lib/locale.ts";
 import type { GetStaticPaths } from "astro";
-import { url } from "../../lib/path.ts";
-import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
 import Heading from "@factory/design-system/components/Heading.astro";
 import { breadcrumbsLd } from "@factory/common";
-import { groupByMonth, monthGrid, resolveTiming } from "@factory/common/calendar";
+import { monthGrid, resolveTiming } from "@factory/common/calendar";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { monthPaths } from "../../lib/paths.ts";
 import EventCard from "../../components/EventCard.astro";
-import { monthLabel, weekdayLabels } from "../../lib/when.ts";
+import { eventTitle, monthLabel, weekdayLabels } from "../../lib/when.ts";
 import { site } from "../../site.config.ts";
-import { i18n } from "../../i18n/dictionaries.ts";
 
 interface Props {
   events: CollectionEntry<"eventi">[];
@@ -22,25 +21,18 @@ interface Props {
   next?: string;
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const months = groupByMonth(await getCollection("eventi"), (event) => event.data);
-  const keys = [...months.keys()];
-  return keys.map((key, index) => ({
-    params: { month: key },
-    props: { events: months.get(key)!, previous: keys[index - 1], next: keys[index + 1] },
-  }));
-};
+export const getStaticPaths: GetStaticPaths = monthPaths;
 
 // `[month]` is a required param, so it is always present here.
 const month = Astro.params.month as string;
 const { events, previous, next } = Astro.props;
-const t = i18n.useTranslations("it");
+const { t, href, lpath, lang, intl } = useLocale(Astro);
 
-const label = monthLabel(month);
+const label = monthLabel(month, intl);
 // "2026-11" → 11: global.css `[data-month]` gives each month its own accent.
 const monthNumber = Number(month.slice(5, 7));
 const weeks = monthGrid(month);
-const weekdays = weekdayLabels();
+const weekdays = weekdayLabels(intl);
 
 // Events keyed by their local start date, for the grid cells.
 const byDay = new Map<string, CollectionEntry<"eventi">[]>();
@@ -51,8 +43,8 @@ for (const event of events) {
 
 const jsonLd = [
   breadcrumbsLd(site, [
-    { name: t("nav.home"), path: "/" },
-    { name: t("events.title"), path: "/eventi/" },
+    { name: t("nav.home"), path: lpath("/") },
+    { name: t("events.title"), path: lpath("/eventi/") },
     { name: label },
   ]),
 ];
@@ -66,8 +58,8 @@ const jsonLd = [
           <Heading level={1} class="text-accent! font-display">{t("events.monthTitle", { month: label })}</Heading>
 
           <nav class="flex justify-between gap-4" aria-label={t("events.months")}>
-            {previous ? <a class="text-accent hover:text-accent-hover" href={url(`/calendario/${previous}/`)}>← {monthLabel(previous)}</a> : <span />}
-            {next ? <a class="text-accent hover:text-accent-hover" href={url(`/calendario/${next}/`)}>{monthLabel(next)} →</a> : <span />}
+            {previous ? <a class="text-accent hover:text-accent-hover" href={href(`/calendario/${previous}/`)}>← {monthLabel(previous, intl)}</a> : <span />}
+            {next ? <a class="text-accent hover:text-accent-hover" href={href(`/calendario/${next}/`)}>{monthLabel(next, intl)} →</a> : <span />}
           </nav>
 
           {/* A grid is unreadable on a phone, so it only appears from md up;
@@ -89,8 +81,8 @@ const jsonLd = [
                       <span class="text-sm">{Number(cell.date.slice(8))}</span>
                       {cell.inMonth &&
                         (byDay.get(cell.date) ?? []).map((event) => (
-                          <a href={url(`/eventi/${event.id}/`)} class="mt-1 block text-xs font-semibold">
-                            {event.data.title}
+                          <a href={href(`/eventi/${event.id}/`)} class="mt-1 block text-xs font-semibold">
+                            {eventTitle(event.data, lang)}
                           </a>
                         ))}
                     </td>

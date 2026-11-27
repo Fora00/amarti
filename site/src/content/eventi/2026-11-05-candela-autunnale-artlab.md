@@ -10,6 +10,9 @@ host: "artlab"
 # Evento passato: resta nel calendario di novembre. Prezzo e posti: sconosciuti.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Decorate your autumn candle"
+  summary: "A workshop with Artlab to decorate your own autumn candle, Thursday 5 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

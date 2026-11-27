@@ -11,6 +11,7 @@ import SiteFooter from "../components/SiteFooter.astro";
 import { site, builtLocales } from "../site.config.ts";
 import { i18n } from "../i18n/dictionaries.ts";
 import { withLocalBusiness } from "../lib/business.ts";
+import { pageLocale } from "../lib/locale.ts";
 import "../styles/global.css";
 
 /**
@@ -29,16 +30,18 @@ interface Props {
   image?: SocialImage;
   /** Keep this page out of search indexes — feeds `<meta name="robots">`. */
   noindex?: boolean;
+  /** Set on a page that exists in Italian only (contatti, grazie): no hreflang to a missing /en/ twin. */
+  italianOnly?: boolean;
 }
 
-const { title, description, bareTitle = false, jsonLd = [], image, noindex = false } = Astro.props;
+const { title, description, bareTitle = false, jsonLd = [], image, noindex = false, italianOnly = false } = Astro.props;
 
-const locale = i18n.localeFrom(Astro.url.pathname);
-const { path } = i18n.stripLocale(Astro.url.pathname);
+// Base path stripped first (src/lib/locale.ts): on Pages the URL starts with /amarti/.
+const { lang: locale, path } = pageLocale(Astro.url.pathname);
 const t = i18n.useTranslations(locale);
 
 // Only locales this site actually published — never the full supported list.
-const alternates = i18n.getAlternates(path, [...builtLocales]);
+const alternates = i18n.getAlternates(path, italianOnly ? ["it"] : [...builtLocales]);
 ---
 
 <html lang={locale} data-theme="light">

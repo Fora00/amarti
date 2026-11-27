@@ -1,0 +1,28 @@
+---
+import { useLocale } from "../../../lib/locale.ts";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const { t, href } = useLocale(Astro);
+---
+
+<!-- Where `room-request` redirects after a request. Nothing to rank for. -->
+<BaseLayout title={t("roomThanks.title")} noindex>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="md" align="start">
+          <Heading level={1}>{t("roomThanks.title")}</Heading>
+          <p class="text-lg text-pretty">{t("roomThanks.lead")}</p>
+          <p class="text-ink-muted text-pretty">{t("roomThanks.next")}</p>
+          <Button href={href("/servizi/")}>{t("roomThanks.back")}</Button>
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

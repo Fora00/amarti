@@ -1,1 +1,198 @@
-{}
+{
+  "nav": {
+    "skip": "Skip to content",
+    "home": "Home",
+    "events": "Workshops",
+    "services": "Services",
+    "shop": "Shop",
+    "about": "About",
+    "write": "Message me",
+    "contact": "Contact",
+    "main": "Main",
+    "otherLanguage": "Versione italiana",
+    "darkTheme": "Dark theme"
+  },
+  "home": {
+    "eyebrow": "Piazza Malfatti 10 · Rovereto",
+    "description": "aMarticeramics Lab is a ceramics studio and concept store at Piazza Malfatti 10 in Rovereto, Italy, with creative evening workshops for adults and children.",
+    "lead": "Always wanted to shape or decorate ceramics? This is the place for you! Join my creative workshops.",
+    "quote": "In a hectic world, here we slow down and get to know each other.",
+    "quoteBy": "Martina, aMarticeramics Lab",
+    "eventsTitle": "Upcoming workshops",
+    "eventsCta": "Full programme",
+    "writeCta": "Message me on Instagram",
+    "spaceTitle": "The space",
+    "space": {
+      "customTitle": "Custom ceramics",
+      "custom": "I make custom ceramics, made in Italy.",
+      "labsTitle": "Workshops every week",
+      "labs": "Ceramics, and more: guest makers and artists take turns in the room, with jewellery, macramé, candles, paper, astrology and Christmas decorations.",
+      "storeTitle": "Concept store",
+      "store": "Next to the studio: aMarti's ceramics and work by local women makers and artists, for sale in the shop.",
+      "roomTitle": "Rent the room",
+      "room": "Birthdays, workshops, events and team building: message me and we'll talk."
+    },
+    "whereTitle": "Where we are",
+    "where": "Piazza Malfatti 10, Rovereto (TN), Italy",
+    "contact": "Information and bookings by DM on Instagram.",
+    "shopTitle": "The shop",
+    "shopLead": "aMarti's ceramics and work by local women makers are in the shop at Piazza Malfatti 10.",
+    "shopCta": "Visit the shop",
+    "faqTitle": "Frequently asked questions",
+    "contactCta": "Write to us"
+  },
+  "events": {
+    "title": "Workshops and events",
+    "lead": "The workshop programme at aMarticeramics Lab in Rovereto, month by month. Most workshops are held in Italian.",
+    "empty": "No events scheduled right now.",
+    "months": "By month",
+    "monthTitle": "Workshops in {month}",
+    "calendar": "Calendar for {month}",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "when": "When",
+    "where": "Where",
+    "price": "Price",
+    "free": "Free",
+    "seats": "Places",
+    "book": {
+      "instagram": "Book by DM on Instagram",
+      "whatsapp": "Book on WhatsApp",
+      "stripe": "Pay and book",
+      "email": "Book by email",
+      "other": "Book"
+    },
+    "addToCalendar": "Add to calendar",
+    "subscribe": "Subscribe to the calendar",
+    "status": {
+      "cancelled": "Cancelled",
+      "postponed": "Postponed"
+    },
+    "bookingMessage": "Hi! I'd like to book «{title}» ({when}).",
+    "copyHint": "Clicking copies a message for you: paste it into the chat.",
+    "copied": "Message copied: paste it into the chat.",
+    "soldOut": "Sold out",
+    "with": "with {host}",
+    "serieDay": "Day {day} of {of}",
+    "serieNext": "Continues on day {day}:",
+    "seriePrevious": "Follows day {day}:",
+    "serieBookFirst": "Booked together with day 1.",
+    "pay": "Pay and book",
+    "payDemo": "Online payment is not active yet: for now, book by DM.",
+    "withLabel": "with"
+  },
+  "shop": {
+    "title": "Shop",
+    "lead": "aMarti's ceramics and work by local women makers and artists are in the shop at Piazza Malfatti 10, Rovereto.",
+    "empty": "No pieces available right now.",
+    "soldTitle": "Already sold",
+    "sold": "Sold",
+    "price": "Price",
+    "buy": {
+      "stripe": "Buy",
+      "vinted": "Buy on Vinted",
+      "other": "Buy"
+    },
+    "buyNote": "Payment and shipping happen on the seller's site.",
+    "vinted": "See the pieces on Vinted",
+    "listTitle": "Price list",
+    "onRequest": "On request",
+    "listNote": "Pieces available in the shop. For information, or to have a piece put aside, message me on Instagram."
+  },
+  "services": {
+    "title": "Services",
+    "lead": "Besides the workshops in the programme, the aMarticeramics Lab room can be booked for parties, birthdays and tailor-made activities.",
+    "labsTitle": "Workshops and courses",
+    "labs": "Every month, ceramics workshops and workshops by guest makers and artists, for adults and children. Sign up from the workshop's page.",
+    "partyTitle": "Parties and birthdays",
+    "party": "A birthday or a party in the studio, with a creative activity for children or adults. Message me the date and how many you are.",
+    "roomTitle": "Rent the room",
+    "room": "The room for workshops, events, team building and other activities. Tell me what you have in mind and we'll talk.",
+    "customTitle": "Custom ceramics",
+    "custom": "I make custom ceramics, made in Italy: tell me your idea.",
+    "ask": "Message me on Instagram",
+    "book": "Pick a date"
+  },
+  "about": {
+    "title": "About",
+    "lead": "I'm Martina, a ceramicist. In November 2025 I opened aMarticeramics Lab at Piazza Malfatti 10 in Rovereto: a ceramics studio and concept store, with creative workshops for all ages."
+  },
+  "contact": {
+    "title": "Write to us",
+    "lead": "Fill in the form: we will reply as soon as we can.",
+    "name": "Your name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "message": "Your message",
+    "submit": "Send the message",
+    "privacy": "We use these details only to reply to you.",
+    "fallback": "If you don't see the confirmation, try again or write to us directly."
+  },
+  "thanks": {
+    "title": "Thank you!",
+    "lead": "We received your message and will reply soon.",
+    "back": "Back to the home page"
+  },
+  "form": {
+    "error": "We couldn't send the message. Check the required fields and try again."
+  },
+  "signup": {
+    "cta": "Book your place",
+    "title": "Book your place",
+    "lead": "Leave your details: signing up is free and doesn't commit you to pay now.",
+    "how": "When the workshop reaches its minimum number of people, Martina confirms your place on WhatsApp or by email and sends you a SumUp link to pay. If the workshop doesn't go ahead, you pay nothing.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "phoneHint": "Preferably a number with WhatsApp: the confirmation arrives there.",
+    "note": "Notes (optional)",
+    "noteHint": "Allergies, special needs, if you're coming with someone…",
+    "privacyBefore": "I have read the ",
+    "privacyLink": "privacy notice",
+    "privacyAfter": " and agree to my data being used to handle the sign-up.",
+    "submit": "Sign up for the workshop",
+    "error": "We couldn't record your sign-up. Check the fields (valid email and phone, privacy box ticked) and try again.",
+    "orInstagram": "Prefer to write? You can also book by DM on Instagram.",
+    "fallback": "If you don't see the confirmation, try again or message us on Instagram."
+  },
+  "signupThanks": {
+    "title": "You're on the list!",
+    "lead": "We received your sign-up: thank you!",
+    "next": "When the workshop reaches its minimum number of people, Martina confirms your place on WhatsApp or by email.",
+    "pay": "Payment comes only after the confirmation, with a SumUp link: until then you don't need to do anything.",
+    "back": "Back to the programme"
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "lead": "How we use the data you leave when you sign up for a workshop or write to us from the website."
+  },
+  "room": {
+    "title": "Book the room",
+    "lead": "Pick a day and time among the available ones and leave your details: I'll get back to you about the rest.",
+    "what": "What for?",
+    "tipo": {
+      "compleanno": "Birthday or party",
+      "attivita": "Activity or event",
+      "altro": "Other"
+    },
+    "when": "Day and time",
+    "whenHint": "The times that are free right now.",
+    "busyHint": "Workshop evenings are in the programme:",
+    "people": "Roughly how many people",
+    "note": "Tell me what you have in mind (optional)",
+    "noteHint": "Children's ages, kind of activity, special needs…",
+    "privacyAfter": " and agree to my data being used to handle the request.",
+    "submit": "Send the request",
+    "how": "Your request holds the time for you. I'll get back to you on WhatsApp or by email to confirm and sort out the details.",
+    "none": "There are no open dates for the room right now. Message me and we'll find a day together.",
+    "error": "We couldn't send the request. Check the fields (day and time chosen, valid email and phone, privacy box ticked) and try again.",
+    "taken": "Someone has just requested that time. Pick another one, or message me."
+  },
+  "roomThanks": {
+    "title": "Request sent!",
+    "lead": "I received your request for the room: the time is held for you.",
+    "next": "I'll get back to you soon on WhatsApp or by email to confirm and talk about the details.",
+    "back": "Back to services"
+  }
+}

@@ -1,0 +1,140 @@
+---
+import { useLocale } from "../../../lib/locale.ts";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
+import { breadcrumbsLd } from "@factory/common";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import FormField from "../../../components/FormField.astro";
+import { site, instagramDm } from "../../../site.config.ts";
+import { forms } from "../../../forms.ts";
+import { PRIVACY_VERSION } from "../../../lib/privacy.ts";
+import { loadSlotsByDay, slotLabel } from "../../../lib/sala.ts";
+
+/**
+ * Room booking, "Calendly style" with zero JS (DECISIONS 2026-11-27): the free
+ * slots she opened in the dashboard (read at build time), one radio "chip" per
+ * slot grouped by day, then the visitor's details. A plain POST to the
+ * `room-request` function, which claims the slot and answers 303 →
+ * /servizi/richiesta-inviata/, or back here with #errore / #occupato.
+ * Field names and limits must match `roomFields` in
+ * backend/supabase/functions/_shared/specs.ts.
+ */
+const { t, href, lpath, lang, intl } = useLocale(Astro);
+const days = await loadSlotsByDay();
+const dayFmt = new Intl.DateTimeFormat(intl, { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+const dayLabel = (d: string) => dayFmt.format(new Date(`${d}T12:00:00Z`));
+const tipi = ["compleanno", "attivita", "altro"] as const;
+
+const jsonLd = [
+  breadcrumbsLd(site, [
+    { name: t("nav.home"), path: lpath("/") },
+    { name: t("services.title"), path: lpath("/servizi/") },
+    { name: t("room.title") },
+  ]),
+];
+const chip =
+  "inline-flex min-h-11 cursor-pointer items-center rounded-pill border border-line-strong bg-surface-raised px-4 py-2 font-semibold tabular-nums text-ink hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent has-[:checked]:text-accent-contrast has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus";
+---
+
+<BaseLayout title={t("room.title")} description={t("room.lead")} jsonLd={jsonLd}>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="lg">
+          <Stack gap="sm">
+            <p><a href={href("/servizi/")}>← {t("services.title")}</a></p>
+            <Heading level={1} class="text-heading! font-display">{t("room.title")}</Heading>
+            <p class="text-lg text-ink-muted text-pretty">{t("room.lead")}</p>
+          </Stack>
+
+          <!-- Shown only when the server sent the visitor back here (CSS :target). -->
+          <p id="errore" role="alert" class="hidden scroll-mt-6 rounded-lg border border-accent bg-accent-muted p-4 font-semibold text-ink target:block">
+            {t("room.error")}
+          </p>
+          <p id="occupato" role="alert" class="hidden scroll-mt-6 rounded-lg border border-accent bg-accent-muted p-4 font-semibold text-ink target:block">
+            {t("room.taken")}
+          </p>
+
+          {
+            days.length === 0 ? (
+              <Stack gap="sm" align="start">
+                <p class="text-pretty">{t("room.none")}</p>
+                <Button href={instagramDm} external>{t("services.ask")}</Button>
+              </Stack>
+            ) : (
+              <form method="post" action={forms.room} class="grid gap-8">
+                <input type="hidden" name="privacy_version" value={PRIVACY_VERSION} />
+                <input type="hidden" name="lang" value={lang} />
+
+                <fieldset class="grid gap-3">
+                  <legend class="mb-2 text-lg font-semibold">{t("room.what")} <span aria-hidden="true">*</span></legend>
+                  <div class="flex flex-wrap gap-2">
+                    {tipi.map((tipo) => (
+                      <label class={chip}>
+                        <input type="radio" name="tipo" value={tipo} required class="sr-only" />
+                        {t(`room.tipo.${tipo}`)}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="grid gap-5">
+                  <legend class="mb-1 text-lg font-semibold">{t("room.when")} <span aria-hidden="true">*</span></legend>
+                  <p class="-mt-3 text-sm text-ink-muted">{t("room.whenHint")}</p>
+                  {days.map(([day, slots]) => (
+                    <div class="grid gap-2 rounded-card border border-line p-4">
+                      <p class="font-semibold capitalize text-heading">{dayLabel(day)}</p>
+                      <div class="flex flex-wrap gap-2">
+                        {slots.map((slot) => (
+                          <label class={chip}>
+                            <input type="radio" name="slot_id" value={slot.id} required class="sr-only" />
+                            <span class="sr-only">{dayLabel(day)}, </span>{slotLabel(slot)}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <p class="text-sm text-ink-muted">
+                    {t("room.busyHint")} <a href={href("/eventi/")}>{t("home.eventsCta")}</a>
+                  </p>
+                </fieldset>
+
+                <div class="grid gap-5">
+                  <FormField id="persone" label={t("room.people")} type="number" min={1} max={500} inputmode="numeric" />
+                  <div class="grid gap-5 sm:grid-cols-2">
+                    <FormField id="nome" label={t("signup.firstName")} required autocomplete="given-name" maxlength={80} />
+                    <FormField id="cognome" label={t("signup.lastName")} required autocomplete="family-name" maxlength={80} />
+                  </div>
+                  <FormField id="email" label={t("signup.email")} type="email" required autocomplete="email" maxlength={160} />
+                  <FormField id="telefono" label={t("signup.phone")} type="tel" required autocomplete="tel" maxlength={30} hint={t("signup.phoneHint")} />
+                  <FormField id="note" label={t("room.note")} multiline maxlength={1000} hint={t("room.noteHint")} />
+
+                  <div class="flex items-start gap-3">
+                    <input id="privacy" name="privacy" type="checkbox" value="si" required class="mt-1 size-5 shrink-0 accent-accent" />
+                    <label for="privacy" class="text-sm text-ink">
+                      {t("signup.privacyBefore")}<a href={href("/privacy/")}>{t("signup.privacyLink")}</a>{t("room.privacyAfter")}<span aria-hidden="true"> *</span>
+                    </label>
+                  </div>
+
+                  <!-- Honeypot: humans never see it; a bot that fills it is dropped. -->
+                  <div class="sr-only" aria-hidden="true">
+                    <label>Non compilare <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+                  </div>
+
+                  <div><Button type="submit" size="lg">{t("room.submit")}</Button></div>
+                  <p class="text-sm text-ink-muted">{t("room.how")}</p>
+                  <p class="text-sm text-ink-muted"><ExternalLink href={instagramDm}>{t("signup.orInstagram")}</ExternalLink></p>
+                </div>
+              </form>
+            )
+          }
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

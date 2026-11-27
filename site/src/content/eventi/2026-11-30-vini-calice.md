@@ -8,6 +8,9 @@ location:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Wine tasting, buffet and glass decorating"
+  summary: "An evening of wine tasting and buffet where everyone decorates their own wine glass: Monday 30 November at 6:30 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

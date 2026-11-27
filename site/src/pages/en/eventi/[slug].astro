@@ -1,0 +1,12 @@
+---
+// English: the same page as the Italian one; it reads the language from the URL (src/lib/locale.ts).
+import type { GetStaticPaths } from "astro";
+import type { CollectionEntry } from "astro:content";
+import Page from "../../eventi/[slug].astro";
+import { eventPaths } from "../../../lib/paths.ts";
+
+export const getStaticPaths: GetStaticPaths = eventPaths;
+const { event } = Astro.props as { event: CollectionEntry<"eventi"> };
+---
+
+<Page event={event} />

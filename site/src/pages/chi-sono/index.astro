@@ -1,0 +1,39 @@
+---
+import { useLocale } from "../../lib/locale.ts";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import { breadcrumbsLd } from "@factory/common";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { site, instagramDm } from "../../site.config.ts";
+
+/**
+ * "Chi sono": the bare minimum on purpose (user, 2026-11-27), only facts
+ * already known (Il Dolomiti article, her Instagram). She will write the rest.
+ */
+const { t, lpath } = useLocale(Astro);
+
+const jsonLd = [
+  breadcrumbsLd(site, [{ name: t("nav.home"), path: lpath("/") }, { name: t("about.title") }]),
+];
+---
+
+<BaseLayout title={t("about.title")} description={t("about.lead")} jsonLd={jsonLd}>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="md" align="start">
+          <Heading level={1} class="text-heading! font-display">{t("about.title")}</Heading>
+          <p class="text-lg text-pretty">{t("about.lead")}</p>
+          <figure class="border-l-4 border-accent pl-5">
+            <blockquote class="font-display text-3xl/tight text-heading">“{t("home.quote")}”</blockquote>
+          </figure>
+          <Button href={instagramDm} external variant="secondary">{t("home.writeCta")}</Button>
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

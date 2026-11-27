@@ -2,17 +2,15 @@
 import AppLayout from "../../layouts/AppLayout.astro";
 ---
 
-<AppLayout title="Richieste" active="richieste">
+<AppLayout title="Messaggi" active="richieste" eyebrow="Dal modulo contatti">
   <p class="muted">I messaggi inviati dai visitatori dal sito.</p>
   <div id="inbox" style="margin-top:1rem"></div>
-  <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../../lib/guard";
     import { data } from "../../lib/data";
-    import { supabase } from "../../lib/supabase";
     import { $, button, el, fmtFull, render, say } from "../../lib/ui";
-    import { attempt, sessionButton, whatsappUrl } from "../../lib/views";
+    import { attempt, whatsappUrl } from "../../lib/views";
     import type { InboxRow } from "../../lib/types";
 
     // Payload keys → what the owner reads. Anything not listed is shown as is, so
@@ -57,7 +55,6 @@ import AppLayout from "../../layouts/AppLayout.astro";
 
     void attempt(async () => {
       await requireStaff();
-      sessionButton($("#session"), () => supabase.auth.signOut());
       await load();
     });
   </script>

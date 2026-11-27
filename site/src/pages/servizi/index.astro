@@ -1,0 +1,62 @@
+---
+import { useLocale } from "../../lib/locale.ts";
+import Container from "@factory/design-system/components/Container.astro";
+import Section from "@factory/design-system/components/Section.astro";
+import Stack from "@factory/design-system/components/Stack.astro";
+import Heading from "@factory/design-system/components/Heading.astro";
+import Button from "@factory/design-system/components/Button.astro";
+import { breadcrumbsLd } from "@factory/common";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { site, instagramDm } from "../../site.config.ts";
+
+/**
+ * "I miei servizi": what she offers besides the monthly programme. The room
+ * (birthdays, extra activities) is booked on /servizi/prenota/ from the slots
+ * she opens in the dashboard (our own system, not Calendly: DECISIONS 2026-11-27).
+ * Copy: a DRAFT built on her bio ("Realizzo ceramiche personalizzate /
+ * Workshop, events, team building") and the user's notes; for her to correct.
+ */
+const { t, href, lpath } = useLocale(Astro);
+const services = ["labs", "party", "room", "custom"] as const;
+
+const jsonLd = [
+  breadcrumbsLd(site, [{ name: t("nav.home"), path: lpath("/") }, { name: t("services.title") }]),
+];
+---
+
+<BaseLayout title={t("services.title")} description={t("services.lead")} jsonLd={jsonLd}>
+  <main id="main">
+    <Section space="md">
+      <Container width="reading">
+        <Stack gap="lg">
+          <Stack gap="sm">
+            <Heading level={1} class="text-heading! font-display">{t("services.title")}</Heading>
+            <p class="text-lg text-ink-muted text-pretty">{t("services.lead")}</p>
+          </Stack>
+
+          {
+            services.map((key) => (
+              <section id={key} aria-labelledby={`${key}-title`} class="scroll-mt-6 rounded-card border border-line p-5 sm:p-6">
+                <Stack gap="sm" align="start">
+                  <Heading level={2} size="lg" id={`${key}-title`} class="text-heading!">{t(`services.${key}Title`)}</Heading>
+                  <p class="text-pretty">{t(`services.${key}`)}</p>
+                  {key === "labs" ? (
+                    <Button href={href("/eventi/")} variant="secondary">{t("home.eventsCta")}</Button>
+                  ) : (
+                    <div class="flex flex-wrap gap-3">
+                      {(key === "party" || key === "room") && (
+                        <Button href={href("/servizi/prenota/")}>{t("services.book")}</Button>
+                      )}
+                      <Button href={instagramDm} external variant="secondary">{t("services.ask")}</Button>
+                    </div>
+                  )}
+                </Stack>
+              </section>
+            ))
+          }
+        </Stack>
+      </Container>
+    </Section>
+  </main>
+</BaseLayout>

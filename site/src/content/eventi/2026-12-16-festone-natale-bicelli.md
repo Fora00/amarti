@@ -10,6 +10,9 @@ host: "lorenzo-bicelli"
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Make your Christmas garland"
+  summary: "A workshop with Lorenzo Bicelli to make your own Christmas garland, Wednesday 16 December from 5:30 to 8 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

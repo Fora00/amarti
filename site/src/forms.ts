@@ -14,4 +14,6 @@ export const forms = {
   request: `${functions}/request`,
   /** Course sign-up from an event page → `signups` (backend/supabase/functions/signup). */
   signup: `${functions}/signup`,
+  /** Room booking request from /servizi/prenota/ → `richieste_sala` (backend/supabase/functions/room-request). */
+  room: `${functions}/room-request`,
 } as const;

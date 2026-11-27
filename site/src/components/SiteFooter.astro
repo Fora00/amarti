@@ -1,11 +1,11 @@
 ---
+import { useLocale } from "../lib/locale.ts";
 import Container from "@factory/design-system/components/Container.astro";
 import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
-import { site } from "../site.config.ts";
+import { site, footerLinks } from "../site.config.ts";
 import { url } from "../lib/path.ts";
-import { i18n } from "../i18n/dictionaries.ts";
 
-const t = i18n.useTranslations("it");
+const { t, href } = useLocale(Astro);
 const year = new Date().getFullYear();
 ---
 
@@ -15,7 +15,7 @@ const year = new Date().getFullYear();
       <p>aMarticeramics Lab · {t("home.where")}</p>
       <ul class="flex list-none gap-5 p-0">
         {
-          site.links.map((link) => (
+          footerLinks.map((link) => (
             <li>
               <ExternalLink href={link.url}>{link.label}</ExternalLink>
             </li>

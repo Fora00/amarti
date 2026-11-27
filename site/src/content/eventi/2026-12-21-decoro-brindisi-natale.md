@@ -9,6 +9,9 @@ location:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Ceramic decorating for all ages and a Christmas toast"
+  summary: "Adults and children decorate ceramics together, then we raise a glass to Christmas: Monday 21 December from 6 to 8 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

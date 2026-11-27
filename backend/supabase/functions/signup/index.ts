@@ -3,13 +3,13 @@
 // the course is confirmed (plan/BOOKING-FLOW.md). Success → /iscrizione/,
 // a refusal → back to the event page with #errore.
 import { handlePost } from "../_shared/form.ts";
-import { signupCheck, signupFailPath, signupFields, signupRow } from "../_shared/specs.ts";
+import { signupCheck, signupFailPath, signupFields, signupOkPath, signupRow } from "../_shared/specs.ts";
 
 Deno.serve((req) =>
   handlePost(req, {
     fields: signupFields,
-    okPath: "/iscrizione/",
-    failPath: (get) => signupFailPath(get?.("event_id")),
+    okPath: (get) => signupOkPath(get("lang")),
+    failPath: (get) => signupFailPath(get?.("event_id"), get?.("lang")),
     extraCheck: signupCheck,
     insert: (v) => ({ table: "signups", row: signupRow(v, new Date()) }),
   })

@@ -1,9 +1,10 @@
 ---
+import { useLocale } from "../../lib/locale.ts";
 import type { GetStaticPaths } from "astro";
 import { url } from "../../lib/path.ts";
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
-import { getCollection, getEntry, render } from "astro:content";
+import { getEntry, render } from "astro:content";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -15,37 +16,38 @@ import { eventLd, breadcrumbsLd, faqPageLd } from "@factory/common";
 import { isUpcoming, resolveTiming } from "@factory/common/calendar";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { eventPaths } from "../../lib/paths.ts";
 import DateTile from "../../components/DateTile.astro";
-import PriceTbd from "../../components/PriceTbd.astro";
 import SignupForm from "../../components/SignupForm.astro";
-import { dateTile, formatWhen } from "../../lib/when.ts";
+import { dateTile, eventLead, eventSummary, eventTitle, formatWhen } from "../../lib/when.ts";
 import { formatPrice } from "../../lib/price.ts";
 import { site } from "../../site.config.ts";
-import { i18n } from "../../i18n/dictionaries.ts";
 
 /** Astro types `Astro.props` from this interface; without it `event` is `unknown`. */
 interface Props {
   event: CollectionEntry<"eventi">;
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const events = await getCollection("eventi");
-  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
-};
+export const getStaticPaths: GetStaticPaths = eventPaths;
 
 const { event } = Astro.props;
-const t = i18n.useTranslations("it");
+const { t, href, lpath, lang, intl } = useLocale(Astro);
 const { Content } = await render(event);
 
 const { data } = event;
 const path = `/eventi/${event.id}/`;
 const { startIso } = resolveTiming(data);
+const description = eventSummary(data, lang);
+const title = eventTitle(data, lang);
+const lead = eventLead(data, lang);
+// Every field but title and date is optional: a row of facts shows only what is set.
+const priceText = data.price ? formatPrice(data.price, intl) : data.free ? t("events.free") : undefined;
 
 // Instagram cannot prefill a DM, so the button copies this to the clipboard and
 // the visitor pastes it into the chat. Needs the one inline script below.
 const copyMessage =
   data.bookingProvider === "instagram" && data.bookingUrl
-    ? t("events.bookingMessage", { title: data.title, when: formatWhen(data) })
+    ? t("events.bookingMessage", { title, when: formatWhen(data, intl) })
     : undefined;
 // Day 2 of a two-evening course is booked with day 1, so only day 1 books.
 const laterDay = Boolean(data.serie && data.serie.day > 1);
@@ -65,9 +67,9 @@ if (data.serie && !other) throw new Error(`${event.id}: serie.with points at a m
 
 const jsonLd = [
   eventLd(site, {
-    name: data.title,
-    description: data.summary,
-    path,
+    name: title,
+    description,
+    path: lpath(path),
     timing: data,
     status: data.status,
     location: data.location,
@@ -76,29 +78,29 @@ const jsonLd = [
     soldOut: data.soldOut,
   }),
   breadcrumbsLd(site, [
-    { name: t("nav.home"), path: "/" },
-    { name: t("events.title"), path: "/eventi/" },
-    { name: data.title },
+    { name: t("nav.home"), path: lpath("/") },
+    { name: t("events.title"), path: lpath("/eventi/") },
+    { name: title },
   ]),
   ...(data.faq.length > 0 ? [faqPageLd(data.faq)] : []),
 ];
 ---
 
-<BaseLayout title={data.title} description={data.summary} jsonLd={jsonLd} noindex={data.noindex}>
+<BaseLayout title={title} description={description} jsonLd={jsonLd} noindex={data.noindex}>
   <main id="main">
     <Section space="md">
       <Container width="reading" as="article">
         <Stack gap="lg">
           <Stack gap="sm">
-            <div class="flex items-center gap-5" data-month={dateTile(data).monthNumber}>
+            <div class="flex items-center gap-5" data-month={dateTile(data, intl).monthNumber}>
               <DateTile timing={data} size="lg" />
               <p class="font-semibold text-accent">
-                <time datetime={startIso}>{formatWhen(data)}</time>
+                <time datetime={startIso}>{formatWhen(data, intl)}</time>
                 {data.status !== "scheduled" && <span> · {t(`events.status.${data.status}`)}</span>}
                 {data.serie && <span class="block text-ink-muted">{t("events.serieDay", { day: data.serie.day, of: data.serie.of })}</span>}
               </p>
             </div>
-            <Heading level={1} size="title" class="text-heading! text-balance">{data.title}</Heading>
+            <Heading level={1} size="title" class="text-heading! text-balance">{title}</Heading>
             {
               host && (
                 <p class="text-lg font-semibold">
@@ -113,14 +115,14 @@ const jsonLd = [
                 </p>
               )
             }
-            <p class="text-lg text-ink-muted text-pretty">{data.summary}</p>
+            {lead && <p class="text-lg text-ink-muted text-pretty">{lead}</p>}
             {
               data.serie && other && (
                 <p class="rounded-card border border-line bg-surface-muted px-4 py-3">
                   {t(other.data.serie!.day > data.serie.day ? "events.serieNext" : "events.seriePrevious", {
                     day: other.data.serie!.day,
                   })}{" "}
-                  <a href={url(`/eventi/${other.id}/`)}>{formatWhen(other.data)}</a>
+                  <a href={href(`/eventi/${other.id}/`)}>{formatWhen(other.data, intl)}</a>
                 </p>
               )
             }
@@ -140,13 +142,7 @@ const jsonLd = [
             )
           }
           {
-            !data.cover && (
-              <div class="grid aspect-[16/9] w-full place-items-center rounded-card border-2 border-dashed border-line-strong bg-surface-muted text-sm text-ink-muted">
-                {t("events.photoPlaceholder")}
-              </div>
-            )
-          }
-
+            (data.location || priceText || data.capacity) && (
           <dl class="grid gap-x-8 gap-y-3 sm:grid-cols-[auto_1fr]">
             {
               data.location && (
@@ -159,10 +155,14 @@ const jsonLd = [
                 </>
               )
             }
-            <dt class="font-semibold">{t("events.price")}</dt>
-            <dd>
-              {data.price ? formatPrice(data.price) : data.free ? t("events.free") : <PriceTbd label={t("events.priceTbd")} />}
-            </dd>
+            {
+              priceText && (
+                <>
+                  <dt class="font-semibold">{t("events.price")}</dt>
+                  <dd>{priceText}</dd>
+                </>
+              )
+            }
             {
               data.capacity && (
                 <>
@@ -172,6 +172,8 @@ const jsonLd = [
               )
             }
           </dl>
+            )
+          }
 
           <Stack direction="row" gap="sm" wrap align="center">
             {signupOpen && <Button href="#prenota">{t("signup.cta")}</Button>}
@@ -248,7 +250,8 @@ const jsonLd = [
             )
           }
 
-          <Prose><Content /></Prose>
+          {/* The Markdown body is written in Italian only: left out of /en/ rather than shown untranslated. */}
+          {lang === "it" && <Prose><Content /></Prose>}
 
           {signupOpen && <SignupForm eventId={event.id} />}
         </Stack>

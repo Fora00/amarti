@@ -10,6 +10,9 @@ host: "artlab"
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Make your scented candle"
+  summary: "A workshop with Artlab to make your own scented candle, Thursday 3 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
 Info e prenotazioni in DM su Instagram.

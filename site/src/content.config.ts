@@ -30,10 +30,9 @@ const eventi = defineCollection({
        */
       host: reference("ospiti").optional(),
       /**
-       * Explicitly free. Without it, an event with no `price` shows a "00"
-       * placeholder ("prezzo da definire"), never "Gratuito": the programme
-       * comes from posters that say "info in DM", so a missing price means
-       * unknown, not free.
+       * Explicitly free: shows "Gratuito". With neither `price` nor `free` the
+       * price is simply not shown (no placeholder since 2026-11-27) — a missing
+       * price means unknown, never free.
        */
       free: z.boolean().default(false),
       /**
@@ -48,6 +47,23 @@ const eventi = defineCollection({
         })
         .optional(),
       ...seoFields.shape,
+      /**
+       * Optional for events, unlike the shared `seoFields` (user, 2026-11-27:
+       * every course field but title and date may be left out, and what is
+       * missing does not show). Meta/JSON-LD/llms.txt fall back to
+       * `eventSummary()` in src/lib/when.ts.
+       */
+      summary: z.string().max(300).optional(),
+      /**
+       * English text for /en/ (all optional): what is missing falls back to
+       * the Italian. The body (Markdown) stays Italian.
+       */
+      en: z
+        .object({
+          title: z.string().optional(),
+          summary: z.string().max(300).optional(),
+        })
+        .optional(),
     }),
 });
 

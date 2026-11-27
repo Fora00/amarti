@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import { icsCalendar } from "@factory/common/calendar";
 import { absoluteUrl } from "@factory/common";
 import { site } from "../../site.config.ts";
+import { eventSummary } from "../../lib/when.ts";
 
 export const getStaticPaths: GetStaticPaths = async () =>
   (await getCollection("eventi")).map((event) => ({
@@ -21,7 +22,7 @@ export const GET: APIRoute = ({ props }) => {
         uid: event.id,
         title: data.title,
         timing: data,
-        description: data.summary,
+        description: eventSummary(data),
         location: data.location
           ? [data.location.name, data.location.address].filter(Boolean).join(", ")
           : undefined,

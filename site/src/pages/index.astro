@@ -1,6 +1,6 @@
 ---
+import { useLocale } from "../lib/locale.ts";
 import { getCollection } from "astro:content";
-import { url } from "../lib/path.ts";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -12,16 +12,15 @@ import { isUpcoming, resolveTiming } from "@factory/common/calendar";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import EventCard from "../components/EventCard.astro";
 import Logo from "../components/Logo.astro";
-import { site, instagramDm, vintedUrl } from "../site.config.ts";
-import { i18n } from "../i18n/dictionaries.ts";
-import { faq } from "../faq.ts";
+import { site, instagramDm } from "../site.config.ts";
+import { faqByLang } from "../faq.ts";
 
 /**
  * Copy: the lead and "Ceramiche personalizzate" / "Affitta la sala" are her own
  * words (Instagram bio and pinned post); the quote is from the Il Dolomiti
  * article (sponsored). The rest is a draft for her to correct — BRIEF.md.
  */
-const t = i18n.useTranslations("it");
+const { t, href, lang } = useLocale(Astro);
 
 const upcoming = (await getCollection("eventi"))
   .filter((event) => isUpcoming(event.data))
@@ -31,7 +30,7 @@ const upcoming = (await getCollection("eventi"))
 const space = ["custom", "labs", "store", "room"] as const;
 ---
 
-<BaseLayout title={`aMarticeramics Lab — ${t("home.eyebrow")}`} description={site.description} bareTitle>
+<BaseLayout title={`aMarticeramics Lab — ${t("home.eyebrow")}`} description={lang === "en" ? t("home.description") : site.description} bareTitle>
   <main id="main">
     <section class="bg-hero text-hero-ink">
       <Container>
@@ -42,7 +41,7 @@ const space = ["custom", "labs", "store", "room"] as const;
             <Heading level={1} class="text-hero-ink! font-display">aMarticeramics Lab</Heading>
             <p class="max-w-reading text-lg text-pretty">{t("home.lead")}</p>
             <div class="flex flex-wrap gap-3">
-              <Button href={url("/eventi/")}>{t("home.eventsCta")}</Button>
+              <Button href={href("/eventi/")}>{t("home.eventsCta")}</Button>
               <Button href={instagramDm} external variant="ghost" class="text-hero-ink! hover:bg-transparent! underline">
                 {t("home.writeCta")}
               </Button>
@@ -61,7 +60,7 @@ const space = ["custom", "labs", "store", "room"] as const;
               <ul class="grid list-none gap-4 p-0 md:grid-cols-2">
                 {upcoming.map((event) => <EventCard event={event} />)}
               </ul>
-              <Button href={url("/eventi/")} variant="secondary">{t("home.eventsCta")}</Button>
+              <Button href={href("/eventi/")} variant="secondary">{t("home.eventsCta")}</Button>
             </Stack>
           </Container>
         </Section>
@@ -77,7 +76,13 @@ const space = ["custom", "labs", "store", "room"] as const;
               space.map((key) => (
                 <li>
                   <Stack gap="xs">
-                    <Heading level={3} size="md">{t(`home.space.${key}Title`)}</Heading>
+                    <Heading level={3} size="md">
+                      {key === "room" ? (
+                        <a href={href("/servizi/#room")} class="text-ink no-underline hover:text-accent hover:underline">{t(`home.space.${key}Title`)}</a>
+                      ) : (
+                        t(`home.space.${key}Title`)
+                      )}
+                    </Heading>
                     <p class="text-ink-muted text-pretty">{t(`home.space.${key}`)}</p>
                   </Stack>
                 </li>
@@ -98,7 +103,7 @@ const space = ["custom", "labs", "store", "room"] as const;
           <Stack gap="sm" align="start">
             <Heading level={2} size="xl" class="text-heading!">{t("home.shopTitle")}</Heading>
             <p class="text-ink-muted text-pretty">{t("home.shopLead")}</p>
-            <Button href={vintedUrl} external variant="secondary">{t("home.shopCta")}</Button>
+            <Button href={href("/negozio/")} variant="secondary">{t("home.shopCta")}</Button>
           </Stack>
           <Stack gap="sm" align="start">
             <Heading level={2} size="xl" class="text-heading!">{t("home.whereTitle")}</Heading>
@@ -115,7 +120,7 @@ const space = ["custom", "labs", "store", "room"] as const;
       <Container width="reading">
         <Stack gap="md">
           <Heading level={2} class="text-heading! font-display">{t("home.faqTitle")}</Heading>
-          <Faq items={faq} />
+          <Faq items={[...faqByLang[lang]]} />
         </Stack>
       </Container>
     </Section>

@@ -89,7 +89,8 @@ async function up() {
   sql(`insert into staff (email) values ('${email}') on conflict do nothing`);
 
   const note = "# Written by `pnpm backend:local`: the LOCAL Supabase, used by `astro dev` only. Git-ignored.\n";
-  writeFileSync(join(root, "site/.env.development"), `${note}PUBLIC_SUPABASE_URL=${s.API_URL}\n`);
+  // The site's build-time price list (src/lib/listino.ts) needs the key of the same stack.
+  writeFileSync(join(root, "site/.env.development"), `${note}PUBLIC_SUPABASE_URL=${s.API_URL}\nPUBLIC_SUPABASE_ANON_KEY=${publicKey}\n`);
   writeFileSync(join(root, "app/.env.development"), `${note}PUBLIC_SUPABASE_URL=${s.API_URL}\nPUBLIC_SUPABASE_ANON_KEY=${publicKey}\n`);
 
   const mail = s.MAILPIT_URL || s.INBUCKET_URL || "http://127.0.0.1:54324";

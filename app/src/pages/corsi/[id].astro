@@ -32,21 +32,69 @@ const dates = course.dates.join(" + ");
     </p>
   </div>
 
+  <form id="sumup-form" class="card sumup" style="margin-top:1rem" hidden>
+    <div class="field">
+      <label for="f-sumup">Link SumUp per questo corso</label>
+      <input id="f-sumup" name="sumup" class="input" type="url" inputmode="url" autocomplete="off"
+        placeholder="https://…" />
+    </div>
+    <p class="muted" style="margin:.5rem 0 0">
+      Incolla il link di pagamento che hai creato su SumUp per questo corso: entra nel messaggio di conferma
+      (WhatsApp ed email) di ogni iscritto. Lascia vuoto per toglierlo.
+    </p>
+    <div class="row" style="justify-content:flex-start;gap:.5rem;margin-top:.75rem">
+      <button type="submit" class="btn small">Salva il link</button>
+      <a id="sumup-open" class="btn secondary small" target="_blank" rel="noopener noreferrer" hidden>Apri</a>
+    </div>
+  </form>
+
   <div id="signups" style="margin-top:1rem"></div>
-  <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../../lib/guard";
     import { data } from "../../lib/data";
-    import { supabase } from "../../lib/supabase";
-    import { isActive, STATUS_LABELS } from "../../lib/corsi";
+    import { cleanSumupLink, isActive, STATUS_LABELS } from "../../lib/corsi";
     import { $, el, render, say } from "../../lib/ui";
-    import { attempt, sessionButton, signupItem, type CourseInfo } from "../../lib/views";
+    import { attempt, signupItem, type CourseInfo } from "../../lib/views";
     import type { SignupStatus } from "../../lib/types";
 
     const root = $<HTMLElement>("#corso");
     const ids = new Set((root.dataset.aliases ?? "").split(" ").filter(Boolean));
-    const info: CourseInfo = { title: root.dataset.title ?? "", dates: root.dataset.dates ?? "" };
+    const courseId = [...ids][0] ?? "";
+    const info: CourseInfo = { title: root.dataset.title ?? "", dates: root.dataset.dates ?? "", sumup: null };
+    const form = $<HTMLFormElement>("#sumup-form");
+    const input = $<HTMLInputElement>("#f-sumup");
+    const open = $<HTMLAnchorElement>("#sumup-open");
+
+    function showSumup(link: string | null) {
+      info.sumup = link;
+      input.value = link ?? "";
+      open.hidden = !link;
+      if (link) open.href = link;
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      void attempt(async () => {
+        const typed = input.value.trim();
+        const link = typed === "" ? null : cleanSumupLink(typed);
+        if (typed !== "" && !link) {
+          say("Il link deve iniziare con https:// e non contenere spazi.", true);
+          input.focus();
+          return;
+        }
+        const submit = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+        submit.disabled = true;
+        try {
+          await data.setCorsoSumup(courseId, link);
+          showSumup(link);
+          await load();
+          say(link ? "Link SumUp salvato: è nei messaggi di conferma." : "Link SumUp tolto.");
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    });
     // Grouped in the order she works through them; empty groups are left out.
     const ORDER: SignupStatus[] = ["iscritta", "confermata", "pagato", "attesa", "annullata"];
 
@@ -71,7 +119,9 @@ const dates = course.dates.join(" + ");
 
     void attempt(async () => {
       await requireStaff();
-      sessionButton($("#session"), () => supabase.auth.signOut());
+      const corso = (await data.listCorsi()).find((c) => c.event_id === courseId);
+      showSumup(corso?.sumup_link ?? null);
+      form.hidden = false;
       await load();
     });
   </script>

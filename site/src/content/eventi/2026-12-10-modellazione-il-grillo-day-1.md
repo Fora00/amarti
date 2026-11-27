@@ -14,6 +14,9 @@ serie:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Ceramic shaping (day 1)"
+  summary: "First evening of the ceramics course with Il Grillo: shaping clay on Thursday 10 December, 6:30-9 pm. Decorating is day 2, Thursday 17 December."
 ---
 
 Info e prenotazioni in DM su Instagram.

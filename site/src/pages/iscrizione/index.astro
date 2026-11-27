@@ -1,4 +1,5 @@
 ---
+import { useLocale } from "../../lib/locale.ts";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -6,10 +7,8 @@ import Heading from "@factory/design-system/components/Heading.astro";
 import Button from "@factory/design-system/components/Button.astro";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { i18n } from "../../i18n/dictionaries.ts";
-import { url } from "../../lib/path.ts";
 
-const t = i18n.useTranslations("it");
+const { t, href } = useLocale(Astro);
 ---
 
 <!-- Where the `signup` edge function redirects after a course sign-up (same
@@ -23,7 +22,7 @@ const t = i18n.useTranslations("it");
           <p class="text-lg text-pretty">{t("signupThanks.lead")}</p>
           <p class="text-ink-muted text-pretty">{t("signupThanks.next")}</p>
           <p class="text-ink-muted text-pretty">{t("signupThanks.pay")}</p>
-          <Button href={url("/eventi/")}>{t("signupThanks.back")}</Button>
+          <Button href={href("/eventi/")}>{t("signupThanks.back")}</Button>
         </Stack>
       </Container>
     </Section>

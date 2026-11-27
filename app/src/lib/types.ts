@@ -30,3 +30,56 @@ export interface SignupRow {
   status: SignupStatus;
   created_at: string;
 }
+
+/** One row of `corsi`: what the owner sets per course. `event_id` = the course id (day 1's entry id). */
+export interface CorsoRow {
+  event_id: string;
+  /** Her SumUp payment link for this course; null = not set yet. */
+  sumup_link: string | null;
+  updated_at: string;
+}
+
+/** One row of `listino`: a shop item with a fixed price. Public once `visibile` (the site reads it at build time). */
+export interface ListinoRow {
+  id: string;
+  nome: string;
+  descrizione: string | null;
+  /** Euro cents; null = "su richiesta". */
+  prezzo_cents: number | null;
+  ordine: number;
+  visibile: boolean;
+  updated_at: string;
+}
+
+export type ListinoInput = Pick<ListinoRow, "nome" | "descrizione" | "prezzo_cents" | "ordine" | "visibile">;
+
+/** One room slot she opened (`disponibilita`). Times are "HH:MM:SS", Rovereto wall clock. */
+export type SlotState = "libero" | "richiesto" | "confermato";
+export interface SlotRow {
+  id: string;
+  giorno: string;
+  inizio: string;
+  fine: string;
+  stato: SlotState;
+  created_at: string;
+}
+
+export type RoomRequestState = "nuova" | "contattata" | "confermata" | "annullata";
+/** One request from /servizi/prenota/ (`richieste_sala`). Text fields are untrusted: textContent only. */
+export interface RoomRequestRow {
+  id: string;
+  slot_id: string | null;
+  giorno: string;
+  inizio: string;
+  fine: string;
+  tipo: "compleanno" | "attivita" | "altro";
+  persone: number | null;
+  nome: string;
+  cognome: string;
+  email: string;
+  telefono: string;
+  note: string | null;
+  privacy_at: string;
+  stato: RoomRequestState;
+  created_at: string;
+}

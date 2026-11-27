@@ -11,10 +11,19 @@ import type { SignupRow, SignupStatus } from "./types";
 export const MINIMO_DEFAULT: number | null = null;
 
 /**
- * Her SumUp payment link, once she has one to share. Empty = the confirmation
- * message says the link will follow, without a URL. Never invent one.
+ * A SumUp link as the dashboard accepts it: https, no spaces (the same rule as
+ * the `corsi.sumup_link` check in backend/supabase/schema.sql). Returns the
+ * cleaned link, or null when the text is not one.
  */
-export const SUMUP_LINK = ""; // TODO: SumUp link from the owner
+export function cleanSumupLink(text: string): string | null {
+  const link = text.trim();
+  if (!/^https:\/\/\S{4,300}$/.test(link)) return null;
+  try {
+    return new URL(link).protocol === "https:" ? link : null;
+  } catch {
+    return null;
+  }
+}
 
 /** These hold a seat; `attesa` and `annullata` do not. */
 export const ACTIVE: readonly SignupStatus[] = ["iscritta", "confermata", "pagato"];

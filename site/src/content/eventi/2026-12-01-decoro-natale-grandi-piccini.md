@@ -9,6 +9,9 @@ location:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Ceramic decorating for all ages: Christmas ornaments"
+  summary: "Adults and children decorate their own ceramic Christmas ornaments together, Tuesday 1 December from 6 to 8 pm at aMarticeramics Lab."
 ---
 
 Info e prenotazioni in DM su Instagram.

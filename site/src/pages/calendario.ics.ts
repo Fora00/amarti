@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { icsCalendar } from "@factory/common/calendar";
 import { absoluteUrl } from "@factory/common";
 import { site } from "../site.config.ts";
+import { eventSummary } from "../lib/when.ts";
 
 /** The whole programme as one subscribable feed. */
 export const GET: APIRoute = async () => {
@@ -13,7 +14,7 @@ export const GET: APIRoute = async () => {
       uid: id,
       title: data.title,
       timing: data,
-      description: data.summary,
+      description: eventSummary(data),
       location: data.location
         ? [data.location.name, data.location.address].filter(Boolean).join(", ")
         : undefined,

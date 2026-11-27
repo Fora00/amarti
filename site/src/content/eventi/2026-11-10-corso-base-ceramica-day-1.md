@@ -9,6 +9,9 @@ location:
 # Evento passato: resta nel calendario di novembre. Prezzo e posti: sconosciuti.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Beginners' ceramics course: shaping clay (day 1)"
+  summary: "First evening of the beginners' ceramics course, on shaping clay: Tuesday 10 November at 6:30 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

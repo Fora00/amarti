@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { llmsTxt } from "@factory/common";
 import { site } from "../site.config.ts";
 import { faq } from "../faq.ts";
+import { eventSummary } from "../lib/when.ts";
 
 export const GET: APIRoute = async () => {
   const eventi = (await getCollection("eventi")).filter((event) => !event.data.noindex);
@@ -25,7 +26,7 @@ export const GET: APIRoute = async () => {
           links: eventi.map((event) => ({
             title: event.data.title,
             path: `/eventi/${event.id}/`,
-            summary: event.data.summary,
+            summary: eventSummary(event.data),
           })),
         },
         {

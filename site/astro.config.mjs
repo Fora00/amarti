@@ -37,7 +37,7 @@ export default defineConfig({
             // noindex pages (thank-you pages, the draft privacy notice) stay out of the sitemap.
             filter: (page) =>
               sitemapFilter(site, [...builtLocales])(page) &&
-              !["/grazie/", "/iscrizione/", "/privacy/"].some((p) => page.includes(p)),
+              !["/grazie/", "/iscrizione/", "/privacy/", "/richiesta-inviata/"].some((p) => page.includes(p)),
           }),
         ],
 

@@ -13,6 +13,9 @@ serie:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Make your mug, Christmas edition (day 1)"
+  summary: "First evening: shape your own Christmas-themed ceramic mug, Monday 14 December 6:30-9 pm. Decorating is day 2, Friday 18 December."
 ---
 
 Info e prenotazioni in DM su Instagram.

@@ -5,7 +5,12 @@
     "events": "Laboratori",
     "shop": "Negozio",
     "write": "Scrivimi",
-    "contact": "Contatti"
+    "contact": "Contatti",
+    "services": "Servizi",
+    "about": "Chi sono",
+    "main": "Principale",
+    "otherLanguage": "English version",
+    "darkTheme": "Tema scuro"
   },
   "home": {
     "eyebrow": "Piazza Malfatti 10 · Rovereto",
@@ -24,14 +29,14 @@
       "storeTitle": "Concept store",
       "store": "Accanto al laboratorio, le ceramiche di aMarti e le creazioni di artigiane e artiste del territorio, in vendita in negozio.",
       "roomTitle": "Affitta la sala",
-      "room": "Workshop, eventi e team building: scrivimi e ne parliamo."
+      "room": "Compleanni, workshop, eventi e team building: scrivimi e ne parliamo."
     },
     "whereTitle": "Dove siamo",
     "where": "Piazza Malfatti 10, Rovereto (TN)",
     "contact": "Info e prenotazioni in DM su Instagram.",
     "shopTitle": "Il negozio",
-    "shopLead": "Le ceramiche si trovano in negozio; alcuni pezzi sono anche online su Vinted.",
-    "shopCta": "Vedi i pezzi su Vinted",
+    "shopLead": "Le ceramiche di aMarti e le creazioni di artigiane del territorio si trovano in negozio, in Piazza Malfatti 10.",
+    "shopCta": "Vai al negozio",
     "faqTitle": "Domande frequenti",
     "contactCta": "Scrivici"
   },
@@ -67,19 +72,17 @@
     "copied": "Messaggio copiato: incollalo nella chat.",
     "soldOut": "Posti esauriti",
     "with": "con {host}",
-    "priceTbd": "Prezzo da definire",
     "serieDay": "Day {day} di {of}",
     "serieNext": "Continua con il day {day}:",
     "seriePrevious": "Fa seguito al day {day}:",
     "serieBookFirst": "Si prenota insieme al day 1.",
     "pay": "Paga e prenota",
     "payDemo": "Il pagamento online non è ancora attivo: per ora si prenota in DM.",
-    "photoPlaceholder": "Qui andrà la foto del laboratorio",
     "withLabel": "con"
   },
   "shop": {
     "title": "Negozio",
-    "lead": "Le ceramiche di aMarti e le creazioni di artigiane e artiste del territorio si trovano in negozio, in Piazza Malfatti 10 a Rovereto. Alcuni pezzi sono anche online su Vinted.",
+    "lead": "Le ceramiche di aMarti e le creazioni di artigiane e artiste del territorio si trovano in negozio, in Piazza Malfatti 10 a Rovereto.",
     "empty": "Nessun pezzo disponibile al momento.",
     "soldTitle": "Già venduti",
     "sold": "Venduto",
@@ -90,7 +93,10 @@
       "other": "Acquista"
     },
     "buyNote": "Il pagamento e la spedizione avvengono sul sito del venditore.",
-    "vinted": "Vedi i pezzi su Vinted"
+    "vinted": "Vedi i pezzi su Vinted",
+    "listTitle": "Listino",
+    "onRequest": "Su richiesta",
+    "listNote": "Pezzi disponibili in negozio. Per info o per farti mettere da parte un pezzo, scrivimi su Instagram."
   },
   "contact": {
     "title": "Scrivici",
@@ -141,5 +147,51 @@
   "privacy": {
     "title": "Informativa privacy",
     "lead": "Come usiamo i dati che ci lasci quando ti iscrivi a un laboratorio o ci scrivi dal sito."
+  },
+  "services": {
+    "title": "Servizi",
+    "lead": "Oltre ai laboratori del programma, la sala di aMarticeramics Lab si può prenotare per feste, compleanni e attività su misura.",
+    "labsTitle": "Laboratori e corsi",
+    "labs": "Ogni mese laboratori di ceramica e di artigiane e artisti ospiti, per adulti e bambini. Ti iscrivi dalla pagina del laboratorio.",
+    "partyTitle": "Feste e compleanni",
+    "party": "Un compleanno o una festa in laboratorio, con un'attività creativa per bambini o per adulti. Scrivimi la data e quante persone siete.",
+    "roomTitle": "Affitta la sala",
+    "room": "La sala per workshop, eventi, team building e attività extra. Scrivimi cosa hai in mente e ne parliamo.",
+    "customTitle": "Ceramiche personalizzate",
+    "custom": "Realizzo ceramiche personalizzate, made in Italy: scrivimi la tua idea.",
+    "ask": "Scrivimi su Instagram",
+    "book": "Scegli una data"
+  },
+  "about": {
+    "title": "Chi sono",
+    "lead": "Sono Martina, ceramista. A novembre 2025 ho aperto aMarticeramics Lab in Piazza Malfatti 10 a Rovereto: un laboratorio di ceramica e un concept store, con laboratori creativi per tutte le età."
+  },
+  "room": {
+    "title": "Prenota la sala",
+    "lead": "Scegli il giorno e l'orario tra quelli disponibili e lasciami i tuoi dati: ti ricontatto io per i dettagli.",
+    "what": "Per cosa?",
+    "tipo": {
+      "compleanno": "Compleanno o festa",
+      "attivita": "Attività o evento",
+      "altro": "Altro"
+    },
+    "when": "Giorno e orario",
+    "whenHint": "Gli orari liberi in questo momento.",
+    "busyHint": "Le serate dei laboratori sono nel programma:",
+    "people": "Quante persone, più o meno",
+    "note": "Raccontami cosa hai in mente (facoltativo)",
+    "noteHint": "Età dei bambini, tipo di attività, esigenze particolari…",
+    "privacyAfter": " e acconsento all'uso dei miei dati per gestire la richiesta.",
+    "submit": "Invia la richiesta",
+    "how": "La richiesta blocca l'orario per te. Ti ricontatto su WhatsApp o via email per confermare e definire i dettagli.",
+    "none": "Al momento non ci sono date aperte per la sala. Scrivimi e troviamo un giorno insieme.",
+    "error": "Non siamo riusciti a inviare la richiesta. Controlla i campi (giorno e orario scelti, email e telefono validi, privacy spuntata) e riprova.",
+    "taken": "Quell'orario è appena stato richiesto da qualcun altro. Scegline un altro, oppure scrivimi."
+  },
+  "roomThanks": {
+    "title": "Richiesta inviata!",
+    "lead": "Ho ricevuto la tua richiesta per la sala: l'orario è tenuto per te.",
+    "next": "Ti ricontatto presto su WhatsApp o via email per confermare e parlare dei dettagli.",
+    "back": "Torna ai servizi"
   }
 }

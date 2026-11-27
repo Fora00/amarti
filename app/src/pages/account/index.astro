@@ -2,7 +2,7 @@
 import AppLayout from "../../layouts/AppLayout.astro";
 ---
 
-<AppLayout title="Il tuo accesso">
+<AppLayout title="Il tuo accesso" active="account">
   <p class="muted">
     Con una password entri senza aspettare l'email: il browser (o il portachiavi dell'iPhone) la ricorda per te.
     L'email di accesso resta per il primo accesso su un nuovo dispositivo o se la dimentichi.
@@ -22,13 +22,12 @@ import AppLayout from "../../layouts/AppLayout.astro";
     <p class="muted" style="margin:.5rem 0 0">Almeno 10 caratteri.</p>
     <div style="margin-top:1rem"><button class="btn" type="submit">Salva la password</button></div>
   </form>
-  <p id="session" style="margin-top:2rem"></p>
 
   <script>
     import { requireStaff } from "../../lib/guard";
     import { supabase } from "../../lib/supabase";
     import { $, say } from "../../lib/ui";
-    import { attempt, sessionButton } from "../../lib/views";
+    import { attempt } from "../../lib/views";
 
     void attempt(async () => {
       await requireStaff();
@@ -36,7 +35,6 @@ import AppLayout from "../../layouts/AppLayout.astro";
       const email = data.user?.email ?? "";
       $<HTMLInputElement>("#username").value = email;
       $("#who").textContent = email ? `Account: ${email}` : "";
-      sessionButton($("#session"), () => supabase.auth.signOut());
       if (new URLSearchParams(location.search).has("benvenuta")) {
         say("Sei dentro. Se vuoi, imposta qui una password: la prossima volta entri senza aspettare l'email.");
       }

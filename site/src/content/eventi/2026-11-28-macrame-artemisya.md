@@ -9,6 +9,9 @@ host: "artemisya-creations"
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Macramé workshop"
+  summary: "A macramé workshop with Artemisya Creations, Saturday 28 November at 10 am at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

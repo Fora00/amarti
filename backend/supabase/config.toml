@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.signup]
 verify_jwt = false
 
+[functions.room-request]
+verify_jwt = false
+
 # Sign-in for the private app: magic link only, for addresses already in Auth
 # (the owner, added by hand) — nobody can create an account. The link returns
 # to the dashboard (the app package) on GitHub Pages; localhost:4322 is `pnpm dev:app` (also used by the

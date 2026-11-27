@@ -1,8 +1,8 @@
 /** Generic helpers live in `@factory/common/app` (shared by every private app); add this app's own views here. */
 import { data } from "./data";
-import { SUMUP_LINK, STATUS_LABELS } from "./corsi";
+import { STATUS_LABELS } from "./corsi";
 import type { SignupRow, SignupStatus } from "./types";
-import { attempt, button, el, fmtFull, href, render, whatsappUrl } from "./ui";
+import { attempt, el, fmtFull, whatsappUrl } from "./ui";
 
 export { attempt, field, whatsappUrl } from "./ui";
 
@@ -10,12 +10,14 @@ export { attempt, field, whatsappUrl } from "./ui";
 export interface CourseInfo {
   title: string;
   dates: string;
+  /** The course's SumUp link (table `corsi`), when she has set one. */
+  sumup?: string | null;
 }
 
 /** Short Italian confirmation: the course runs, the SumUp link follows (or is here once set). */
 export function confirmationText(row: SignupRow, course: CourseInfo): string {
-  const pay = SUMUP_LINK
-    ? `Per tenere il posto puoi pagare qui: ${SUMUP_LINK}`
+  const pay = course.sumup
+    ? `Per tenere il posto puoi pagare qui: ${course.sumup}`
     : "A breve ti mando il link SumUp per il pagamento, che tiene il posto.";
   return `Ciao ${row.nome}! Il corso "${course.title}" (${course.dates}) è confermato. ${pay} A presto, Martina – aMarti ceramics`;
 }
@@ -59,14 +61,4 @@ export function signupItem(row: SignupRow, course: CourseInfo | undefined, reloa
       select,
       row.telefono ? el("a", { href: whatsappUrl(row.telefono, text), class: "btn secondary small", target: "_blank", rel: "noopener noreferrer" }, "WhatsApp") : null,
       row.email ? el("a", { href: mailto(row.email, subject, text ?? `Ciao ${row.nome}!`), class: "btn secondary small" }, "Email") : null));
-}
-
-/** The "Password" link and the "Esci" button every signed-in page shows at the bottom. */
-export function sessionButton(target: HTMLElement, signOut: () => Promise<unknown>) {
-  render(target, el("span", { class: "row", style: "justify-content:flex-start;gap:.5rem" },
-    el("a", { href: href("/account/"), class: "btn secondary" }, "Password"),
-    button("Esci", () => attempt(async () => {
-      await signOut();
-      location.assign(href("/login/"));
-    }), "secondary")));
 }

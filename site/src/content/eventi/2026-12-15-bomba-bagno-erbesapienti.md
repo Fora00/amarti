@@ -10,6 +10,9 @@ host: "erbesapienti"
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Make your scented bath bomb"
+  summary: "A workshop with Erbesapienti to make your own scented bath bomb, Tuesday 15 December from 6:30 to 8:30 pm at aMarticeramics Lab."
 ---
 
 Info e prenotazioni in DM su Instagram.

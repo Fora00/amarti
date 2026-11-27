@@ -10,6 +10,9 @@ host: "minicami"
 # Evento passato: resta nel calendario di novembre. Prezzo e posti: sconosciuti.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Paracord workshop"
+  summary: "A paracord workshop with Minicami, Thursday 12 November at 6 pm at aMarticeramics Lab in Rovereto."
 ---
 
 Info e prenotazioni in DM su Instagram.

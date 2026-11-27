@@ -1,35 +1,38 @@
 ---
+import { useLocale, localUrl } from "../lib/locale.ts";
 import Container from "@factory/design-system/components/Container.astro";
-import { url } from "../lib/path.ts";
 import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
 
 import Logo from "./Logo.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 import { site, instagramDm } from "../site.config.ts";
-import { i18n } from "../i18n/dictionaries.ts";
 
-const t = i18n.useTranslations("it");
+const { t, href, lang, path } = useLocale(Astro);
 
 const links = [
-  { href: url("/eventi/"), label: t("nav.events") },
-  { href: url("/negozio/"), label: t("nav.shop") },
+  { href: href("/eventi/"), label: t("nav.events") },
+  { href: href("/servizi/"), label: t("nav.services") },
+  { href: href("/negozio/"), label: t("nav.shop") },
+  { href: href("/chi-sono/"), label: t("nav.about") },
 ];
-const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-accent";
+// The same page in the other language (every public page exists in both).
+const other = lang === "it" ? "en" : "it";
+const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-accent aria-[current=page]:text-accent";
 ---
 
 <header class="border-b border-line">
   <Container>
-    <nav class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3" aria-label="Principale">
-      <a href={url("/")} class="flex items-center gap-3 text-ink no-underline">
+    <nav class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3" aria-label={t("nav.main")}>
+      <a href={href("/")} class="flex items-center gap-3 text-ink no-underline">
         <Logo class="h-7 w-auto" />
         <span class="sr-only">{site.name} — {t("nav.home")}</span>
       </a>
 
-      <ul class="flex list-none flex-wrap items-center gap-6 p-0">
+      <ul class="flex list-none flex-wrap items-center gap-x-5 gap-y-2 p-0">
         {
           links.map((link) => (
             <li>
-              <a href={link.href} class={linkClass}>
+              <a href={link.href} class={linkClass} aria-current={Astro.url.pathname === link.href ? "page" : undefined}>
                 {link.label}
               </a>
             </li>
@@ -37,6 +40,12 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
         }
         <li>
           <ExternalLink href={instagramDm} class={linkClass}>{t("nav.write")}</ExternalLink>
+        </li>
+        <li>
+          <a href={localUrl(path, other)} hreflang={other} lang={other} class={linkClass}>
+            <span aria-hidden="true">{other.toUpperCase()}</span>
+            <span class="sr-only">{t("nav.otherLanguage")}</span>
+          </a>
         </li>
         <li class="flex"><ThemeToggle /></li>
       </ul>

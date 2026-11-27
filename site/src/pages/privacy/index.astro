@@ -1,4 +1,5 @@
 ---
+import { useLocale } from "../../lib/locale.ts";
 import Container from "@factory/design-system/components/Container.astro";
 import Section from "@factory/design-system/components/Section.astro";
 import Stack from "@factory/design-system/components/Stack.astro";
@@ -6,15 +7,21 @@ import Heading from "@factory/design-system/components/Heading.astro";
 import Prose from "@factory/design-system/components/Prose.astro";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { i18n } from "../../i18n/dictionaries.ts";
+import { PRIVACY_VERSION } from "../../lib/privacy.ts";
 
-const t = i18n.useTranslations("it");
 /**
- * DRAFT wording, not reviewed by the owner or anyone legal. The version name
- * says so (CONVENTIONS → "A consent text is versioned data"); change it with
- * the wording. Placeholders in [square brackets] are for Martina to fill.
+ * Informativa ex art. 13 GDPR for what the site actually does (checked against
+ * the code, 2026-11-27): the sign-up form and the room request (→ Supabase, EU region), the contact
+ * form (not published yet), SumUp for payment, WhatsApp/email for the
+ * confirmation, GitHub Pages hosting, NO cookies, NO analytics, fonts
+ * self-hosted, localStorage only for the light/dark choice.
+ *
+ * Still a DRAFT: the [square brackets] need her details (P.IVA, contact email,
+ * retention period) and ideally a look from her accountant. When it changes,
+ * change PRIVACY_VERSION (src/lib/privacy.ts) with it.
  */
-const version = "bozza-2026-11-27";
+const { t, lang } = useLocale(Astro);
+const it = lang === "it";
 ---
 
 <!-- Draft: kept out of search until the owner confirms it. -->
@@ -24,47 +31,281 @@ const version = "bozza-2026-11-27";
       <Container width="reading">
         <Stack gap="md">
           <p role="note" class="rounded-lg border border-accent bg-accent-muted p-4 font-semibold text-ink">
-            Bozza da confermare: questo testo non è ancora stato verificato da aMarti ceramics.
-            Le parti tra parentesi quadre sono da completare.
+            {it
+              ? "Bozza da confermare: questo testo non è ancora stato verificato da aMarti ceramics. Le parti tra parentesi quadre sono da completare."
+              : "Draft: this text has not been confirmed by aMarti ceramics yet. Parts in square brackets are still to be filled in."}
           </p>
           <Heading level={1}>{t("privacy.title")}</Heading>
           <p class="text-ink-muted text-pretty">{t("privacy.lead")}</p>
-          <Prose>
-            <h2>Chi tratta i dati</h2>
-            <p>
-              aMarti ceramics (aMarticeramics Lab), Piazza Malfatti 10, Rovereto (TN).
-              [Ragione sociale, codice fiscale o partita IVA, email di contatto.]
-            </p>
+          {
+            it ? (
+              <Prose>
+                <p>
+                  Questa informativa spiega, come richiesto dall'art. 13 del Regolamento UE 2016/679 (GDPR), quali dati
+                  personali raccogliamo attraverso questo sito, perché, per quanto tempo e quali sono i tuoi diritti.
+                </p>
 
-            <h2>Quali dati e perché</h2>
-            <p>
-              Quando ti iscrivi a un laboratorio ci lasci nome, cognome, email, telefono ed
-              eventuali note. Li usiamo solo per gestire la tua iscrizione: confermarti il posto
-              quando il corso parte, mandarti il link per il pagamento, avvisarti di cambi o
-              annullamenti. Quando ci scrivi dal modulo contatti, usiamo i tuoi dati solo per
-              risponderti.
-            </p>
-            <p>
-              La base giuridica è la tua richiesta di partecipare (art. 6.1.b GDPR). Non usiamo i
-              dati per pubblicità e non li vendiamo a nessuno.
-            </p>
+                <h2>1. Titolare del trattamento</h2>
+                <p>
+                  Martina Bonfiglio – aMarti ceramics (aMarticeramics Lab), Piazza Malfatti 10, 38068 Rovereto (TN).
+                  [Partita IVA]. Per qualsiasi domanda sui tuoi dati: [email di contatto] oppure in DM su Instagram
+                  (@amarticeramics).
+                </p>
 
-            <h2>Dove sono conservati e per quanto</h2>
-            <p>
-              In un database ospitato da un fornitore esterno (Supabase), accessibile solo a chi
-              gestisce il laboratorio. Il pagamento avviene sulla pagina di SumUp: il sito non vede
-              mai i dati della tua carta. Conserviamo i dati per [durata da definire, ad es. 12 mesi
-              dopo il laboratorio], salvo obblighi fiscali.
-            </p>
+                <h2>2. Quali dati raccogliamo</h2>
+                <ul>
+                  <li>
+                    <strong>Iscrizione a un laboratorio</strong>: nome, cognome, email, telefono, eventuali note, il
+                    laboratorio scelto, data e ora dell'iscrizione e la versione di questa informativa che hai accettato.
+                  </li>
+                  <li>
+                    <strong>Richiesta della sala</strong> (feste, compleanni, attività): giorno e orario scelti, per
+                    cosa, quante persone, nome, cognome, email, telefono, eventuali note e la versione di questa
+                    informativa che hai accettato.
+                  </li>
+                  <li>
+                    <strong>Note</strong>: se ci segnali un'allergia o un'esigenza di salute (ad esempio per smalti,
+                    cera o alimenti), è un dato "particolare" (art. 9 GDPR). Lo usiamo solo per farti partecipare in
+                    sicurezza e lo trattiamo sulla base del tuo consenso esplicito, che dai scrivendolo. Non è
+                    obbligatorio: puoi anche dircelo di persona.
+                  </li>
+                  <li>
+                    <strong>Pagamento</strong>: il sito non vede né conserva i dati della tua carta. Paghi sulla
+                    pagina di SumUp, che li tratta come titolare autonomo (informativa su sumup.it). Noi sappiamo solo se
+                    il pagamento è arrivato.
+                  </li>
+                  <li>
+                    <strong>Navigazione</strong>: come ogni sito, il server che lo ospita registra per motivi tecnici e di
+                    sicurezza l'indirizzo IP e il browser di chi lo visita. Non usiamo questi dati per altro.
+                  </li>
+                </ul>
 
-            <h2>I tuoi diritti</h2>
-            <p>
-              Puoi chiederci in qualsiasi momento di vedere, correggere o cancellare i tuoi dati,
-              o di smettere di usarli, scrivendo a [email di contatto] o in DM su Instagram. Puoi
-              anche rivolgerti al Garante per la protezione dei dati personali (garanteprivacy.it).
-            </p>
-          </Prose>
-          <p class="text-sm text-ink-muted">Versione: {version}</p>
+                <h2>3. Perché e su quale base</h2>
+                <ul>
+                  <li>
+                    Rispondere alla tua richiesta per la sala: tenerti l'orario, ricontattarti per i dettagli e la
+                    conferma. Base: la tua richiesta (art. 6.1.b GDPR). Lo stesso vale per
+                  </li>
+                  <li>
+                    gestire la tua iscrizione: confermarti il posto quando il laboratorio raggiunge il numero minimo,
+                    mandarti il link per il pagamento, avvisarti di cambi o annullamenti. Base: la tua richiesta di
+                    partecipare (art. 6.1.b GDPR, misure precontrattuali e contratto).
+                  </li>
+                  <li>
+                    Rispettare gli obblighi fiscali e contabili sui pagamenti. Base: obbligo di legge (art. 6.1.c).
+                  </li>
+                  <li>
+                    Tenere il sito sicuro e funzionante (log tecnici). Base: legittimo interesse (art. 6.1.f).
+                  </li>
+                </ul>
+                <p>
+                  Non usiamo i tuoi dati per pubblicità o newsletter, non li vendiamo e non prendiamo decisioni
+                  automatizzate su di te. Se un giorno ci sarà una newsletter, ti chiederemo un consenso a parte.
+                </p>
+
+                <h2>4. Sei obbligato a darci i dati?</h2>
+                <p>
+                  Nome, cognome, email e telefono servono per iscriverti: senza, non possiamo tenerti il posto. Le note
+                  sono facoltative. Puoi sempre prenotare anche scrivendoci in DM su Instagram.
+                </p>
+
+                <h2>5. Chi vede i tuoi dati</h2>
+                <p>
+                  Solo Martina, che gestisce il laboratorio, e chi la aiuta a gestire il sito ([nome], che ha accesso
+                  tecnico come incaricato), attraverso un'area riservata protetta da password. Per
+                  funzionare ci appoggiamo a questi fornitori, che trattano i dati solo per nostro conto (responsabili
+                  del trattamento, art. 28) o come titolari autonomi:
+                </p>
+                <ul>
+                  <li>
+                    <strong>Supabase</strong> (database delle iscrizioni), con i dati conservati in un data center
+                    nell'Unione Europea (Francoforte, Germania).
+                  </li>
+                  <li><strong>GitHub</strong> (ospita le pagine del sito; vede solo i log tecnici di navigazione).</li>
+                  <li><strong>SumUp</strong> (pagamenti), titolare autonomo.</li>
+                  <li>
+                    <strong>WhatsApp (Meta) o il servizio email</strong>, quando ti scriviamo per confermare il posto
+                    sul canale che ci hai lasciato; <strong>Instagram (Meta)</strong> se ci scrivi in DM.
+                  </li>
+                </ul>
+                <p>
+                  Alcuni di questi fornitori hanno sede negli Stati Uniti: in quel caso il trasferimento è coperto dal
+                  Data Privacy Framework UE-USA o dalle clausole contrattuali standard della Commissione europea (artt.
+                  45-46 GDPR).
+                </p>
+
+                <h2>6. Per quanto tempo</h2>
+                <ul>
+                  <li>
+                    Iscrizioni e richieste della sala: [12 mesi] dopo la data del laboratorio o della festa, poi le
+                    cancelliamo. Le note sulla salute le
+                    cancelliamo a laboratorio concluso.
+                  </li>
+                  <li>Dati legati a un pagamento: per il tempo richiesto dalla legge fiscale (di norma 10 anni).</li>
+                  <li>Log tecnici: per il tempo, breve, stabilito dal fornitore che ospita il sito.</li>
+                </ul>
+
+                <h2>7. Bambini e ragazzi</h2>
+                <p>
+                  Per i laboratori dedicati ai più piccoli, l'iscrizione la fa un genitore o chi ne esercita la
+                  responsabilità, con i propri dati. I minori di 14 anni non devono iscriversi da soli.
+                </p>
+
+                <h2>8. Cookie</h2>
+                <p>
+                  Il sito non usa cookie, né di profilazione né di statistica, e non carica servizi di terze parti mentre
+                  navighi (i caratteri sono ospitati sul sito stesso). Se scegli il tema scuro, la tua scelta resta
+                  salvata solo nel tuo browser (localStorage) e non ci viene inviata.
+                </p>
+
+                <h2>9. I tuoi diritti</h2>
+                <p>
+                  Puoi chiederci in qualsiasi momento di accedere ai tuoi dati, correggerli, cancellarli, limitarne
+                  l'uso, opporti al trattamento basato sul legittimo interesse, riceverli in un formato leggibile
+                  (portabilità) e revocare il consenso dato per le note (artt. 15-22 GDPR). La revoca non rende
+                  illegittimo quanto fatto prima. Scrivi a [email di contatto] o in DM su Instagram: ti rispondiamo entro
+                  un mese.
+                </p>
+                <p>
+                  Se pensi che i tuoi dati siano trattati in modo non corretto, puoi presentare reclamo al Garante per la
+                  protezione dei dati personali (garanteprivacy.it).
+                </p>
+
+                <h2>10. Modifiche</h2>
+                <p>
+                  Se cambiamo questa informativa, aggiorniamo la versione qui sotto. Per ogni iscrizione conserviamo
+                  quale versione era in vigore quando l'hai accettata.
+                </p>
+              </Prose>
+            ) : (
+              <Prose>
+                <p>
+                  This notice explains, as required by Article 13 of the EU General Data Protection Regulation
+                  2016/679 (GDPR), which personal data we collect through this website, why, for how long, and what
+                  your rights are. The Italian version is the reference text.
+                </p>
+
+                <h2>1. Data controller</h2>
+                <p>
+                  Martina Bonfiglio – aMarti ceramics (aMarticeramics Lab), Piazza Malfatti 10, 38068 Rovereto (TN),
+                  Italy. [VAT number]. For any question about your data: [contact email] or a DM on Instagram
+                  (@amarticeramics).
+                </p>
+
+                <h2>2. What we collect</h2>
+                <ul>
+                  <li>
+                    <strong>Workshop sign-up</strong>: first and last name, email, phone, optional notes, the workshop
+                    you chose, the date and time of the sign-up and the version of this notice you accepted.
+                  </li>
+                  <li>
+                    <strong>Room request</strong> (parties, birthdays, activities): the day and time you picked, what
+                    for, how many people, first and last name, email, phone, optional notes and the version of this
+                    notice you accepted.
+                  </li>
+                  <li>
+                    <strong>Notes</strong>: if you tell us about an allergy or a health need (glazes, wax, food), that
+                    is "special category" data (Art. 9 GDPR). We use it only so you can take part safely, based on your
+                    explicit consent, given by writing it. It is optional: you can also tell us in person.
+                  </li>
+                  <li>
+                    <strong>Payment</strong>: the website never sees or stores your card details. You pay on SumUp's
+                    page, and SumUp handles them as an independent controller. We only learn whether the payment
+                    arrived.
+                  </li>
+                  <li>
+                    <strong>Browsing</strong>: like any website, the hosting server logs visitors' IP address and
+                    browser for technical and security reasons. We use these for nothing else.
+                  </li>
+                </ul>
+
+                <h2>3. Why, and on what legal basis</h2>
+                <ul>
+                  <li>
+                    To answer your room request: hold the time for you and get back to you about details and
+                    confirmation. Basis: your request (Art. 6(1)(b) GDPR). The same applies
+                  </li>
+                  <li>
+                    to handling your sign-up: confirm your place once the workshop reaches its minimum, send you the
+                    payment link, tell you about changes or cancellations. Basis: your request to take part (Art. 6(1)(b)
+                    GDPR, pre-contractual steps and contract).
+                  </li>
+                  <li>To meet tax and accounting duties on payments. Basis: legal obligation (Art. 6(1)(c)).</li>
+                  <li>To keep the site secure and working (technical logs). Basis: legitimate interest (Art. 6(1)(f)).</li>
+                </ul>
+                <p>
+                  We do not use your data for advertising or newsletters, we do not sell it, and we make no automated
+                  decisions about you. If there is ever a newsletter, we will ask for a separate consent.
+                </p>
+
+                <h2>4. Do you have to give us your data?</h2>
+                <p>
+                  Name, email and phone are needed to sign you up: without them we cannot hold your place. Notes are
+                  optional. You can always book by DM on Instagram instead.
+                </p>
+
+                <h2>5. Who sees your data</h2>
+                <p>
+                  Only Martina, who runs the studio, and the person who helps her run the website ([name], with
+                  technical access on her behalf), through a password-protected area. To work, we rely on these
+                  providers, which process data only on our behalf (processors, Art. 28) or as independent
+                  controllers:
+                </p>
+                <ul>
+                  <li><strong>Supabase</strong> (sign-up database), with the data stored in the European Union (Frankfurt, Germany).</li>
+                  <li><strong>GitHub</strong> (hosts the website's pages; sees only technical browsing logs).</li>
+                  <li><strong>SumUp</strong> (payments), independent controller.</li>
+                  <li>
+                    <strong>WhatsApp (Meta) or the email service</strong>, when we write to confirm your place on the
+                    channel you gave us; <strong>Instagram (Meta)</strong> if you DM us.
+                  </li>
+                </ul>
+                <p>
+                  Some of these providers are based in the United States: such transfers are covered by the EU-US Data
+                  Privacy Framework or by the European Commission's standard contractual clauses (Arts. 45-46 GDPR).
+                </p>
+
+                <h2>6. How long we keep it</h2>
+                <ul>
+                  <li>Sign-ups and room requests: [12 months] after the workshop or party date, then deleted. Health notes are deleted once the workshop is over.</li>
+                  <li>Data tied to a payment: as long as tax law requires (usually 10 years).</li>
+                  <li>Technical logs: for the short period set by the hosting provider.</li>
+                </ul>
+
+                <h2>7. Children</h2>
+                <p>
+                  For children's workshops, a parent or guardian signs up with their own details. Children under 14
+                  must not sign up by themselves.
+                </p>
+
+                <h2>8. Cookies</h2>
+                <p>
+                  The site uses no cookies, neither for profiling nor for statistics, and loads no third-party services
+                  while you browse (fonts are served by the site itself). If you choose the dark theme, that choice is
+                  saved only in your browser (localStorage) and is never sent to us.
+                </p>
+
+                <h2>9. Your rights</h2>
+                <p>
+                  You can ask us at any time to access, correct or delete your data, restrict its use, object to
+                  processing based on legitimate interest, receive it in a portable format, and withdraw the consent
+                  given for notes (Arts. 15-22 GDPR). Withdrawal does not affect what was done before it. Write to
+                  [contact email] or DM us on Instagram: we reply within one month.
+                </p>
+                <p>
+                  If you think your data is handled improperly, you can lodge a complaint with the Italian data
+                  protection authority, the Garante per la protezione dei dati personali (garanteprivacy.it).
+                </p>
+
+                <h2>10. Changes</h2>
+                <p>
+                  If we change this notice, we update the version below. For each sign-up we keep which version was in
+                  force when you accepted it.
+                </p>
+              </Prose>
+            )
+          }
+          <p class="text-sm text-ink-muted">{it ? "Versione" : "Version"}: {PRIVACY_VERSION}</p>
         </Stack>
       </Container>
     </Section>

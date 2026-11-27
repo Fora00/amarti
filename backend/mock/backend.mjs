@@ -21,6 +21,7 @@ import {
   signupCheck,
   signupFailPath,
   signupFields,
+  signupOkPath,
   signupRow,
 } from "../supabase/functions/_shared/specs.ts";
 
@@ -68,9 +69,10 @@ export function createBackend(kit) {
   async function acceptSignup(req, res) {
     let params;
     try { params = new URLSearchParams(await kit.readBody(req, MAX_BODY_BYTES)); } catch { return kit.redirect(res, "/eventi/"); }
-    const fail = signupFailPath(params.get("event_id"));
+    const fail = signupFailPath(params.get("event_id"), params.get("lang"));
+    const ok = signupOkPath(params.get("lang"));
     const verdict = validate((name) => params.get(name), signupFields, signupCheck);
-    if (verdict.result === "spam") return kit.redirect(res, "/iscrizione/");
+    if (verdict.result === "spam") return kit.redirect(res, ok);
     if (verdict.result === "invalid") return kit.redirect(res, fail);
     const now = Date.now();
     (state.signups ??= []).push({
@@ -78,7 +80,7 @@ export function createBackend(kit) {
     });
     save();
     console.log(`  signups ← ${verdict.values.nome} ${verdict.values.cognome} (${verdict.values.event_id})`);
-    kit.redirect(res, "/iscrizione/");
+    kit.redirect(res, ok);
   }
 
   return {

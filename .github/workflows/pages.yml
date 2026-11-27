@@ -11,6 +11,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Nightly rebuild, so the shop's price list edited in the dashboard (table
+  # `listino`, read at build time) reaches the site by the next morning.
+  schedule:
+    - cron: "15 3 * * *"
 
 permissions:
   contents: read
@@ -51,6 +55,8 @@ jobs:
           PUBLIC_DEMO: "1"
           # The sign-up form on event pages POSTs to <this>/functions/v1/signup.
           PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+          # Public key: the build reads the visible rows of `listino` (shop prices) with it.
+          PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
 
       # The private app (behind the magic-link login, noindex). Its Supabase URL and
       # anon key are public by nature, so they are repository VARIABLES, not secrets:

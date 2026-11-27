@@ -14,6 +14,9 @@ serie:
 # Dalla locandina di Instagram ("Info in dm"). Prezzo e posti: da chiedere.
 bookingUrl: "https://ig.me/m/amarticeramics"
 bookingProvider: "instagram"
+en:
+  title: "Ceramic decorating (day 2)"
+  summary: "Second evening of the course with Il Grillo: decorate the piece shaped on 10 December, Thursday 17 December from 6:30 to 8 pm."
 ---
 
 Info e prenotazioni in DM su Instagram.

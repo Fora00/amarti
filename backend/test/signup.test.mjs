@@ -8,6 +8,7 @@ import {
   signupCheck,
   signupFailPath,
   signupFields,
+  signupOkPath,
   signupRow,
 } from "../supabase/functions/_shared/specs.ts";
 
@@ -19,6 +20,7 @@ const good = {
   telefono: "+39 345 123 4567",
   note: "",
   privacy: "si",
+  privacy_version: "2026-11-27",
 };
 const run = (over = {}) => {
   const form = { ...good, ...over };
@@ -38,7 +40,15 @@ test("a complete sign-up is accepted, trimmed, and maps to the signups row", () 
     telefono: good.telefono,
     note: null,
     privacy_at: "2026-11-27T10:00:00.000Z",
+    privacy_version: "2026-11-27",
   });
+});
+
+test("the privacy version is optional (old cached pages) but checked by shape", () => {
+  assert.equal(signupRow(run({ privacy_version: undefined }).values, new Date()).privacy_version, null);
+  for (const privacy_version of ["2026 11 27", "<b>", "Bozza"]) {
+    assert.equal(run({ privacy_version }).result, "invalid", privacy_version);
+  }
 });
 
 test("a note is kept when given", () => {
@@ -100,4 +110,12 @@ test("a refusal goes back to the event page only for a well-formed id", () => {
   assert.equal(signupFailPath(good.event_id), `/eventi/${good.event_id}/#errore`);
   assert.equal(signupFailPath("https://evil.example/"), "/eventi/");
   assert.equal(signupFailPath(undefined), "/eventi/");
+});
+
+test("redirects follow the page's language; anything but 'en' is Italian", () => {
+  assert.equal(signupOkPath("en"), "/en/iscrizione/");
+  assert.equal(signupOkPath(null), "/iscrizione/");
+  assert.equal(signupOkPath("https://evil.example"), "/iscrizione/");
+  assert.equal(signupFailPath("2026-12-14-tazza-natale-day-1", "en"), "/en/eventi/2026-12-14-tazza-natale-day-1/#errore");
+  assert.equal(signupFailPath("../../x", "en"), "/en/eventi/");
 });
