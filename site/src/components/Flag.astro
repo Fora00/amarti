@@ -1,0 +1,32 @@
+---
+/**
+ * A small flag for the language switch, as inline SVG: emoji flags are not
+ * drawn on Windows (they show "GB"/"IT" letters), and an image would be an
+ * extra request. Decorative: the link next to it already names the language.
+ * "en" shows the UK flag (the usual convention for English on Italian sites).
+ */
+interface Props { lang: "it" | "en"; class?: string }
+const { lang, class: className } = Astro.props;
+---
+
+{
+  lang === "it" ? (
+    <svg viewBox="0 0 3 2" class:list={["rounded-[2px] ring-1 ring-ink/15", className]} aria-hidden="true">
+      <rect width="1" height="2" fill="#009246" />
+      <rect x="1" width="1" height="2" fill="#fff" />
+      <rect x="2" width="1" height="2" fill="#ce2b37" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 60 30" class:list={["rounded-[2px] ring-1 ring-ink/15", className]} aria-hidden="true">
+      <clipPath id="flag-uk-s"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+      <clipPath id="flag-uk-t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" /></clipPath>
+      <g clip-path="url(#flag-uk-s)">
+        <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+        <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#flag-uk-t)" stroke="#C8102E" stroke-width="4" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6" />
+      </g>
+    </svg>
+  )
+}

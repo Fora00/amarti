@@ -4,6 +4,7 @@ import Container from "@factory/design-system/components/Container.astro";
 
 import Logo from "./Logo.astro";
 import ThemeToggle from "./ThemeToggle.astro";
+import Flag from "./Flag.astro";
 import { site, instagramDm } from "../site.config.ts";
 
 const { t, href, lang, path } = useLocale(Astro);
@@ -45,7 +46,8 @@ const linkClass = "text-sm font-semibold text-ink-muted no-underline hover:text-
           <a href={instagramDm} class={linkClass} target="_blank" rel="noopener noreferrer">{t("nav.write")} ↗</a>
         </li>
         <li>
-          <a href={localUrl(path, other)} hreflang={other} lang={other} class={linkClass}>
+          <a href={localUrl(path, other)} hreflang={other} lang={other} class:list={[linkClass, "inline-flex items-center gap-1.5"]}>
+            <Flag lang={other} class="h-3.5 w-auto" />
             <span aria-hidden="true">{other.toUpperCase()}</span>
             <span class="sr-only">{t("nav.otherLanguage")}</span>
           </a>

@@ -15,7 +15,7 @@ import ExternalLink from "@factory/design-system/components/ExternalLink.astro";
 import FormField from "./FormField.astro";
 import { forms } from "../forms.ts";
 import { url } from "../lib/path.ts";
-import { site } from "../site.config.ts";
+import { instagramDm } from "../site.config.ts";
 import { PRIVACY_VERSION } from "../lib/privacy.ts";
 
 interface Props {
@@ -24,7 +24,6 @@ interface Props {
 }
 const { eventId } = Astro.props;
 const { t, href, lang } = useLocale(Astro);
-const instagram = site.links.find((link) => link.label === "Instagram")?.url;
 ---
 
 <section id="prenota" aria-labelledby="prenota-title" class="scroll-mt-6 rounded-card border border-line bg-surface-muted p-5 sm:p-8">
@@ -77,12 +76,9 @@ const instagram = site.links.find((link) => link.label === "Instagram")?.url;
       </p>
     </form>
 
-    {
-      instagram && (
-        <p class="text-sm text-ink-muted">
-          <ExternalLink href={instagram}>{t("signup.orInstagram")}</ExternalLink>
-        </p>
-      )
-    }
+    <!-- Straight into her Instagram chat (ig.me), like "Scrivimi" in the header — not her profile. -->
+    <p class="text-sm text-ink-muted">
+      <ExternalLink href={instagramDm}>{t("signup.orInstagram")}</ExternalLink>
+    </p>
   </Stack>
 </section>
